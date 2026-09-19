@@ -1,0 +1,24 @@
+# Python / Backend
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+*.db
+*.sqlite3
+
+# Node / Angular Frontend
+node_modules/
+dist/
+.angular/
+
+# IDEs y SO
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Docker local data
+data/
