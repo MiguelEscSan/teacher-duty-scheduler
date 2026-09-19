@@ -1,0 +1,43 @@
+<div class="app-shell">
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-icon">🏫</span>
+      <div>
+        <h1>GuardPlan</h1>
+        <span class="brand-tag">Optimizador Quincenal de Guardias Escolares</span>
+      </div>
+    </div>
+
+    <nav class="nav-bar">
+      <button
+        class="nav-tab"
+        [class.active]="activeTab === 'teachers'"
+        (click)="activeTab = 'teachers'"
+      >
+        <span class="nav-icon">👨‍🏫</span> Claustro y Horario Base
+      </button>
+
+      <button
+        class="nav-tab"
+        [class.active]="activeTab === 'absences'"
+        (click)="activeTab = 'absences'"
+      >
+        <span class="nav-icon">📝</span> Registro de Ausencias
+      </button>
+
+      <button
+        class="nav-tab"
+        [class.active]="activeTab === 'guards'"
+        (click)="activeTab = 'guards'"
+      >
+        <span class="nav-icon">📊</span> Cuadrante de Guardias
+      </button>
+    </nav>
+  </header>
+
+  <main class="content-body">
+    <app-teachers *ngIf="activeTab === 'teachers'"></app-teachers>
+    <app-absences *ngIf="activeTab === 'absences'"></app-absences>
+    <app-guards *ngIf="activeTab === 'guards'"></app-guards>
+  </main>
+</div>

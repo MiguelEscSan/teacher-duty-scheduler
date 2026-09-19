@@ -1,0 +1,90 @@
+<div class="absences-container">
+  <div class="card form-card">
+    <div class="card-title">
+      <h3>Declarar Nueva Ausencia o Permiso</h3>
+      <p>Registra la fecha y hora exacta en la que un docente no estará disponible.</p>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Docente</label>
+        <select [(ngModel)]="newAbsence.teacher_id">
+          <option *ngFor="let t of teachers" [value]="t.id">
+            {{ t.name }} ({{ t.department }})
+          </option>
+        </select>
+      </div>
+
+      <!-- Selector de fecha real de calendario -->
+      <div class="form-field">
+        <label>Fecha de Ausencia</label>
+        <input type="date" [(ngModel)]="newAbsence.date" />
+      </div>
+
+      <div class="form-field">
+        <label>Periodo / Franja</label>
+        <select [(ngModel)]="newAbsence.period">
+          <option *ngFor="let h of hours; let p = index" [ngValue]="p">Periodo {{ p }} ({{ h }})</option>
+        </select>
+      </div>
+
+      <div class="form-field field-wide">
+        <label>Motivo</label>
+        <input type="text" placeholder="Baja médica, deber inexcusable, permiso..." [(ngModel)]="newAbsence.reason" />
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-warning" (click)="submitAbsence()">⚠️ Registrar Ausencia</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card list-card">
+    <div class="list-header">
+      <h3>Histórico de Ausencias Registradas</h3>
+      <p>Total registradas: <strong>{{ absences.length }}</strong></p>
+    </div>
+
+    <div class="table-responsive" *ngIf="absences.length > 0; else emptyAbsences">
+      <table class="absences-table">
+        <thead>
+        <tr>
+          <th>Profesor</th>
+          <th>Fecha Exacta</th>
+          <th>Hora</th>
+          <th>Motivo</th>
+          <th class="text-right">Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let item of absences">
+          <td>
+            <div class="docent-cell">
+              <span class="docent-tag">ID: {{ item.teacher_id }}</span>
+              <strong>{{ item.teacher_name }}</strong>
+            </div>
+          </td>
+          <td>
+            <span class="date-badge">📅 {{ item.date }}</span>
+          </td>
+          <td>
+            <span class="hour-tag">P{{ item.period }} ({{ hours[item.period] }})</span>
+          </td>
+          <td>{{ item.reason }}</td>
+          <td class="text-right">
+            <button class="btn-delete" (click)="remove(item.id)">Eliminar</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #emptyAbsences>
+      <div class="empty-box">
+        <span class="empty-icon">✅</span>
+        <h4>Sin ausencias declaradas</h4>
+        <p>No hay bajas registradas en el sistema.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

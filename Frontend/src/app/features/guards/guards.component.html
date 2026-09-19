@@ -1,0 +1,114 @@
+<div class="guards-container">
+  <!-- Barra de Selección de Semana y Acción -->
+  <div class="action-card">
+    <div class="calendar-navigator">
+      <button class="btn-nav" (click)="changeWeek(-7)" title="Semana anterior">◀ Anterior</button>
+
+      <div class="picker-wrapper">
+        <label for="weekPicker">Semana de:</label>
+        <input
+          id="weekPicker"
+          type="date"
+          [(ngModel)]="selectedDate"
+          (change)="onDateChange()"
+          class="date-input"
+        />
+      </div>
+
+      <button class="btn-nav" (click)="changeWeek(7)" title="Semana siguiente">Siguiente ▶</button>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn-run" [disabled]="isOptimizing" (click)="calculateGuards()">
+        <span *ngIf="!isOptimizing">⚡ Reoptimizar Semana</span>
+        <span *ngIf="isOptimizing">⚙️ Calculando...</span>
+      </button>
+      <button *ngIf="results" class="btn-print" (click)="print()">🖨️ Imprimir</button>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-banner">
+    ⚠️ {{ errorMessage }}
+  </div>
+
+  <div *ngIf="results" class="results-layout">
+    <!-- Título con el rango de fechas formateado por el backend -->
+    <div class="week-banner">
+      <h2>{{ results.week_label }}</h2>
+      <span class="status-pill" [class.optimal]="results.is_optimal">
+        {{ results.is_optimal ? 'SOLUCIÓN ÓPTIMA' : results.status }}
+      </span>
+    </div>
+
+    <!-- Métricas -->
+    <div class="metrics-row">
+      <div class="metric-box">
+        <span class="m-label">Déficit (Sin cubrir)</span>
+        <span class="m-value" [class.alert]="results.total_deficits > 0">{{ results.total_deficits }} plazas</span>
+      </div>
+      <div class="metric-box">
+        <span class="m-label">Brecha de Carga (Max - Min)</span>
+        <span class="m-value">{{ results.max_difference }} horas</span>
+      </div>
+      <div class="metric-box">
+        <span class="m-label">Incidencias reportadas</span>
+        <span class="m-value">{{ results.incidents.length }}</span>
+      </div>
+    </div>
+
+    <!-- Cuadrícula con las Fechas Reales en Cabecera -->
+    <div class="grid-card">
+      <div class="table-wrapper">
+        <table class="guards-grid">
+          <thead>
+          <tr>
+            <th class="col-p">Periodo / Hora</th>
+            <!-- Días reales devueltos por el backend (ej. Lunes 21 Sep) -->
+            <th *ngFor="let d of results.days">
+              <span class="day-title">{{ d.day_name }}</span>
+              <span class="day-date">{{ d.date }}</span>
+            </th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let row of results.grid; let p = index">
+            <td class="col-p-data">
+              <span class="p-num">P{{ p }}</span>
+              <span class="p-hrs">{{ hours[p] }}</span>
+            </td>
+            <td *ngFor="let cell of row" [class.has-deficit]="cell.deficit > 0">
+              <div class="cell-guardians">
+                <div *ngFor="let name of cell.assigned" class="pill-guardian">
+                  👤 {{ name }}
+                </div>
+                <div *ngIf="cell.deficit > 0" class="tag-deficit">
+                  ⚠️ Falta {{ cell.deficit }}
+                </div>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Balance semanal de horas -->
+    <div class="balance-card">
+      <h3>Distribución de Horas de Guardia en la Semana</h3>
+      <table class="balance-table">
+        <thead>
+        <tr>
+          <th>Profesor</th>
+          <th class="text-center">Guardias Asignadas</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let r of results.ranking">
+          <td><strong>{{ r.name }}</strong> ({{ r.department }})</td>
+          <td class="text-center"><span class="count-badge">{{ r.count }}</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

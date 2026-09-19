@@ -1,0 +1,101 @@
+<div class="teachers-layout">
+  <aside class="sidebar-card">
+    <div class="card-header">
+      <h3>Claustro Docente</h3>
+      <span class="badge">{{ teachers.length }} profesores</span>
+    </div>
+
+    <!-- Formulario de Alta con Nombre y Departamento -->
+    <div class="add-box">
+      <div class="form-vertical">
+        <input
+          type="text"
+          placeholder="Nombre y Apellidos"
+          class="input-name"
+          [(ngModel)]="newTeacher.name"
+        />
+        <select class="select-dept" [(ngModel)]="newTeacher.department">
+          <option *ngFor="let dep of departments" [value]="dep">{{ dep }}</option>
+        </select>
+        <button class="btn btn-primary" (click)="saveTeacher()">+ Añadir Docente</button>
+      </div>
+    </div>
+
+    <!-- Lista de Profesores -->
+    <ul class="teacher-list">
+      <li
+        *ngFor="let t of teachers"
+        [class.active]="selectedTeacher?.id === t.id"
+        (click)="selectTeacher(t)"
+      >
+        <div class="teacher-info">
+          <span class="teacher-avatar">{{ t.name.charAt(0) }}</span>
+          <div class="teacher-texts">
+            <div class="teacher-name">{{ t.name }}</div>
+            <div class="teacher-dept">{{ t.department }}</div>
+          </div>
+        </div>
+        <button class="btn-icon-danger" (click)="$event.stopPropagation(); removeTeacher(t.id!)" title="Eliminar docente">
+          🗑️
+        </button>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Panel Principal del Horario -->
+  <section class="main-card">
+    <ng-container *ngIf="selectedTeacher; else noSelection">
+      <div class="main-header">
+        <div>
+          <h2>Horario Lectivo Base</h2>
+          <p class="subtitle">
+            Docente: <strong>{{ selectedTeacher.name }}</strong>
+            <span class="dept-badge">{{ selectedTeacher.department }}</span>
+          </p>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><i class="dot dot-free"></i> Libre</span>
+          <span class="legend-item"><i class="dot dot-teaching"></i> Clase Lectiva</span>
+        </div>
+      </div>
+
+      <div class="table-container" [class.loading]="isLoadingSchedule">
+        <table class="schedule-matrix">
+          <thead>
+          <tr>
+            <th class="col-hour">Franja</th>
+            <th *ngFor="let d of days">{{ d }}</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let row of teacherSchedule; let p = index">
+            <td class="col-hour-data">
+              <span class="period-code">P{{ p }}</span>
+              <span class="period-time">{{ hours[p] }}</span>
+            </td>
+            <td
+              *ngFor="let cell of row"
+              (click)="toggleScheduleCell(cell.day, cell.period)"
+              [class.slot-teaching]="cell.status === 'TEACHING'"
+              [class.slot-free]="cell.status === 'FREE'"
+            >
+              <div class="cell-content">
+                <span class="cell-icon">{{ cell.status === 'TEACHING' ? '📚' : '🟢' }}</span>
+                <span class="cell-label">{{ cell.status === 'TEACHING' ? 'Docencia' : 'Libre' }}</span>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
+
+    <ng-template #noSelection>
+      <div class="empty-state">
+        <span class="empty-icon">👈</span>
+        <h3>Selecciona un profesor</h3>
+        <p>Elige un docente de la lista para gestionar su horario habitual.</p>
+      </div>
+    </ng-template>
+  </section>
+</div>
