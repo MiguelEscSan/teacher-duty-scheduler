@@ -1,5 +1,7 @@
 from typing import Any
 from pydantic import BaseModel, Field
+from enum import Enum
+from typing import Optional
 
 # --- Docentes ---
 class TeacherCreate(BaseModel):
@@ -18,6 +20,7 @@ class SlotToggleRequest(BaseModel):
     teacher_id: str  # GUID del profesor
     day: int = Field(ge=0, le=4)
     period: int = Field(ge=0, le=5)
+    group_id: Optional[str] = None  # None = Libre, string = ID o Nombre del Grupo
 
 class ToggleSlotResponse(BaseModel):
     teacher_id: str
@@ -35,15 +38,18 @@ class SlotCellResponse(BaseModel):
 class AbsenceCreate(BaseModel):
     teacher_id: str
     date: str      # Formato ISO "YYYY-MM-DD"
-    period: int = Field(ge=0, le=5)
+    all_day: bool = False
+    period: Optional[int] = Field(default=None, ge=0, le=5)
     reason: str = "Permiso / Asunto propio"
 
 class AbsenceResponse(BaseModel):
+    id: str
     teacher_id: str
     teacher_name: str
-    week: int
-    day: int
+    date: str
     period: int
+    group_name: str
+    student_count: Optional[int] = None
     reason: str
 
 # --- Optimizacion ---
@@ -57,3 +63,45 @@ class OptimizationResult(BaseModel):
     max_difference: int
     weeks: list[dict[str, Any]]
     ranking: list[dict[str, Any]]
+
+class ResolutionAction(str, Enum):
+    AUTO_ASSIGN = "AUTO_ASSIGN"          # Intentar guardia ordinaria; si no, escalar a corta
+    EXCURSION = "EXCURSION"              # Marcar resuelto sin sustitución por excursión del grupo
+    MERGE_GROUPS = "MERGE_GROUPS"        # Fusión manual con otro grupo simultáneo
+    FORCE_SHORT_TERM = "FORCE_SHORT_TERM"# Escalar directamente a sustitución corta
+
+class PeriodResolveRequest(BaseModel):
+    date: str
+    period: int
+    absent_teacher_id: str
+    group_id: Optional[str] = None
+    action: ResolutionAction = ResolutionAction.AUTO_ASSIGN
+    merged_with_group_id: Optional[str] = None  # ID de la clase con la que se fusiona
+
+
+class PeriodResolveResponse(BaseModel):
+    date: str
+    period: int
+    resolved: bool
+    action_applied: str
+    substitute_id: Optional[str] = None
+    substitute_name: Optional[str] = None
+    source_type: Optional[str] = None
+    staff_room_keeper_name: Optional[str] = None
+    email_notification_dispatched: bool = False
+    details: str
+
+class AvailableTeacherOut(BaseModel):
+    id: str
+    name: str
+    department: str
+    duty_type: str  # 'FIXED_DUTY' (guardia ordinaria), 'SHORT_TERM' (sustitución corta), o 'FREE' (hora libre)
+    interventions_count: int  # Para que jefatura vea cuántas sustituciones lleva este curso
+
+class ManualAssignmentIn(BaseModel):
+    date: str  # 'YYYY-MM-DD'
+    period: int  # 0 a 5
+    absent_teacher_id: str
+    substitute_teacher_id: str
+    group_id: Optional[str] = None
+    notes: Optional[str] = "Asignación manual"

@@ -1,11 +1,11 @@
 <div class="teachers-layout">
+  <!-- Columna lateral: Listado y Alta -->
   <aside class="sidebar-card">
     <div class="card-header">
       <h3>Claustro Docente</h3>
       <span class="badge">{{ teachers.length }} profesores</span>
     </div>
 
-    <!-- Formulario de Alta con Nombre y Departamento -->
     <div class="add-box">
       <div class="form-vertical">
         <input
@@ -21,7 +21,6 @@
       </div>
     </div>
 
-    <!-- Lista de Profesores -->
     <ul class="teacher-list">
       <li
         *ngFor="let t of teachers"
@@ -42,7 +41,7 @@
     </ul>
   </aside>
 
-  <!-- Panel Principal del Horario -->
+  <!-- Panel Principal: Matriz de Horario Base -->
   <section class="main-card">
     <ng-container *ngIf="selectedTeacher; else noSelection">
       <div class="main-header">
@@ -55,7 +54,7 @@
         </div>
         <div class="legend">
           <span class="legend-item"><i class="dot dot-free"></i> Libre</span>
-          <span class="legend-item"><i class="dot dot-teaching"></i> Clase Lectiva</span>
+          <span class="legend-item"><i class="dot dot-teaching"></i> Clase Lectiva (Grupo)</span>
         </div>
       </div>
 
@@ -75,13 +74,18 @@
             </td>
             <td
               *ngFor="let cell of row"
-              (click)="toggleScheduleCell(cell.day, cell.period)"
+              (click)="openSlotModal(cell)"
               [class.slot-teaching]="cell.status === 'TEACHING'"
               [class.slot-free]="cell.status === 'FREE'"
             >
               <div class="cell-content">
                 <span class="cell-icon">{{ cell.status === 'TEACHING' ? '📚' : '🟢' }}</span>
-                <span class="cell-label">{{ cell.status === 'TEACHING' ? 'Docencia' : 'Libre' }}</span>
+                <span class="cell-label" *ngIf="cell.status === 'TEACHING'">
+                    {{ cell.group_name }}
+                  </span>
+                <span class="cell-label" *ngIf="cell.status === 'FREE'">
+                    Libre
+                  </span>
               </div>
             </td>
           </tr>
@@ -98,4 +102,33 @@
       </div>
     </ng-template>
   </section>
+</div>
+
+<!-- Modal para asignar o quitar Grupo -->
+<div class="modal-backdrop" *ngIf="activeSlot" (click)="closeModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <h3>Configurar Franja Horaria</h3>
+    <p class="modal-subtitle">
+      {{ days[activeSlot.day] }} a las {{ hours[activeSlot.period] }} (P{{ activeSlot.period }})
+    </p>
+
+    <div class="modal-body">
+      <label>Grupo de alumnos:</label>
+      <select [(ngModel)]="selectedGroupId" class="select-group">
+        <option *ngFor="let g of groups" [value]="g.id">
+          {{ g.name }} {{ g.student_count !== null ? '(' + g.student_count + ' alumnos)' : '' }}
+        </option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="setSlotFree()" *ngIf="activeSlot.status === 'TEACHING'">
+        Marcar como Libre
+      </button>
+      <div class="actions-right">
+        <button class="btn btn-outline" (click)="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" (click)="confirmGroupAssignment()">Guardar Grupo</button>
+      </div>
+    </div>
+  </div>
 </div>

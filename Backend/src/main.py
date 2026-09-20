@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.routes import guards, schedules, teachers
+from src.api.routes import guards, schedules, teachers, substitutions
 from src.infrastructure.db.config import init_db
 
 
@@ -33,6 +33,7 @@ app.add_middleware(
 app.include_router(teachers.router)
 app.include_router(schedules.router)
 app.include_router(guards.router)
+app.include_router(substitutions.router)
 
 
 if __name__ == "__main__":

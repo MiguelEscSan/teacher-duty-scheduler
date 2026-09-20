@@ -1,90 +1,145 @@
-<div class="absences-container">
-  <div class="card form-card">
-    <div class="card-title">
-      <h3>Declarar Nueva Ausencia o Permiso</h3>
-      <p>Registra la fecha y hora exacta en la que un docente no estará disponible.</p>
-    </div>
-
-    <div class="form-grid">
-      <div class="form-field">
-        <label>Docente</label>
-        <select [(ngModel)]="newAbsence.teacher_id">
-          <option *ngFor="let t of teachers" [value]="t.id">
-            {{ t.name }} ({{ t.department }})
-          </option>
+<div class="absences-view">
+  <!-- Panel de Registro de Ausencia -->
+  <section class="card form-card">
+    <h2>Registrar Ausencia</h2>
+    <form (ngSubmit)="submitAbsence()" class="absence-form">
+      <div class="form-group">
+        <label for="teacherSelect">Profesor</label>
+        <select id="teacherSelect" [(ngModel)]="newAbsence.teacher_id" name="teacher_id" required>
+          <option *ngFor="let t of teachers" [value]="t.id">{{ t.name }} ({{ t.department }})</option>
         </select>
       </div>
 
-      <!-- Selector de fecha real de calendario -->
-      <div class="form-field">
-        <label>Fecha de Ausencia</label>
-        <input type="date" [(ngModel)]="newAbsence.date" />
+      <div class="form-group">
+        <label for="absenceDate">Fecha</label>
+        <input id="absenceDate" type="date" [(ngModel)]="newAbsence.date" name="date" required />
       </div>
 
-      <div class="form-field">
-        <label>Periodo / Franja</label>
-        <select [(ngModel)]="newAbsence.period">
-          <option *ngFor="let h of hours; let p = index" [ngValue]="p">Periodo {{ p }} ({{ h }})</option>
+      <div class="form-group checkbox-group">
+        <label>
+          <input type="checkbox" [(ngModel)]="newAbsence.all_day" name="all_day" />
+          Falta todo el día (Jornada completa)
+        </label>
+      </div>
+
+      <div class="form-group" *ngIf="!newAbsence.all_day">
+        <label for="periodSelect">Periodo</label>
+        <select id="periodSelect" [(ngModel)]="newAbsence.period" name="period">
+          <option *ngFor="let h of hours; let i = index" [value]="i">P{{ i }} ({{ h }})</option>
         </select>
       </div>
 
-      <div class="form-field field-wide">
-        <label>Motivo</label>
-        <input type="text" placeholder="Baja médica, deber inexcusable, permiso..." [(ngModel)]="newAbsence.reason" />
+      <div class="form-group">
+        <label for="reasonInput">Motivo</label>
+        <input id="reasonInput" type="text" [(ngModel)]="newAbsence.reason" name="reason" placeholder="Motivo de la falta" />
       </div>
 
-      <div class="form-actions">
-        <button class="btn btn-warning" (click)="submitAbsence()">⚠️ Registrar Ausencia</button>
-      </div>
-    </div>
-  </div>
+      <button type="submit" class="btn-submit">Guardar Ausencia</button>
+    </form>
+  </section>
 
-  <div class="card list-card">
-    <div class="list-header">
-      <h3>Histórico de Ausencias Registradas</h3>
-      <p>Total registradas: <strong>{{ absences.length }}</strong></p>
-    </div>
+  <!-- Tabla de Clases Desatendidas -->
+  <section class="card table-card">
+    <h2>Ausencias Lectivas Detectadas</h2>
 
-    <div class="table-responsive" *ngIf="absences.length > 0; else emptyAbsences">
-      <table class="absences-table">
+    <div class="table-wrapper">
+      <table class="data-table">
         <thead>
         <tr>
-          <th>Profesor</th>
-          <th>Fecha Exacta</th>
-          <th>Hora</th>
+          <th>Fecha</th>
+          <th>Periodo</th>
+          <th>Docente Ausente</th>
+          <th>Grupo Afectado</th>
           <th>Motivo</th>
-          <th class="text-right">Acción</th>
+          <th class="text-right">Acciones</th>
         </tr>
         </thead>
         <tbody>
         <tr *ngFor="let item of absences">
+          <td>{{ item.date }}</td>
+          <td><span class="period-badge">P{{ item.period }}</span></td>
+          <td><strong>{{ item.teacher_name || 'Desconocido' }}</strong></td>
           <td>
-            <div class="docent-cell">
-              <span class="docent-tag">ID: {{ item.teacher_id }}</span>
-              <strong>{{ item.teacher_name }}</strong>
-            </div>
-          </td>
-          <td>
-            <span class="date-badge">📅 {{ item.date }}</span>
-          </td>
-          <td>
-            <span class="hour-tag">P{{ item.period }} ({{ hours[item.period] }})</span>
+              <span class="group-tag" *ngIf="item.group_name; else sinGrupo">
+                {{ item.group_name }}
+                <small *ngIf="item.student_count">({{ item.student_count }} al.)</small>
+              </span>
+            <ng-template #sinGrupo>
+              <span class="text-muted">—</span>
+            </ng-template>
           </td>
           <td>{{ item.reason }}</td>
-          <td class="text-right">
-            <button class="btn-delete" (click)="remove(item.id)">Eliminar</button>
+
+          <!-- Columna de menú de 3 puntos -->
+          <td class="text-right action-cell">
+            <div class="dropdown-wrapper">
+              <button
+                type="button"
+                class="btn-dots"
+                (click)="toggleMenu($event, item.id)"
+                aria-label="Opciones"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="5" r="2"/>
+                  <circle cx="12" cy="12" r="2"/>
+                  <circle cx="12" cy="19" r="2"/>
+                </svg>
+              </button>
+
+              <!-- Menú desplegable -->
+              <div class="dropdown-menu" *ngIf="activeMenuId === item.id">
+                <!-- 1. Cubrir Manualmente -->
+                <button type="button" class="menu-item" (click)="openManualCoverModal(item)">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                  </svg>
+                  <span>Cubrir manualmente</span>
+                </button>
+
+                <!-- 2. Marcar como no cubrir -->
+                <button type="button" class="menu-item disabled" (click)="markAsDoNotCover(item)">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                  </svg>
+                  <span>Marcar como no cubrir</span>
+                </button>
+
+                <!-- 3. Cubrir automáticamente -->
+                <button type="button" class="menu-item disabled" (click)="resolveAutomatic(item)">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                  <span>Cubrir automáticamente</span>
+                </button>
+
+                <hr class="menu-divider" />
+
+                <!-- 4. Eliminar ausencia -->
+                <button type="button" class="menu-item danger" (click)="remove(item.id)">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                  <span>Eliminar ausencia</span>
+                </button>
+              </div>
+            </div>
           </td>
+        </tr>
+
+        <tr *ngIf="absences.length === 0">
+          <td colspan="6" class="empty-state">No hay clases desatendidas registradas.</td>
         </tr>
         </tbody>
       </table>
     </div>
-
-    <ng-template #emptyAbsences>
-      <div class="empty-box">
-        <span class="empty-icon">✅</span>
-        <h4>Sin ausencias declaradas</h4>
-        <p>No hay bajas registradas en el sistema.</p>
-      </div>
-    </ng-template>
-  </div>
+  </section>
 </div>
+
+<!-- Modal para el Caso 1 -->
+<app-manual-cover-modal
+  *ngIf="selectedAbsenceForManualCover"
+  [absence]="selectedAbsenceForManualCover"
+  (confirmed)="onManualCoverConfirmed()"
+  (cancelled)="onManualCoverCancelled()"
+>
+</app-manual-cover-modal>

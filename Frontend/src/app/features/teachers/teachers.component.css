@@ -359,3 +359,111 @@
   margin-left: 0.5rem;
   font-weight: 600;
 }
+
+
+/* Modal de asignación */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.modal-card {
+  background: #ffffff;
+  padding: 1.75rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 440px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-card h3 {
+  margin: 0 0 0.25rem 0;
+  color: #0f172a;
+  font-size: 1.2rem;
+}
+
+.modal-subtitle {
+  margin: 0 0 1.25rem 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-body label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.select-group {
+  padding: 0.65rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: #f8fafc;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.actions-right {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.btn-secondary {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: none;
+}
+
+.btn-secondary:hover {
+  background: #fecaca;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+
+.btn-outline:hover {
+  background: #f1f5f9;
+}
+
+/* Ajustes de celdas con nombre de grupo */
+.cell-content .cell-label {
+  font-weight: 600;
+  font-size: 0.78rem;
+  line-height: 1.1;
+}
+
+.slot-teaching {
+  background-color: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1d4ed8 !important;
+}
+
+.slot-teaching:hover {
+  background-color: #dbeafe !important;
+}
