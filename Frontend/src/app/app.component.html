@@ -19,11 +19,20 @@
 
       <button
         class="nav-tab"
+        [class.active]="activeTab === 'duty-calendar'"
+        (click)="activeTab = 'duty-calendar'"
+      >
+        <span class="nav-icon">🗓️</span> Calendario de Guardias
+      </button>
+
+      <button
+        class="nav-tab"
         [class.active]="activeTab === 'absences'"
         (click)="activeTab = 'absences'"
       >
         <span class="nav-icon">📝</span> Registro de Ausencias
       </button>
+
 
       <button
         class="nav-tab"
@@ -38,6 +47,7 @@
   <main class="content-body">
     <app-teachers *ngIf="activeTab === 'teachers'"></app-teachers>
     <app-absences *ngIf="activeTab === 'absences'"></app-absences>
+    <app-duty-calendar *ngIf="activeTab === 'duty-calendar'"></app-duty-calendar>
     <app-guards *ngIf="activeTab === 'guards'"></app-guards>
   </main>
 </div>

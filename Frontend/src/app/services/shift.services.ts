@@ -5,6 +5,7 @@ import {
   Absence,
   AvailableTeacher,
   BaseSlot,
+  DutySlot,
   OptimizationResponse,
   StudentGroup,
   Teacher
@@ -67,6 +68,10 @@ export class GuardiasService {
       .set('date_str', date)
       .set('period', period.toString());
     return this.http.get<AvailableTeacher[]>(`${this.url}/available-candidates`, { params });
+  }
+
+  getDutyTeachers(): Observable<DutySlot[]> {
+    return this.http.get<DutySlot[]>(`${this.url}/v1/substitutions/duty-teachers`);
   }
 
   // 2. Asignar sustitución manual

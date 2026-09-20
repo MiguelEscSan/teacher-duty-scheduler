@@ -1,0 +1,79 @@
+<div class="modal-backdrop" (click)="close()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <header class="modal-header">
+      <div class="header-info">
+        <h3>Cubrir Guardia Manualmente</h3>
+        <p class="subtitle">
+          Periodo P{{ absence.period }} | Grupo: <strong>{{ absence.group_name || 'Sin grupo' }}</strong>
+          | Ausente: <strong>{{ absence.teacher_name }}</strong>
+        </p>
+      </div>
+      <button class="btn-close" type="button" aria-label="Cerrar" (click)="close()">✕</button>
+    </header>
+
+    <div class="modal-body">
+      <!-- Cargando -->
+      <div *ngIf="loading" class="state-msg">
+        <span class="spinner"></span>
+        <p>Buscando docentes disponibles...</p>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="!loading && errorMsg" class="state-msg error">
+        <p>{{ errorMsg }}</p>
+        <button class="btn-retry" (click)="fetchCandidates()">Reintentar</button>
+      </div>
+
+      <!-- Vacío -->
+      <div *ngIf="!loading && !errorMsg && candidates.length === 0" class="state-msg">
+        <p>No hay ningún docente disponible en este periodo.</p>
+      </div>
+
+      <!-- Lista de Candidatos -->
+      <div *ngIf="!loading && !errorMsg && candidates.length > 0" class="candidates-list">
+        <div
+          *ngFor="let teacher of candidates"
+          class="candidate-row"
+          [class.selected]="selectedTeacher?.id === teacher.id"
+          (click)="selectTeacher(teacher)"
+        >
+          <div class="radio-indicator">
+            <input
+              type="radio"
+              name="substitute"
+              [checked]="selectedTeacher?.id === teacher.id"
+            />
+          </div>
+
+          <div class="teacher-info">
+            <div class="name">{{ teacher.name }}</div>
+            <div class="dept">{{ teacher.department }}</div>
+          </div>
+
+          <div class="badge-container">
+            <span class="badge" [ngClass]="teacher.duty_type.toLowerCase()">
+              {{ getDutyLabel(teacher.duty_type) }}
+            </span>
+            <span class="interventions-tag" title="Sustituciones realizadas este curso">
+              {{ teacher.interventions_count }} interv.
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="modal-footer">
+      <button class="btn-secondary" type="button" (click)="close()">Cancelar</button>
+      <button
+        class="btn-primary"
+        type="button"
+        [disabled]="!selectedTeacher || submitting"
+        (click)="confirmAssignment()"
+      >
+        {{ submitting ? 'Asignando...' : 'Confirmar Sustitución' }}
+      </button>
+    </footer>
+
+  </div>
+</div>

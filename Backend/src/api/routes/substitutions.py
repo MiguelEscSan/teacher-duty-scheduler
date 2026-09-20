@@ -1,19 +1,78 @@
 from datetime import datetime
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlmodel import Session
 from src.api.dependencies import get_session
-from src.api.schemas import PeriodResolveRequest, PeriodResolveResponse, ResolutionAction, ManualAssignmentIn, \
-    AvailableTeacherOut
+from src.api.schemas import (
+    TeacherResponse,
+    AvailableTeacherOut,
+    DutySlotOut,
+    ManualAssignmentIn,
+    PeriodResolveRequest,
+    PeriodResolveResponse,
+    ResolutionAction,
+)
 from src.infrastructure.db.models import AbsenceDB, StudentGroupDB, SubstitutionSourceType, TeacherDB, \
     SubstitutionLogDB, FixedDutyDB, ShortTermSubstitutionDB, TeacherScheduleDB
 from src.services.email_service import send_urgent_substitution_email
 from src.services.substitution_service import SubstitutionService
-from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
-from datetime import datetime
 from typing import List
 
 router = APIRouter(prefix="/api/v1/substitutions", tags=["Sustituciones Operativas"])
+DAY_NAMES = ("Lunes", "Martes", "Miércoles", "Jueves", "Viernes")
+
+
+@router.get("/duty-teachers", response_model=List[DutySlotOut])
+def get_duty_teachers(
+    day_of_week: int | None = Query(default=None, ge=0, le=4),
+    period: int | None = Query(default=None, ge=0, le=5),
+    session: Session = Depends(get_session),
+):
+    """Devuelve el calendario semanal de profesores con guardia fija."""
+    duty_query = select(FixedDutyDB)
+    if day_of_week is not None:
+        duty_query = duty_query.where(FixedDutyDB.day_of_week == day_of_week)
+    if period is not None:
+        duty_query = duty_query.where(FixedDutyDB.period == period)
+
+    duties = session.exec(duty_query).all()
+    teacher_ids = {duty.teacher_id for duty in duties}
+    teachers = {
+        teacher.id: teacher
+        for teacher in session.exec(
+            select(TeacherDB).where(TeacherDB.id.in_(teacher_ids))
+        ).all()
+    }
+
+    teachers_by_slot: dict[tuple[int, int], list[TeacherResponse]] = {}
+    for duty in duties:
+        teacher = teachers.get(duty.teacher_id)
+        if teacher is None:
+            continue
+
+        teachers_by_slot.setdefault((duty.day_of_week, duty.period), []).append(
+            TeacherResponse(
+                id=teacher.id,
+                name=teacher.name,
+                department=teacher.department,
+            ),
+        )
+
+    days = [day_of_week] if day_of_week is not None else range(5)
+    periods = [period] if period is not None else range(6)
+    return [
+        DutySlotOut(
+            day_of_week=day,
+            day_name=DAY_NAMES[day],
+            period=slot_period,
+            teachers=sorted(
+                teachers_by_slot.get((day, slot_period), []),
+                key=lambda teacher: teacher.name.lower(),
+            ),
+        )
+        for day in days
+        for slot_period in periods
+    ]
 
 
 @router.post("/resolve", response_model=PeriodResolveResponse)

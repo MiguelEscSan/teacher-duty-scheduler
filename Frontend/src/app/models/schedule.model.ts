@@ -72,6 +72,13 @@ export interface AvailableTeacher {
   interventions_count: number;
 }
 
+export interface DutySlot {
+  day_of_week: number;
+  day_name: string;
+  period: number;
+  teachers: Teacher[];
+}
+
 export interface ManualAssignmentPayload {
   date: string;          // 'YYYY-MM-DD'
   period: number;        // 0 a 5

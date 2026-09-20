@@ -98,6 +98,13 @@ class AvailableTeacherOut(BaseModel):
     duty_type: str  # 'FIXED_DUTY' (guardia ordinaria), 'SHORT_TERM' (sustitución corta), o 'FREE' (hora libre)
     interventions_count: int  # Para que jefatura vea cuántas sustituciones lleva este curso
 
+
+class DutySlotOut(BaseModel):
+    day_of_week: int
+    day_name: str
+    period: int
+    teachers: list[TeacherResponse]
+
 class ManualAssignmentIn(BaseModel):
     date: str  # 'YYYY-MM-DD'
     period: int  # 0 a 5

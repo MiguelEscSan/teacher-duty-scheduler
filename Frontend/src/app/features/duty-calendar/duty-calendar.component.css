@@ -1,0 +1,126 @@
+:host {
+  display: block;
+}
+
+.calendar-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.section-heading h2 {
+  color: #1e3a8a;
+  font-size: 1.35rem;
+}
+
+.section-heading p {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.btn-refresh {
+  background: #2563eb;
+  color: white;
+  border: 0;
+  border-radius: 6px;
+  padding: 0.55rem 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-banner {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.loading-label {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.duty-calendar {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 6px;
+}
+
+.duty-calendar th {
+  background: #1e293b;
+  color: white;
+  padding: 0.85rem;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.period-column {
+  min-width: 140px;
+}
+
+.period-cell {
+  background: #f1f5f9;
+  border-radius: 6px;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  color: #1e293b;
+}
+
+.period-cell strong,
+.period-cell span {
+  display: block;
+}
+
+.period-cell span {
+  color: #64748b;
+  font-size: 0.75rem;
+  margin-top: 0.2rem;
+}
+
+.duty-cell {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem 0.5rem;
+  vertical-align: top;
+  min-width: 160px;
+  height: 70px;
+}
+
+.teacher-pill {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  margin-bottom: 0.35rem;
+}
+
+.empty-slot {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-style: italic;
+}
