@@ -24,7 +24,8 @@ export class AbsencesComponent implements OnInit {
     date: new Date().toISOString().split('T')[0],
     all_day: true,
     period: 0,
-    reason: 'Baja médica / Permiso'
+    reason: 'Baja médica / Permiso',
+    resolved: false
   };
 
   hours = [
@@ -71,6 +72,7 @@ export class AbsencesComponent implements OnInit {
 
   // --- Caso 1: Cubrir Manualmente ---
   openManualCoverModal(absence: Absence): void {
+    if (absence.resolved) return;
     this.activeMenuId = null;
     this.selectedAbsenceForManualCover = absence;
   }
@@ -84,13 +86,21 @@ export class AbsencesComponent implements OnInit {
     this.selectedAbsenceForManualCover = null;
   }
 
-  // --- Caso 2: Marcar como no cubrir (Siguiente paso) ---
   markAsDoNotCover(absence: Absence): void {
     this.activeMenuId = null;
-    console.log('Caso 2 por implementar:', absence);
+    if (absence.resolved) return;
+
+    this.api.markAbsenceAsDoNotCover({
+      date: absence.date,
+      period: absence.period,
+      absent_teacher_id: absence.teacher_id
+    }).subscribe(() => {
+      this.loadAbsences();
+    });
   }
 
   resolveAutomatic(absence: Absence): void {
+    if (absence.resolved) return;
     this.activeMenuId = null;
     this.selectedAbsenceForAutomaticCover = absence;
   }

@@ -32,6 +32,7 @@ export interface Absence {
   date: string;       // YYYY-MM-DD
   all_day?: boolean;  // Flag para el formulario
   period: number;
+  resolved: boolean;
   group_id?: string;
   group_name?: string;
   student_count?: number | null;

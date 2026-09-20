@@ -96,6 +96,17 @@ export class GuardiasService {
     return this.http.post<{ message: string }>(`${this.url}/assign-manual`, payload);
   }
 
+  markAbsenceAsDoNotCover(payload: {
+    date: string;
+    period: number;
+    absent_teacher_id: string;
+  }): Observable<{ message: string; resolved: boolean }> {
+    return this.http.post<{ message: string; resolved: boolean }>(
+      `${this.url}/v1/substitutions/do-not-cover`,
+      payload
+    );
+  }
+
   // Horario Base
   getBaseSchedule(teacherId: string): Observable<BaseSlot[][]> {
     return this.http.get<BaseSlot[][]>(`${this.url}/teachers/${teacherId}/base-schedule`);
