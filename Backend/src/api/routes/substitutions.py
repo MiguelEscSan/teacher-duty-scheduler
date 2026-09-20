@@ -75,6 +75,65 @@ def get_duty_teachers(
     ]
 
 
+@router.get("/short-term-teachers", response_model=List[DutySlotOut])
+def get_short_term_teachers(
+    day_of_week: int | None = Query(default=None, ge=0, le=4),
+    period: int | None = Query(default=None, ge=0, le=5),
+    session: Session = Depends(get_session),
+):
+    """Devuelve el calendario semanal de profesores de sustitución corta."""
+    substitution_query = select(ShortTermSubstitutionDB)
+    if day_of_week is not None:
+        substitution_query = substitution_query.where(
+            ShortTermSubstitutionDB.day_of_week == day_of_week
+        )
+    if period is not None:
+        substitution_query = substitution_query.where(
+            ShortTermSubstitutionDB.period == period
+        )
+
+    substitutions = session.exec(substitution_query).all()
+    teacher_ids = {substitution.teacher_id for substitution in substitutions}
+    teachers = {
+        teacher.id: teacher
+        for teacher in session.exec(
+            select(TeacherDB).where(TeacherDB.id.in_(teacher_ids))
+        ).all()
+    }
+
+    teachers_by_slot: dict[tuple[int, int], list[TeacherResponse]] = {}
+    for substitution in substitutions:
+        teacher = teachers.get(substitution.teacher_id)
+        if teacher is None:
+            continue
+
+        teachers_by_slot.setdefault(
+            (substitution.day_of_week, substitution.period), []
+        ).append(
+            TeacherResponse(
+                id=teacher.id,
+                name=teacher.name,
+                department=teacher.department,
+            )
+        )
+
+    days = [day_of_week] if day_of_week is not None else range(5)
+    periods = [period] if period is not None else range(6)
+    return [
+        DutySlotOut(
+            day_of_week=day,
+            day_name=DAY_NAMES[day],
+            period=slot_period,
+            teachers=sorted(
+                teachers_by_slot.get((day, slot_period), []),
+                key=lambda teacher: teacher.name.lower(),
+            ),
+        )
+        for day in days
+        for slot_period in periods
+    ]
+
+
 @router.post("/resolve", response_model=PeriodResolveResponse)
 def resolve_substitution(
     payload: PeriodResolveRequest,
