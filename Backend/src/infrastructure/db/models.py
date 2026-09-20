@@ -22,6 +22,7 @@ class AbsenceDB(SQLModel, table=True):
     date: str = Field(index=True)  # "YYYY-MM-DD"
     period: int  # 0 a 5
     reason: str
+    resolved: bool = Field(default=False, index=True)
 
 class SubstitutionSourceType(str, Enum):
     ORDINARY_GUARD = "ORDINARY_GUARD"

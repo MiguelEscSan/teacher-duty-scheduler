@@ -2,8 +2,7 @@
 Configuración del motor de base de datos SQLite.
 """
 from typing import Generator
-from sqlmodel import Session, SQLModel, create_engine, select
-from src.infrastructure.db.models import TeacherDB
+from sqlmodel import Session, SQLModel, create_engine
 
 SQLITE_FILE_NAME = "guardias.db"
 SQLITE_URL = f"sqlite:///{SQLITE_FILE_NAME}"

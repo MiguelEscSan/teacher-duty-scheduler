@@ -11,6 +11,7 @@ from src.api.schemas import (
     PeriodResolveResponse,
     ResolutionAction,
     SubstitutionEmailRequest,
+    DoNotCoverRequest,
 )
 from src.infrastructure.db.models import AbsenceDB, StudentGroupDB, SubstitutionSourceType, TeacherDB, \
     SubstitutionLogDB, FixedDutyDB, ShortTermSubstitutionDB, TeacherScheduleDB
@@ -158,18 +159,20 @@ def resolve_substitution(
         period=payload.period
     ).first()
     if not existing_absence:
-        session.add(
-            AbsenceDB(
-                teacher_id=payload.absent_teacher_id,
-                date=payload.date,
-                period=payload.period,
-                reason="Ausencia reportada en despacho",
-            )
+        existing_absence = AbsenceDB(
+            teacher_id=payload.absent_teacher_id,
+            date=payload.date,
+            period=payload.period,
+            reason="Ausencia reportada en despacho",
         )
+        session.add(existing_absence)
         session.commit()
 
     # Caso 1: Excursión
     if payload.action == ResolutionAction.EXCURSION:
+        existing_absence.resolved = True
+        session.add(existing_absence)
+        session.commit()
         return PeriodResolveResponse(
             date=payload.date,
             period=payload.period,
@@ -185,6 +188,9 @@ def resolve_substitution(
         target_count = target_group.student_count if target_group and target_group.student_count is not None else 0
         current_count = group.student_count if group and group.student_count is not None else 0
 
+        existing_absence.resolved = True
+        session.add(existing_absence)
+        session.commit()
         return PeriodResolveResponse(
             date=payload.date,
             period=payload.period,
@@ -224,6 +230,10 @@ def resolve_substitution(
                 action_applied=payload.action.value,
                 details="ALERTA: Sin profesores disponibles en guardia ni en sustitución corta.",
             )
+
+    existing_absence.resolved = True
+    session.add(existing_absence)
+    session.commit()
 
     # Registrar en el histórico de rotación
     service.register_log(
@@ -292,6 +302,33 @@ def send_substitution_email(
         absent_teacher_name=absent_teacher.name,
     )
     return {"message": "Correo de sustitución programado correctamente."}
+
+
+@router.post("/do-not-cover")
+def mark_absence_as_do_not_cover(
+    payload: DoNotCoverRequest,
+    session: Session = Depends(get_session),
+):
+    """Marca una ausencia como resuelta sin asignar un sustituto."""
+    absence = session.exec(
+        select(AbsenceDB).where(
+            AbsenceDB.date == payload.date,
+            AbsenceDB.period == payload.period,
+            AbsenceDB.teacher_id == payload.absent_teacher_id,
+        )
+    ).first()
+    if absence is None:
+        raise HTTPException(status_code=404, detail="Ausencia no encontrada.")
+
+    absence.resolved = True
+    session.add(absence)
+    session.commit()
+    session.refresh(absence)
+
+    return {
+        "message": "Ausencia marcada como no cubrir.",
+        "resolved": absence.resolved,
+    }
 
 
 @router.get("/available-candidates", response_model=List[AvailableTeacherOut])
@@ -415,6 +452,24 @@ def assign_manual_substitution(payload: ManualAssignmentIn, session: Session = D
             source_type="MANUAL"
         )
         session.add(new_log)
+
+    absence = session.exec(
+        select(AbsenceDB).where(
+            AbsenceDB.date == payload.date,
+            AbsenceDB.period == payload.period,
+            AbsenceDB.teacher_id == payload.absent_teacher_id,
+        )
+    ).first()
+    if absence is None:
+        absence = AbsenceDB(
+            teacher_id=payload.absent_teacher_id,
+            date=payload.date,
+            period=payload.period,
+            reason="Ausencia reportada en asignación manual",
+        )
+        session.add(absence)
+    absence.resolved = True
+    session.add(absence)
 
     session.commit()
     return {"message": "Sustitución manual asignada correctamente"}

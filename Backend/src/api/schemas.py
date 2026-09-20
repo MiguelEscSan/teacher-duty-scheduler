@@ -48,6 +48,7 @@ class AbsenceResponse(BaseModel):
     teacher_name: str
     date: str
     period: int
+    resolved: bool
     group_id: Optional[str] = None
     group_name: str
     student_count: Optional[int] = None
@@ -124,3 +125,9 @@ class ManualAssignmentIn(BaseModel):
     substitute_teacher_id: str
     group_id: Optional[str] = None
     notes: Optional[str] = "Asignación manual"
+
+
+class DoNotCoverRequest(BaseModel):
+    date: str
+    period: int = Field(ge=0, le=5)
+    absent_teacher_id: str
