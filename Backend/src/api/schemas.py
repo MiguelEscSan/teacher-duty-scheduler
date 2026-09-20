@@ -48,6 +48,7 @@ class AbsenceResponse(BaseModel):
     teacher_name: str
     date: str
     period: int
+    group_id: Optional[str] = None
     group_name: str
     student_count: Optional[int] = None
     reason: str

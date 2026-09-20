@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { GuardiasService } from '../../services/shift.services';
 import { Absence, Teacher } from '../../models/schedule.model';
 import { ManualCoverModalComponent } from './components/manual-cover-modal/manual-cover-modal.component'
+import { AutomaticCoverModalComponent } from './components/automatic-cover-modal/automatic-cover-modal.component';
 
 @Component({
   selector: 'app-absences',
   standalone: true,
-  imports: [CommonModule, FormsModule, ManualCoverModalComponent],
+  imports: [CommonModule, FormsModule, ManualCoverModalComponent, AutomaticCoverModalComponent],
   templateUrl: './absences.component.html',
   styleUrls: ['./absences.component.css']
 })
@@ -34,6 +35,7 @@ export class AbsencesComponent implements OnInit {
   // Control de menú de 3 puntos y modal
   activeMenuId: number | null = null;
   selectedAbsenceForManualCover: Absence | null = null;
+  selectedAbsenceForAutomaticCover: Absence | null = null;
 
   ngOnInit(): void {
     this.api.getTeachers().subscribe(t => {
@@ -88,10 +90,18 @@ export class AbsencesComponent implements OnInit {
     console.log('Caso 2 por implementar:', absence);
   }
 
-  // --- Caso 3: Cubrir automáticamente (Siguiente paso) ---
   resolveAutomatic(absence: Absence): void {
     this.activeMenuId = null;
-    console.log('Caso 3 por implementar:', absence);
+    this.selectedAbsenceForAutomaticCover = absence;
+  }
+
+  onAutomaticCoverConfirmed(): void {
+    this.selectedAbsenceForAutomaticCover = null;
+    this.loadAbsences();
+  }
+
+  onAutomaticCoverCancelled(): void {
+    this.selectedAbsenceForAutomaticCover = null;
   }
 
   // --- Caso 4: Eliminar ausencia (Ya implementado) ---

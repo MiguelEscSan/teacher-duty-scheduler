@@ -1,0 +1,54 @@
+<div class="modal-backdrop" (click)="close()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div>
+        <h3>Cubrir automáticamente</h3>
+        <p class="subtitle">Periodo P{{ absence.period }} | Grupo: <strong>{{ absence.group_name || 'Sin grupo' }}</strong></p>
+      </div>
+      <button class="btn-close" type="button" aria-label="Cerrar" (click)="close()">✕</button>
+    </header>
+
+    <div class="modal-body">
+      <div *ngIf="loading" class="state-msg">
+        <span class="spinner"></span>
+        <p>Buscando el mejor profesor sustituto...</p>
+      </div>
+
+      <div *ngIf="!loading && errorMsg && !resolution" class="state-msg error">
+        <p>{{ errorMsg }}</p>
+        <button class="btn-retry" type="button" (click)="resolve()">Reintentar</button>
+      </div>
+
+      <div *ngIf="!loading && resolution" class="summary">
+        <div *ngIf="resolution.resolved; else unresolved">
+          <p class="success">Sustitución asignada correctamente.</p>
+          <dl>
+            <div><dt>Profesor sustituido</dt><dd>{{ absence.teacher_name || absence.teacher_id }}</dd></div>
+            <div><dt>Profesor sustituto</dt><dd>{{ resolution.substitute_name }}</dd></div>
+            <div><dt>Grupo</dt><dd>{{ absence.group_name || 'Sin grupo' }}</dd></div>
+            <div><dt>Periodo</dt><dd>P{{ absence.period }}</dd></div>
+          </dl>
+          <p *ngIf="resolution.details" class="details">{{ resolution.details }}</p>
+          <p *ngIf="emailSent" class="email-success">Correo enviado al profesor sustituto.</p>
+          <p *ngIf="errorMsg" class="inline-error">{{ errorMsg }}</p>
+        </div>
+        <ng-template #unresolved>
+          <p class="inline-error">{{ resolution.details || 'No hay profesores disponibles para cubrir esta clase.' }}</p>
+        </ng-template>
+      </div>
+    </div>
+
+    <footer class="modal-footer">
+      <button class="btn-secondary" type="button" (click)="close()">Cerrar</button>
+      <button
+        *ngIf="resolution?.resolved"
+        class="btn-primary"
+        type="button"
+        [disabled]="sendingEmail || emailSent"
+        (click)="sendEmail()"
+      >
+        {{ sendingEmail ? 'Enviando...' : (emailSent ? 'Correo enviado' : 'Enviar correo al sustituto') }}
+      </button>
+    </footer>
+  </div>
+</div>

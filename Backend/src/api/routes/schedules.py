@@ -137,6 +137,7 @@ def get_actionable_absences(session: Session = Depends(get_session)):
                     teacher_name=teachers.get(a.teacher_id, a.teacher_id),
                     date=a.date,
                     period=a.period,
+                    group_id=group_id,
                     group_name=group_name,
                     student_count=student_count,
                     reason=a.reason,

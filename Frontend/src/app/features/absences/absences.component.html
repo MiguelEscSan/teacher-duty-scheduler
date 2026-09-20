@@ -105,7 +105,7 @@
                 </button>
 
                 <!-- 3. Cubrir automáticamente -->
-                <button type="button" class="menu-item disabled" (click)="resolveAutomatic(item)">
+                <button type="button" class="menu-item" (click)="resolveAutomatic(item)">
                   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                   </svg>
@@ -143,3 +143,11 @@
   (cancelled)="onManualCoverCancelled()"
 >
 </app-manual-cover-modal>
+
+<app-automatic-cover-modal
+  *ngIf="selectedAbsenceForAutomaticCover"
+  [absence]="selectedAbsenceForAutomaticCover"
+  (confirmed)="onAutomaticCoverConfirmed()"
+  (cancelled)="onAutomaticCoverCancelled()"
+>
+</app-automatic-cover-modal>
