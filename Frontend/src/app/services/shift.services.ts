@@ -67,7 +67,7 @@ export class GuardiasService {
     const params = new HttpParams()
       .set('date_str', date)
       .set('period', period.toString());
-    return this.http.get<AvailableTeacher[]>(`${this.url}/available-candidates`, { params });
+    return this.http.get<AvailableTeacher[]>(`${this.url}/v1/substitutions/available-candidates`, { params });
   }
 
   getDutyTeachers(): Observable<DutySlot[]> {
