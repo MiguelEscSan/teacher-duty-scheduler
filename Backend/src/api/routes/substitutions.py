@@ -10,6 +10,7 @@ from src.api.schemas import (
     PeriodResolveRequest,
     PeriodResolveResponse,
     ResolutionAction,
+    SubstitutionEmailRequest,
 )
 from src.infrastructure.db.models import AbsenceDB, StudentGroupDB, SubstitutionSourceType, TeacherDB, \
     SubstitutionLogDB, FixedDutyDB, ShortTermSubstitutionDB, TeacherScheduleDB
@@ -137,7 +138,6 @@ def get_short_term_teachers(
 @router.post("/resolve", response_model=PeriodResolveResponse)
 def resolve_substitution(
     payload: PeriodResolveRequest,
-    background_tasks: BackgroundTasks,
     session: Session = Depends(get_session),
 ):
     service = SubstitutionService(session)
@@ -200,7 +200,6 @@ def resolve_substitution(
     substitute = None
     source = None
     staff_room_keeper = None
-    email_dispatched = False
     details = ""
 
     if payload.action == ResolutionAction.AUTO_ASSIGN:
@@ -217,17 +216,6 @@ def resolve_substitution(
         )
         if substitute:
             source = SubstitutionSourceType.SHORT_TERM_SUBSTITUTION
-            # Disparo de notificación en segundo plano
-            background_tasks.add_task(
-                send_urgent_substitution_email,
-                to_email=substitute.email,
-                teacher_name=substitute.name,
-                group_name=group_name,
-                period=payload.period,
-                date_str=payload.date,
-                absent_teacher_name=absent_teacher.name,
-            )
-            email_dispatched = True
         else:
             return PeriodResolveResponse(
                 date=payload.date,
@@ -254,11 +242,57 @@ def resolve_substitution(
         action_applied=source.value,
         substitute_id=substitute.id,
         substitute_name=substitute.name,
+        substitute_email=substitute.email,
         source_type=source.value,
+        is_short_term_substitute=source == SubstitutionSourceType.SHORT_TERM_SUBSTITUTION,
+        is_fixed_duty_substitute=source == SubstitutionSourceType.ORDINARY_GUARD,
         staff_room_keeper_name=staff_room_keeper.name if staff_room_keeper else None,
-        email_notification_dispatched=email_dispatched,
         details=details,
     )
+
+
+@router.post("/send-email")
+def send_substitution_email(
+    payload: SubstitutionEmailRequest,
+    background_tasks: BackgroundTasks,
+    session: Session = Depends(get_session),
+):
+    """Envía la notificación de una sustitución ya asignada."""
+    absent_teacher = session.get(TeacherDB, payload.absent_teacher_id)
+    if absent_teacher is None:
+        raise HTTPException(status_code=404, detail="Profesor ausente no encontrado.")
+
+    substitute = session.get(TeacherDB, payload.substitute_teacher_id)
+    if substitute is None:
+        raise HTTPException(status_code=404, detail="Profesor sustituto no encontrado.")
+
+    assignment = session.exec(
+        select(SubstitutionLogDB).where(
+            SubstitutionLogDB.date == payload.date,
+            SubstitutionLogDB.period == payload.period,
+            SubstitutionLogDB.absent_teacher_id == payload.absent_teacher_id,
+            SubstitutionLogDB.substitute_teacher_id == payload.substitute_teacher_id,
+        )
+    ).first()
+    if assignment is None:
+        raise HTTPException(
+            status_code=404,
+            detail="No existe una sustitución asignada con esos datos.",
+        )
+
+    group = session.get(StudentGroupDB, payload.group_id) if payload.group_id else None
+    group_name = group.name if group else "Sin Grupo"
+    background_tasks.add_task(
+        send_urgent_substitution_email,
+        to_email=substitute.email,
+        teacher_name=substitute.name,
+        group_name=group_name,
+        period=payload.period,
+        date_str=payload.date,
+        absent_teacher_name=absent_teacher.name,
+    )
+    return {"message": "Correo de sustitución programado correctamente."}
+
 
 @router.get("/available-candidates", response_model=List[AvailableTeacherOut])
 def get_available_candidates(date_str: str, period: int, session: Session = Depends(get_session)):

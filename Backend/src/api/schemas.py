@@ -79,6 +79,14 @@ class PeriodResolveRequest(BaseModel):
     merged_with_group_id: Optional[str] = None  # ID de la clase con la que se fusiona
 
 
+class SubstitutionEmailRequest(BaseModel):
+    date: str
+    period: int = Field(ge=0, le=5)
+    absent_teacher_id: str
+    substitute_teacher_id: str
+    group_id: Optional[str] = None
+
+
 class PeriodResolveResponse(BaseModel):
     date: str
     period: int
@@ -86,7 +94,10 @@ class PeriodResolveResponse(BaseModel):
     action_applied: str
     substitute_id: Optional[str] = None
     substitute_name: Optional[str] = None
+    substitute_email: Optional[str] = None
     source_type: Optional[str] = None
+    is_short_term_substitute: bool = False
+    is_fixed_duty_substitute: bool = False
     staff_room_keeper_name: Optional[str] = None
     email_notification_dispatched: bool = False
     details: str

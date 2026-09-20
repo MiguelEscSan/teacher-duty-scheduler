@@ -34,7 +34,10 @@ export interface PeriodResolveResponse {
   action_applied: string;
   substitute_id: string | null;
   substitute_name: string | null;
+  substitute_email: string | null;
   source_type: string | null;
+  is_short_term_substitute: boolean;
+  is_fixed_duty_substitute: boolean;
   staff_room_keeper_name: string | null;
   email_notification_dispatched: boolean;
   details: string;

@@ -63,6 +63,19 @@ export class GuardiasService {
     return this.http.post<PeriodResolveResponse>(`${this.url}/v1/substitutions/resolve`, payload);
   }
 
+  sendSubstitutionEmail(payload: {
+    date: string;
+    period: number;
+    absent_teacher_id: string;
+    substitute_teacher_id: string;
+    group_id?: string;
+  }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.url}/v1/substitutions/send-email`,
+      payload
+    );
+  }
+
   getAvailableCandidates(date: string, period: number): Observable<AvailableTeacher[]> {
     const params = new HttpParams()
       .set('date_str', date)
