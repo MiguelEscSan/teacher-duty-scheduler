@@ -27,6 +27,14 @@
 
       <button
         class="nav-tab"
+        [class.active]="activeTab === 'short-term-calendar'"
+        (click)="activeTab = 'short-term-calendar'"
+      >
+        <span class="nav-icon">🔄</span> Sustituciones Cortas
+      </button>
+
+      <button
+        class="nav-tab"
         [class.active]="activeTab === 'absences'"
         (click)="activeTab = 'absences'"
       >
@@ -48,6 +56,7 @@
     <app-teachers *ngIf="activeTab === 'teachers'"></app-teachers>
     <app-absences *ngIf="activeTab === 'absences'"></app-absences>
     <app-duty-calendar *ngIf="activeTab === 'duty-calendar'"></app-duty-calendar>
+    <app-short-term-calendar *ngIf="activeTab === 'short-term-calendar'"></app-short-term-calendar>
     <app-guards *ngIf="activeTab === 'guards'"></app-guards>
   </main>
 </div>

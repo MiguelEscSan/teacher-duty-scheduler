@@ -74,6 +74,10 @@ export class GuardiasService {
     return this.http.get<DutySlot[]>(`${this.url}/v1/substitutions/duty-teachers`);
   }
 
+  getShortTermTeachers(): Observable<DutySlot[]> {
+    return this.http.get<DutySlot[]>(`${this.url}/v1/substitutions/short-term-teachers`);
+  }
+
   // 2. Asignar sustitución manual
   assignManualSubstitution(payload: ManualAssignmentPayload): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.url}/assign-manual`, payload);

@@ -1,0 +1,45 @@
+<section class="calendar-card">
+  <div class="section-heading">
+    <div>
+      <h2>Calendario de sustituciones cortas</h2>
+      <p>Profesores disponibles para cubrir sustituciones cortas por franja.</p>
+    </div>
+    <button class="btn-refresh" type="button" (click)="loadCalendar()" [disabled]="isLoading">
+      ↻ Actualizar
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-banner">⚠️ {{ errorMessage }}</div>
+  <div *ngIf="isLoading" class="loading-label">Cargando calendario...</div>
+
+  <div class="table-wrapper" *ngIf="!isLoading && !errorMessage">
+    <table class="short-term-calendar">
+      <thead>
+      <tr>
+        <th class="period-column">Periodo / Hora</th>
+        <th *ngFor="let day of days">
+          {{ getSlot(day, 0)?.day_name || dayNames[day] }}
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let hour of hours; let period = index">
+        <td class="period-cell">
+          <strong>P{{ period }}</strong>
+          <span>{{ hour }}</span>
+        </td>
+        <td *ngFor="let day of days" class="short-term-cell">
+          <ng-container *ngIf="getTeachers(day, period).length; else noTeacher">
+            <div *ngFor="let teacher of getTeachers(day, period)" class="teacher-pill">
+              👤 {{ teacher.name }}
+            </div>
+          </ng-container>
+          <ng-template #noTeacher>
+            <span class="empty-slot">Sin asignar</span>
+          </ng-template>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
