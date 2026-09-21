@@ -3,9 +3,9 @@ from typing import Optional
 
 from src.api.schemas import SubstitutionHistoryOut
 from src.application.common.mediator import Query, RequestHandler
-from src.domain.repositories.student_group_repository import StudentGroupRepository
-from src.domain.repositories.substitution_repository import SubstitutionRepository
-from src.domain.repositories.teacher_repository import TeacherRepository
+from src.domain.ports.student_group_repository import StudentGroupRepository
+from src.domain.repositories import SubstitutionRepository
+from src.domain.ports.teacher_repository import TeacherRepository
 
 
 @dataclass(frozen=True)

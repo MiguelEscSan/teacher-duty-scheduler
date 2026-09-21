@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
 
-from src.domain.repositories.student_group_repository import StudentGroupRepository
+from src.domain.ports.student_group_repository import StudentGroupRepository
 from src.domain.student_group import StudentGroup
 from src.infrastructure.db.models import StudentGroupDB
 

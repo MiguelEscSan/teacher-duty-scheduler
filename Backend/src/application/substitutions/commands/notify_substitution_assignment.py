@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from src.application.common.mediator import Command, RequestHandler
 from src.domain.email import EmailMessage, EmailRecipient
 from src.domain.ports.email_sender import EmailSender
-from src.domain.repositories.student_group_repository import StudentGroupRepository
-from src.domain.repositories.teacher_repository import TeacherRepository
+from src.domain.ports.student_group_repository import StudentGroupRepository
+from src.domain.ports.teacher_repository import TeacherRepository
 
 
 @dataclass(frozen=True)

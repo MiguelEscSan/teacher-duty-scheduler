@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
 from src.application.common.mediator import Command, RequestHandler
-from src.domain.repositories.absence_repository import AbsenceRepository
-from src.domain.repositories.schedule_repository import ScheduleRepository
-from src.domain.repositories.teacher_repository import TeacherRepository
+from src.domain.ports.absence_repository import AbsenceRepository
+from src.domain.ports.schedule_repository import ScheduleRepository
+from src.domain.ports.teacher_repository import TeacherRepository
 
 
 @dataclass(frozen=True)

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from src.api.schemas import TeacherResponse
 from src.application.common.mediator import Query, RequestHandler
-from src.domain.repositories.teacher_repository import TeacherRepository
+from src.domain.ports.teacher_repository import TeacherRepository
 
 
 @dataclass(frozen=True)

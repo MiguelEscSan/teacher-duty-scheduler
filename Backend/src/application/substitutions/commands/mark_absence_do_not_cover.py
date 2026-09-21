@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from src.application.common.mediator import Command, RequestHandler
-from src.domain.repositories.absence_repository import AbsenceRepository
+from src.domain.ports.absence_repository import AbsenceRepository
 
 
 @dataclass(frozen=True)

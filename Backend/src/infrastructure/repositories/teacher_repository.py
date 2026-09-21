@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
 
 from src.domain.teacher import CorporateEmail, Teacher
-from src.domain.repositories.teacher_repository import TeacherRepository
+from src.domain.ports.teacher_repository import TeacherRepository
 from src.infrastructure.db.models import TeacherDB
 
 

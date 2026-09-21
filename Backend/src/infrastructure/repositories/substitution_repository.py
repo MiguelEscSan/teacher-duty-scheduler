@@ -1,9 +1,6 @@
-from collections import Counter
-from datetime import datetime
-
 from sqlmodel import Session, func, select
 
-from src.domain.repositories.substitution_repository import SubstitutionRepository
+from src.domain.repositories import SubstitutionRepository
 from src.domain.substitution import SubstitutionLog, SubstitutionSourceType
 from src.infrastructure.db.models import SubstitutionLogDB
 

@@ -4,8 +4,8 @@ from typing import Optional
 
 from src.application.common.mediator import Command, RequestHandler
 from src.domain.absence import Absence
-from src.domain.repositories.absence_repository import AbsenceRepository
-from src.domain.repositories.teacher_repository import TeacherRepository
+from src.domain.ports.absence_repository import AbsenceRepository
+from src.domain.ports.teacher_repository import TeacherRepository
 
 
 @dataclass(frozen=True)

@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
 
-from src.domain.repositories.schedule_repository import ScheduleRepository
+from src.domain.ports.schedule_repository import ScheduleRepository
 from src.domain.schedule import ScheduleEntry
 from src.infrastructure.db.models import (
     FixedDutyDB,

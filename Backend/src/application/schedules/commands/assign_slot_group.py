@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from src.application.common.mediator import Command, RequestHandler
-from src.domain.repositories.schedule_repository import ScheduleRepository
+from src.domain.ports.schedule_repository import ScheduleRepository
 from src.domain.schedule import ScheduleEntry
 
 

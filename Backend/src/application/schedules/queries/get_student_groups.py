@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from src.application.common.mediator import Query, RequestHandler
-from src.domain.repositories.student_group_repository import StudentGroupRepository
+from src.domain.ports.student_group_repository import StudentGroupRepository
 
 
 @dataclass(frozen=True)

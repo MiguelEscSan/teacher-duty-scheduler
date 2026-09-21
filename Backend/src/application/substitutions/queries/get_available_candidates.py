@@ -3,10 +3,10 @@ from datetime import datetime
 
 from src.api.schemas import AvailableTeacherOut
 from src.application.common.mediator import Query, RequestHandler
-from src.domain.repositories.absence_repository import AbsenceRepository
-from src.domain.repositories.schedule_repository import ScheduleRepository
-from src.domain.repositories.substitution_repository import SubstitutionRepository
-from src.domain.repositories.teacher_repository import TeacherRepository
+from src.domain.ports.absence_repository import AbsenceRepository
+from src.domain.ports.schedule_repository import ScheduleRepository
+from src.domain.repositories import SubstitutionRepository
+from src.domain.ports.teacher_repository import TeacherRepository
 
 
 @dataclass(frozen=True)
