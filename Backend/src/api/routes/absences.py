@@ -39,7 +39,7 @@ def create_absence(dto: AbsenceCreate, mediator: Mediator = Depends(get_mediator
         return mediator.send(cmd)
     except ValueError as ex:
         detail = str(ex)
-        code = status.HTTP_404_NOT_FOUND if "no encontrado" in detail else status.HTTP_400_BAD_REQUEST
+        code = status.HTTP_404_NOT_FOUND if "no encontrado" in detail else status.HTTP_422_UNPROCESSABLE_ENTITY
         raise HTTPException(status_code=code, detail=detail)
 
 

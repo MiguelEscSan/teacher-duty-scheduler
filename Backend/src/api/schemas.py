@@ -35,6 +35,12 @@ class SlotCellResponse(BaseModel):
     status: str
 
 
+class StudentGroupResponse(BaseModel):
+    id: str
+    name: str
+    student_count: Optional[int] = None
+
+
 # --- Ausencias ---
 class AbsenceCreate(BaseModel):
     teacher_id: str

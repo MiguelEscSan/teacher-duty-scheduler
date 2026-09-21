@@ -17,7 +17,7 @@ class CorporateEmail:
     """Value object for normalized corporate teacher addresses."""
 
     value: str
-    domain: str = "centro.edu"
+    domain: str = "centroeducativo.es"
 
     def __post_init__(self) -> None:
         value = self.value.strip().lower()
@@ -26,13 +26,16 @@ class CorporateEmail:
         object.__setattr__(self, "value", value)
 
     @classmethod
-    def from_teacher_name(cls, name: str, domain: str = "centro.edu") -> CorporateEmail:
+    def from_teacher_name(cls, name: str, domain: str = "centroeducativo.es") -> CorporateEmail:
+        if not name or len(name.strip()) < 2:
+            raise InvalidOperationException("El nombre del docente debe tener al menos dos caracteres.")
         normalized = unicodedata.normalize("NFKD", name)
         ascii_name = "".join(char for char in normalized if not unicodedata.combining(char))
-        parts = re.findall(r"[a-z0-9]+", ascii_name.lower())
+        surname = ascii_name.split(",", 1)[0]
+        parts = re.findall(r"[a-z0-9]+", surname.lower())
         if not parts:
             raise ValueError("El nombre del docente no permite generar un correo.")
-        return cls(f"{'.'.join(parts)}@{domain.strip().lower()}", domain.strip().lower())
+        return cls(f"{parts[0]}@{domain.strip().lower()}", domain.strip().lower())
 
     @property
     def email(self) -> str:
