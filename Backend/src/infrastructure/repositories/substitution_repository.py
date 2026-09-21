@@ -1,6 +1,6 @@
 from sqlmodel import Session, func, select
 
-from src.domain.repositories import SubstitutionRepository
+from src.domain.ports import SubstitutionRepository
 from src.domain.substitution import SubstitutionLog, SubstitutionSourceType
 from src.infrastructure.db.models import SubstitutionLogDB
 

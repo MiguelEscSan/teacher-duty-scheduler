@@ -3,9 +3,9 @@ from datetime import datetime
 
 from src.api.schemas import AvailableTeacherOut
 from src.application.common.mediator import Query, RequestHandler
+from src.domain.ports import SubstitutionRepository
 from src.domain.ports.absence_repository import AbsenceRepository
 from src.domain.ports.schedule_repository import ScheduleRepository
-from src.domain.repositories import SubstitutionRepository
 from src.domain.ports.teacher_repository import TeacherRepository
 
 

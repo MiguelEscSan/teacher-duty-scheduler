@@ -3,8 +3,8 @@ from typing import Optional
 
 from src.application.common.mediator import Command, RequestHandler
 from src.domain.absence import Absence
+from src.domain.ports import SubstitutionRepository
 from src.domain.ports.absence_repository import AbsenceRepository
-from src.domain.repositories import SubstitutionRepository
 from src.domain.substitution import SubstitutionSourceType
 
 

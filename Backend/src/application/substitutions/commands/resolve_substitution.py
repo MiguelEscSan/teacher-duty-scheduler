@@ -5,10 +5,10 @@ from typing import Optional
 from src.api.schemas import PeriodResolveResponse, ResolutionAction
 from src.application.common.mediator import Command, RequestHandler
 from src.domain.absence import Absence
+from src.domain.ports import SubstitutionRepository
 from src.domain.ports.absence_repository import AbsenceRepository
 from src.domain.ports.schedule_repository import ScheduleRepository
 from src.domain.ports.student_group_repository import StudentGroupRepository
-from src.domain.repositories import SubstitutionRepository
 from src.domain.ports.teacher_repository import TeacherRepository
 from src.domain.substitution import SubstitutionSourceType
 

@@ -3,8 +3,8 @@ from typing import Optional
 
 from src.api.schemas import SubstitutionHistoryOut
 from src.application.common.mediator import Query, RequestHandler
+from src.domain.ports import SubstitutionRepository
 from src.domain.ports.student_group_repository import StudentGroupRepository
-from src.domain.repositories import SubstitutionRepository
 from src.domain.ports.teacher_repository import TeacherRepository
 
 
