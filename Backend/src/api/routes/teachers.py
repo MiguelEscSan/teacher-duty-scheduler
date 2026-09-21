@@ -1,9 +1,9 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from src.api.dependencies import get_mediator
 from src.api.schemas import TeacherCreate, TeacherResponse, DutySlotOut
-from src.application.common.mediator import Query, Mediator
+from src.application.common.mediator import Mediator
 from src.application.teachers.commands.create_teacher import CreateTeacherCommand
 from src.application.teachers.commands.delete_teacher import DeleteTeacherCommand
 from src.application.teachers.queries.get_duty_teachers import GetDutyTeachersQuery

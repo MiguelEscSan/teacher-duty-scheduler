@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from typing import Optional
-from src.api.schemas import DutySlotOut
 from src.application.common.mediator import Query
 
 from sqlmodel import Session, select
 from src.api.schemas import DutySlotOut, TeacherResponse
 from src.application.common.mediator import RequestHandler
+from src.domain.constants import DAY_NAMES
 from src.infrastructure.db.models import FixedDutyDB, TeacherDB
 
 @dataclass(frozen=True)
