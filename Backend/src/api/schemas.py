@@ -2,6 +2,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 from enum import Enum
 from typing import Optional
+from datetime import datetime
 
 # --- Docentes ---
 class TeacherCreate(BaseModel):
@@ -125,6 +126,20 @@ class ManualAssignmentIn(BaseModel):
     substitute_teacher_id: str
     group_id: Optional[str] = None
     notes: Optional[str] = "Asignación manual"
+
+
+class SubstitutionHistoryOut(BaseModel):
+    id: int
+    date: str
+    period: int
+    substitute_teacher_id: str
+    substitute_teacher_name: str
+    absent_teacher_id: str
+    absent_teacher_name: str
+    group_id: Optional[str] = None
+    group_name: Optional[str] = None
+    source_type: str
+    created_at: datetime
 
 
 class DoNotCoverRequest(BaseModel):

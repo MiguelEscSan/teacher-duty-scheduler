@@ -12,6 +12,7 @@ from src.api.schemas import (
     ResolutionAction,
     SubstitutionEmailRequest,
     DoNotCoverRequest,
+    SubstitutionHistoryOut,
 )
 from src.infrastructure.db.models import AbsenceDB, StudentGroupDB, SubstitutionSourceType, TeacherDB, \
     SubstitutionLogDB, FixedDutyDB, ShortTermSubstitutionDB, TeacherScheduleDB
@@ -22,6 +23,76 @@ from typing import List
 
 router = APIRouter(prefix="/api/v1/substitutions", tags=["Sustituciones Operativas"])
 DAY_NAMES = ("Lunes", "Martes", "Miércoles", "Jueves", "Viernes")
+
+
+@router.get("/history", response_model=List[SubstitutionHistoryOut])
+def get_substitution_history(
+    date: str | None = Query(default=None, description="Fecha exacta en formato YYYY-MM-DD"),
+    substitute_teacher_id: str | None = Query(default=None),
+    absent_teacher_id: str | None = Query(default=None),
+    session: Session = Depends(get_session),
+):
+    """Devuelve el histórico de guardias y sustituciones realizadas."""
+    history_query = select(SubstitutionLogDB).order_by(
+        SubstitutionLogDB.date.desc(),
+        SubstitutionLogDB.period,
+        SubstitutionLogDB.created_at.desc(),
+    )
+    if date is not None:
+        history_query = history_query.where(SubstitutionLogDB.date == date)
+    if substitute_teacher_id is not None:
+        history_query = history_query.where(
+            SubstitutionLogDB.substitute_teacher_id == substitute_teacher_id
+        )
+    if absent_teacher_id is not None:
+        history_query = history_query.where(
+            SubstitutionLogDB.absent_teacher_id == absent_teacher_id
+        )
+
+    logs = session.exec(history_query).all()
+    teacher_ids = {
+        teacher_id
+        for log in logs
+        for teacher_id in (log.substitute_teacher_id, log.absent_teacher_id)
+    }
+    teachers = {
+        teacher.id: teacher
+        for teacher in session.exec(
+            select(TeacherDB).where(TeacherDB.id.in_(teacher_ids))
+        ).all()
+    }
+    group_ids = {log.group_id for log in logs if log.group_id is not None}
+    groups = {
+        group.id: group
+        for group in session.exec(
+            select(StudentGroupDB).where(StudentGroupDB.id.in_(group_ids))
+        ).all()
+    }
+
+    return [
+        SubstitutionHistoryOut(
+            id=log.id,
+            date=log.date,
+            period=log.period,
+            substitute_teacher_id=log.substitute_teacher_id,
+            substitute_teacher_name=teachers.get(
+                log.substitute_teacher_id
+            ).name if teachers.get(log.substitute_teacher_id) else "Profesor no encontrado",
+            absent_teacher_id=log.absent_teacher_id,
+            absent_teacher_name=teachers.get(
+                log.absent_teacher_id
+            ).name if teachers.get(log.absent_teacher_id) else "Profesor no encontrado",
+            group_id=log.group_id,
+            group_name=groups.get(log.group_id).name
+            if log.group_id and groups.get(log.group_id)
+            else None,
+            source_type=log.source_type.value
+            if hasattr(log.source_type, "value")
+            else str(log.source_type),
+            created_at=log.created_at,
+        )
+        for log in logs
+    ]
 
 
 @router.get("/duty-teachers", response_model=List[DutySlotOut])
