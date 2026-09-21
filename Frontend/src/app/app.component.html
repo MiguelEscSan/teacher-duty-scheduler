@@ -41,6 +41,14 @@
       >
         <span class="nav-icon">📊</span> Cuadrante de Guardias
       </button>
+
+      <button
+        class="nav-tab"
+        [class.active]="activeTab === 'history'"
+        (click)="activeTab = 'history'"
+      >
+        <span class="nav-icon">📚</span> Historial de sustituciones
+      </button>
     </nav>
   </header>
 
@@ -75,5 +83,6 @@
       <app-short-term-calendar *ngIf="activeCalendarTab === 'short-term'"></app-short-term-calendar>
     </section>
     <app-guards *ngIf="activeTab === 'guards'"></app-guards>
+    <app-substitution-history *ngIf="activeTab === 'history'"></app-substitution-history>
   </main>
 </div>

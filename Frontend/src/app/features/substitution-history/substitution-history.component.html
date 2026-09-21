@@ -1,0 +1,73 @@
+<div class="history-view">
+  <section class="card history-card">
+    <div class="section-heading">
+      <div>
+        <h2>Histórico de sustituciones</h2>
+        <p>Consulta las sustituciones y guardias registradas.</p>
+      </div>
+      <button type="button" class="btn-refresh" (click)="loadHistory()" [disabled]="loading">
+        {{ loading ? 'Cargando...' : 'Actualizar' }}
+      </button>
+    </div>
+
+    <form class="filters" (ngSubmit)="loadHistory()">
+      <div class="form-group">
+        <label for="historyDate">Fecha</label>
+        <input id="historyDate" type="date" [(ngModel)]="filters.date" name="date">
+      </div>
+      <div class="form-group">
+        <label for="absentTeacher">Docente ausente</label>
+        <select id="absentTeacher" [(ngModel)]="filters.absent_teacher_id" name="absent_teacher_id">
+          <option value="">Todos</option>
+          <option *ngFor="let teacher of teachers" [value]="teacher.id">{{ teacher.name }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="substituteTeacher">Docente sustituto</label>
+        <select id="substituteTeacher" [(ngModel)]="filters.substitute_teacher_id" name="substitute_teacher_id">
+          <option value="">Todos</option>
+          <option *ngFor="let teacher of teachers" [value]="teacher.id">{{ teacher.name }}</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button type="submit" class="btn-filter">Filtrar</button>
+        <button type="button" class="btn-clear" (click)="clearFilters()">Limpiar</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card history-card">
+    <div *ngIf="errorMessage" class="error-banner">{{ errorMessage }}</div>
+    <div *ngIf="loading" class="loading-label">Cargando histórico...</div>
+
+    <div class="table-wrapper" *ngIf="!loading">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Periodo</th>
+            <th>Docente ausente</th>
+            <th>Sustituto</th>
+            <th>Grupo</th>
+            <th>Origen</th>
+            <th>Registrada</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of history">
+            <td>{{ item.date }}</td>
+            <td><span class="period-badge">P{{ item.period }}</span></td>
+            <td>{{ item.absent_teacher_name }}</td>
+            <td><strong>{{ item.substitute_teacher_name }}</strong></td>
+            <td>{{ item.group_name || '—' }}</td>
+            <td><span class="source-badge">{{ sourceLabel(item.source_type) }}</span></td>
+            <td>{{ formatDateTime(item.created_at) }}</td>
+          </tr>
+          <tr *ngIf="history.length === 0">
+            <td colspan="7" class="empty-state">No hay sustituciones registradas con los filtros seleccionados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

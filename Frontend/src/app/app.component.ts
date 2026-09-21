@@ -5,15 +5,16 @@ import { AbsencesComponent } from './features/absences/absences.component';
 import { GuardsComponent } from './features/guards/guards.component';
 import { DutyCalendarComponent } from './features/duty-calendar/duty-calendar.component';
 import { ShortTermCalendarComponent } from './features/short-term-calendar/short-term-calendar.component';
+import { SubstitutionHistoryComponent } from './features/substitution-history/substitution-history.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, TeachersComponent, AbsencesComponent, GuardsComponent, DutyCalendarComponent, ShortTermCalendarComponent],
+  imports: [CommonModule, TeachersComponent, AbsencesComponent, GuardsComponent, DutyCalendarComponent, ShortTermCalendarComponent, SubstitutionHistoryComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  activeTab: 'teachers' | 'absences' | 'guards' | 'calendars' = 'teachers';
+  activeTab: 'teachers' | 'absences' | 'guards' | 'calendars' | 'history' = 'teachers';
   activeCalendarTab: 'duty' | 'short-term' = 'duty';
 }

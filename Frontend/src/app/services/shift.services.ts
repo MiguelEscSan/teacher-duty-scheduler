@@ -10,7 +10,11 @@ import {
   StudentGroup,
   Teacher
 } from '../models/schedule.model';
-import {AbsencePreviewResponse, PeriodResolveResponse} from '../models/substitutions.model';
+import {
+  AbsencePreviewResponse,
+  PeriodResolveResponse,
+  SubstitutionHistory
+} from '../models/substitutions.model';
 import {ManualAssignmentPayload} from '../models/schedule.model';
 
 @Injectable({ providedIn: 'root' })
@@ -89,6 +93,23 @@ export class GuardiasService {
 
   getShortTermTeachers(): Observable<DutySlot[]> {
     return this.http.get<DutySlot[]>(`${this.url}/v1/substitutions/short-term-teachers`);
+  }
+
+  getSubstitutionHistory(filters?: {
+    date?: string;
+    substitute_teacher_id?: string;
+    absent_teacher_id?: string;
+  }): Observable<SubstitutionHistory[]> {
+    let params = new HttpParams();
+    if (filters?.date) params = params.set('date', filters.date);
+    if (filters?.substitute_teacher_id) {
+      params = params.set('substitute_teacher_id', filters.substitute_teacher_id);
+    }
+    if (filters?.absent_teacher_id) {
+      params = params.set('absent_teacher_id', filters.absent_teacher_id);
+    }
+
+    return this.http.get<SubstitutionHistory[]>(`${this.url}/v1/substitutions/history`, { params });
   }
 
   // 2. Asignar sustitución manual

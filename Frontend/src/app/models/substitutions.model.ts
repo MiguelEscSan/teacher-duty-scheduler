@@ -42,3 +42,17 @@ export interface PeriodResolveResponse {
   email_notification_dispatched: boolean;
   details: string;
 }
+
+export interface SubstitutionHistory {
+  id: number;
+  date: string;
+  period: number;
+  substitute_teacher_id: string;
+  substitute_teacher_name: string;
+  absent_teacher_id: string;
+  absent_teacher_name: string;
+  group_id: string | null;
+  group_name: string | null;
+  source_type: string;
+  created_at: string;
+}

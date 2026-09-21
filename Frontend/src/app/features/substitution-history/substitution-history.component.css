@@ -1,0 +1,167 @@
+:host {
+  display: block;
+}
+
+.history-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.history-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.section-heading h2 {
+  color: #1e3a8a;
+  font-size: 1.35rem;
+}
+
+.section-heading p,
+.loading-label {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.btn-refresh,
+.btn-filter,
+.btn-clear {
+  border: 0;
+  border-radius: 6px;
+  padding: 0.55rem 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-refresh,
+.btn-filter {
+  background: #2563eb;
+  color: white;
+}
+
+.btn-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-clear {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.filters {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 190px;
+}
+
+.form-group label {
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.form-group input,
+.form-group select {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #1e293b;
+  background: #f8fafc;
+  padding: 0.55rem 0.65rem;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.error-banner {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 850px;
+}
+
+.history-table th,
+.history-table td {
+  padding: 0.85rem 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.history-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.period-badge,
+.source-badge {
+  display: inline-block;
+  border-radius: 6px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.period-badge {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.source-badge {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.empty-state {
+  color: #64748b;
+  padding: 2rem !important;
+  text-align: center !important;
+}
+
+@media (max-width: 700px) {
+  .section-heading {
+    flex-direction: column;
+  }
+
+  .filters,
+  .form-group {
+    width: 100%;
+  }
+}
