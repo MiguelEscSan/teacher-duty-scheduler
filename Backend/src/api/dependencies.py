@@ -13,6 +13,10 @@ from src.application.absences.queries.get_actionable_absences import (
     GetActionableAbsencesHandler,
     GetActionableAbsencesQuery,
 )
+from src.application.guards.queries.calculate_week_guards import (
+    CalculateWeekGuardsHandler,
+    CalculateWeekGuardsQuery,
+)
 from src.application.common.mediator import Mediator
 from src.application.schedules.commands.assign_slot_group import (
     AssignSlotGroupCommand,
@@ -72,6 +76,7 @@ from src.application.teachers.queries.get_teachers import (
 )
 from src.infrastructure.db.config import get_session
 from src.infrastructure.email.smtp_email_sender import SMTPEmailSender
+from src.infrastructure.optimization.ortools_guard_optimizer import ORToolsGuardOptimizer
 from src.infrastructure.repositories import (
     SQLAbsenceRepository,
     SQLScheduleRepository,
@@ -79,7 +84,6 @@ from src.infrastructure.repositories import (
     SQLSubstitutionRepository,
     SQLTeacherRepository,
 )
-from src.services.guard_service import GuardService
 
 
 def get_teacher_repository(session: Session = Depends(get_session)):
@@ -102,17 +106,6 @@ def get_substitution_repository(session: Session = Depends(get_session)):
     return SQLSubstitutionRepository(session)
 
 
-def get_repository(session: Session = Depends(get_session)):
-    """Compatibility dependency for callers using the old guard facade."""
-    from src.infrastructure.repositories import SQLGuardRepository
-
-    return SQLGuardRepository(session)
-
-
-def get_guard_service(repo=Depends(get_repository)) -> GuardService:
-    return GuardService(repository=repo)
-
-
 def get_mediator(session: Session = Depends(get_session)) -> Mediator:
     teacher_repository = SQLTeacherRepository(session)
     absence_repository = SQLAbsenceRepository(session)
@@ -120,8 +113,15 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
     student_group_repository = SQLStudentGroupRepository(session)
     substitution_repository = SQLSubstitutionRepository(session)
     email_sender = SMTPEmailSender()
+    optimizer = ORToolsGuardOptimizer()
     mediator = Mediator()
 
+    mediator.register(
+        CalculateWeekGuardsQuery,
+        lambda: CalculateWeekGuardsHandler(
+            teacher_repository, schedule_repository, absence_repository, optimizer
+        ),
+    )
     mediator.register(
         AssignManualSubstitutionCommand,
         lambda: AssignManualSubstitutionHandler(absence_repository, substitution_repository),
