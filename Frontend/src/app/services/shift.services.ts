@@ -20,7 +20,7 @@ import {ManualAssignmentPayload} from '../models/schedule.model';
 @Injectable({ providedIn: 'root' })
 export class GuardiasService {
   private http = inject(HttpClient);
-  private url = 'http://localhost:8000/api';
+  private url = 'http://localhost:8000/api/v1';
 
   // Profesores
   getTeachers(): Observable<Teacher[]> {
@@ -36,7 +36,7 @@ export class GuardiasService {
   }
 
   getGroups(): Observable<StudentGroup[]> {
-    return this.http.get<StudentGroup[]>(`${this.url}/groups`);
+    return this.http.get<StudentGroup[]>(`${this.url}/base-schedule/groups`);
   }
 
   assignSlotGroup(teacherId: string, day: number, period: number, groupId: string | null): Observable<any> {
@@ -50,7 +50,7 @@ export class GuardiasService {
 
   // --- Despacho Operativo v1 ---
   previewDayAbsence(teacherId: string, date: string): Observable<AbsencePreviewResponse> {
-    return this.http.post<AbsencePreviewResponse>(`${this.url}/v1/absences/preview-day`, {
+    return this.http.post<AbsencePreviewResponse>(`${this.url}/absences/preview-day`, {
       teacher_id: teacherId,
       date
     });
@@ -64,7 +64,7 @@ export class GuardiasService {
     action: string;
     merged_with_group_id?: string;
   }): Observable<PeriodResolveResponse> {
-    return this.http.post<PeriodResolveResponse>(`${this.url}/v1/substitutions/resolve`, payload);
+    return this.http.post<PeriodResolveResponse>(`${this.url}/substitutions/resolve`, payload);
   }
 
   sendSubstitutionEmail(payload: {
@@ -75,7 +75,7 @@ export class GuardiasService {
     group_id?: string;
   }): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
-      `${this.url}/v1/substitutions/send-email`,
+      `${this.url}/substitutions/send-email`,
       payload
     );
   }
@@ -84,15 +84,15 @@ export class GuardiasService {
     const params = new HttpParams()
       .set('date_str', date)
       .set('period', period.toString());
-    return this.http.get<AvailableTeacher[]>(`${this.url}/v1/substitutions/available-candidates`, { params });
+    return this.http.get<AvailableTeacher[]>(`${this.url}/substitutions/available-candidates`, { params });
   }
 
   getDutyTeachers(): Observable<DutySlot[]> {
-    return this.http.get<DutySlot[]>(`${this.url}/v1/substitutions/duty-teachers`);
+    return this.http.get<DutySlot[]>(`${this.url}/teachers/duty`);
   }
 
   getShortTermTeachers(): Observable<DutySlot[]> {
-    return this.http.get<DutySlot[]>(`${this.url}/v1/substitutions/short-term-teachers`);
+    return this.http.get<DutySlot[]>(`${this.url}/teachers/short-term`);
   }
 
   getSubstitutionHistory(filters?: {
@@ -109,12 +109,12 @@ export class GuardiasService {
       params = params.set('absent_teacher_id', filters.absent_teacher_id);
     }
 
-    return this.http.get<SubstitutionHistory[]>(`${this.url}/v1/substitutions/history`, { params });
+    return this.http.get<SubstitutionHistory[]>(`${this.url}/substitutions/history`, { params });
   }
 
   // 2. Asignar sustitución manual
   assignManualSubstitution(payload: ManualAssignmentPayload): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.url}/v1/substitutions/assign-manual`, payload);
+    return this.http.post<{ message: string }>(`${this.url}/substitutions/assign-manual`, payload);
   }
 
   markAbsenceAsDoNotCover(payload: {
@@ -123,13 +123,13 @@ export class GuardiasService {
     absent_teacher_id: string;
   }): Observable<{ message: string; resolved: boolean }> {
     return this.http.post<{ message: string; resolved: boolean }>(
-      `${this.url}/v1/substitutions/do-not-cover`,
+      `${this.url}/substitutions/do-not-cover`,
       payload
     );
   }
 
   getBaseSchedule(teacherId: string): Observable<BaseSlot[][]> {
-    return this.http.get<BaseSlot[][]>(`${this.url}/teachers/${teacherId}/base-schedule`);
+    return this.http.get<BaseSlot[][]>(`${this.url}/base-schedule/${teacherId}`);
   }
 
   toggleSlot(teacherId: string, day: number, period: number): Observable<any> {
@@ -155,7 +155,7 @@ export class GuardiasService {
 
   // Optimización por fecha
   optimizeWeek(startDate: string): Observable<OptimizationResponse> {
-    return this.http.post<OptimizationResponse>(`${this.url}/optimize`, {
+    return this.http.post<OptimizationResponse>(`${this.url}/guards/optimize`, {
       start_date: startDate
     });
   }

@@ -11,6 +11,11 @@ from src.infrastructure.db.models import StudentGroupDB
 router = APIRouter(prefix="/api/v1/base-schedule", tags=["Schedules & Absences"])
 
 
+@router.get("/groups", response_model=list[StudentGroupDB])
+def get_student_groups(mediator: Mediator = Depends(get_mediator)):
+    return mediator.send(GetStudentGroupsQuery())
+
+
 @router.get("/{teacher_id}")
 def get_teacher_base_schedule(teacher_id: str, mediator: Mediator = Depends(get_mediator)):
     try:
@@ -18,10 +23,6 @@ def get_teacher_base_schedule(teacher_id: str, mediator: Mediator = Depends(get_
     except ValueError as ex:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ex))
 
-
-@router.get("/groups", response_model=list[StudentGroupDB])
-def get_student_groups(mediator: Mediator = Depends(get_mediator)):
-    return mediator.send(GetStudentGroupsQuery())
 
 @router.put("/assign-slot")
 def assign_slot_group(payload: SlotToggleRequest, mediator: Mediator = Depends(get_mediator)):
