@@ -5,11 +5,12 @@ import { GuardiasService } from '../../services/shift.services';
 import { Absence, Teacher } from '../../models/schedule.model';
 import { ManualCoverModalComponent } from './components/manual-cover-modal/manual-cover-modal.component'
 import { AutomaticCoverModalComponent } from './components/automatic-cover-modal/automatic-cover-modal.component';
+import { AbsenceFormModalComponent } from './components/absence-form-modal/absence-form-modal.component';
 
 @Component({
   selector: 'app-absences',
   standalone: true,
-  imports: [CommonModule, FormsModule, ManualCoverModalComponent, AutomaticCoverModalComponent],
+  imports: [CommonModule, FormsModule, ManualCoverModalComponent, AutomaticCoverModalComponent, AbsenceFormModalComponent],
   templateUrl: './absences.component.html',
   styleUrls: ['./absences.component.css']
 })
@@ -42,6 +43,7 @@ export class AbsencesComponent implements OnInit {
   activeMenuId: number | null = null;
   selectedAbsenceForManualCover: Absence | null = null;
   selectedAbsenceForAutomaticCover: Absence | null = null;
+  showAbsenceModal = false;
 
   ngOnInit(): void {
     this.api.getTeachers().subscribe(t => {
@@ -65,11 +67,18 @@ export class AbsencesComponent implements OnInit {
   }
 
   submitAbsence(): void {
-    if (!this.newAbsence.teacher_id || !this.newAbsence.date) return;
-
     this.api.addAbsence(this.newAbsence).subscribe(() => {
       this.loadAbsences();
+      this.showAbsenceModal = false;
     });
+  }
+
+  openAbsenceModal(): void {
+    this.showAbsenceModal = true;
+  }
+
+  closeAbsenceModal(): void {
+    this.showAbsenceModal = false;
   }
 
   // Cierra cualquier menú desplegable si el usuario pulsa en cualquier parte de la pantalla

@@ -1,0 +1,53 @@
+<div class="modal-backdrop" (click)="close()">
+  <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="absenceModalTitle"
+           (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div class="header-info">
+        <h3 id="absenceModalTitle">Registrar ausencia</h3>
+        <p class="subtitle">Introduce los datos de la ausencia docente.</p>
+      </div>
+      <button type="button" class="btn-close" (click)="close()" aria-label="Cerrar">&times;</button>
+    </header>
+
+    <form (ngSubmit)="submit()" class="absence-form">
+      <div class="form-group">
+        <label for="teacherSelect">Profesor</label>
+        <select id="teacherSelect" [(ngModel)]="absence.teacher_id" name="teacher_id" required>
+          <option *ngFor="let teacher of teachers" [value]="teacher.id">
+            {{ teacher.name }} ({{ teacher.department }})
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="absenceDate">Fecha</label>
+        <input id="absenceDate" type="date" [(ngModel)]="absence.date" name="date" required>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input type="checkbox" [(ngModel)]="absence.all_day" name="all_day">
+          Falta todo el día (Jornada completa)
+        </label>
+      </div>
+
+      <div class="form-group" *ngIf="!absence.all_day">
+        <label for="periodSelect">Periodo</label>
+        <select id="periodSelect" [(ngModel)]="absence.period" name="period">
+          <option *ngFor="let hour of hours; let i = index" [value]="i">P{{ i }} ({{ hour }})</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="reasonInput">Motivo</label>
+        <input id="reasonInput" type="text" [(ngModel)]="absence.reason" name="reason"
+               placeholder="Motivo de la falta">
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="close()">Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar ausencia</button>
+      </footer>
+    </form>
+  </section>
+</div>

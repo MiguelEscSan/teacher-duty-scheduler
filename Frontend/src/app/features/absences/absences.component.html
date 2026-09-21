@@ -1,50 +1,14 @@
 <div class="absences-view">
-  <!-- Panel de Registro de Ausencia -->
-  <section class="card form-card">
-    <h2>Registrar Ausencia</h2>
-    <form (ngSubmit)="submitAbsence()" class="absence-form">
-      <div class="form-group">
-        <label for="teacherSelect">Profesor</label>
-        <select id="teacherSelect" [(ngModel)]="newAbsence.teacher_id" name="teacher_id" required>
-          <option *ngFor="let t of teachers" [value]="t.id">{{ t.name }} ({{ t.department }})</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="absenceDate">Fecha</label>
-        <input id="absenceDate" type="date" [(ngModel)]="newAbsence.date" name="date" required />
-      </div>
-
-      <div class="form-group checkbox-group">
-        <label>
-          <input type="checkbox" [(ngModel)]="newAbsence.all_day" name="all_day" />
-          Falta todo el día (Jornada completa)
-        </label>
-      </div>
-
-      <div class="form-group" *ngIf="!newAbsence.all_day">
-        <label for="periodSelect">Periodo</label>
-        <select id="periodSelect" [(ngModel)]="newAbsence.period" name="period">
-          <option *ngFor="let h of hours; let i = index" [value]="i">P{{ i }} ({{ h }})</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="reasonInput">Motivo</label>
-        <input id="reasonInput" type="text" [(ngModel)]="newAbsence.reason" name="reason" placeholder="Motivo de la falta" />
-      </div>
-
-      <button type="submit" class="btn-submit">Guardar Ausencia</button>
-    </form>
-  </section>
-
   <!-- Tabla de Clases Desatendidas -->
   <section class="card table-card">
-    <div class="section-heading">
+    <div class="section-heading absence-list-heading">
       <div>
         <h2>Ausencias Lectivas Detectadas</h2>
         <p>Filtra las ausencias por fecha, docente o estado.</p>
       </div>
+      <button type="button" class="btn-add-absence" (click)="openAbsenceModal()">
+        Registrar ausencia
+      </button>
     </div>
 
     <form class="filters" (ngSubmit)="loadAbsences()">
@@ -173,6 +137,15 @@
     </div>
   </section>
 </div>
+
+<app-absence-form-modal
+  *ngIf="showAbsenceModal"
+  [teachers]="teachers"
+  [absence]="newAbsence"
+  [hours]="hours"
+  (saved)="submitAbsence()"
+  (cancelled)="closeAbsenceModal()"
+></app-absence-form-modal>
 
 <!-- Modal para el Caso 1 -->
 <app-manual-cover-modal
