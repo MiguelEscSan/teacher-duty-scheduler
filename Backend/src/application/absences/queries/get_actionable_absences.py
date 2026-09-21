@@ -9,7 +9,9 @@ from src.application.common.mediator import Query
 
 @dataclass(frozen=True)
 class GetActionableAbsencesQuery(Query[list[AbsenceResponse]]):
-    pass
+    date: str | None = None
+    teacher_id: str | None = None
+    resolved: bool | None = None
 
 class GetActionableAbsencesHandler(
     RequestHandler[GetActionableAbsencesQuery, list[AbsenceResponse]]
@@ -18,7 +20,15 @@ class GetActionableAbsencesHandler(
         self.session = session
 
     def handle(self, query: GetActionableAbsencesQuery) -> list[AbsenceResponse]:
-        absences = self.session.exec(select(AbsenceDB)).all()
+        absences_query = select(AbsenceDB)
+        if query.date is not None:
+            absences_query = absences_query.where(AbsenceDB.date == query.date)
+        if query.teacher_id is not None:
+            absences_query = absences_query.where(AbsenceDB.teacher_id == query.teacher_id)
+        if query.resolved is not None:
+            absences_query = absences_query.where(AbsenceDB.resolved == query.resolved)
+
+        absences = self.session.exec(absences_query).all()
         teachers = {t.id: t.name for t in self.session.exec(select(TeacherDB)).all()}
         groups = {g.id: g for g in self.session.exec(select(StudentGroupDB)).all()}
 

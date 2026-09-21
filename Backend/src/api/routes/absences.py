@@ -1,5 +1,5 @@
 # src/api/routes/absences.py
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from src.api.dependencies import get_mediator
 from src.api.schemas import AbsenceCreate, AbsenceResponse
 from src.application.absences.commands.create_absence import CreateAbsenceCommand
@@ -12,9 +12,18 @@ router = APIRouter(prefix="/api/v1/absences", tags=["Ausencias"])
 
 
 @router.get("", response_model=list[AbsenceResponse])
-def get_actionable_absences(mediator: Mediator = Depends(get_mediator)):
+def get_actionable_absences(
+    date: str | None = Query(default=None),
+    teacher_id: str | None = Query(default=None),
+    resolved: bool | None = Query(default=None),
+    mediator: Mediator = Depends(get_mediator),
+):
     """Devuelve las ausencias que requieren sustitución en aula."""
-    return mediator.send(GetActionableAbsencesQuery())
+    return mediator.send(GetActionableAbsencesQuery(
+        date=date,
+        teacher_id=teacher_id,
+        resolved=resolved,
+    ))
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
