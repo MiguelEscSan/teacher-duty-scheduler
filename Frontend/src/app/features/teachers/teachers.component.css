@@ -1,11 +1,15 @@
-:host {
-  display: block;
+.teachers-layout {
+  display: flex;
+  flex: 1;
+  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+  gap: 1.5rem;
 }
 
-.teachers-layout {
-  display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 1.5rem;
+.main-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
 }
 
 .sidebar-card, .main-card {
@@ -180,8 +184,10 @@
 /* Panel Principal de Horario */
 .main-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-end;
+  gap: 1rem;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #e2e8f0;
@@ -466,4 +472,44 @@
 
 .slot-teaching:hover {
   background-color: #dbeafe !important;
+}
+
+@media (max-width: 950px) {
+  .teachers-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-list {
+    max-height: 280px;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar-card,
+  .main-card {
+    padding: 1rem;
+  }
+
+  .main-header {
+    align-items: flex-start;
+  }
+
+  .legend {
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .modal-card {
+    width: calc(100% - 2rem);
+    padding: 1.25rem;
+  }
+
+  .modal-actions {
+    flex-wrap: wrap;
+  }
+
+  .actions-right {
+    width: 100%;
+    margin-left: 0;
+  }
 }

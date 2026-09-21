@@ -128,7 +128,6 @@ export class GuardiasService {
     );
   }
 
-  // Horario Base
   getBaseSchedule(teacherId: string): Observable<BaseSlot[][]> {
     return this.http.get<BaseSlot[][]>(`${this.url}/teachers/${teacherId}/base-schedule`);
   }

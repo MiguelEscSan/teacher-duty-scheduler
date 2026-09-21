@@ -16,6 +16,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
@@ -273,6 +275,7 @@
 
 .calendar-navigator {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
 }
@@ -315,8 +318,10 @@
 
 .week-banner {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
   margin-top: 0.5rem;
 }
 
@@ -335,4 +340,27 @@
   font-size: 0.75rem;
   font-weight: 400;
   opacity: 0.85;
+}
+
+@media (max-width: 700px) {
+  .action-card,
+  .grid-card,
+  .balance-card {
+    padding: 1rem;
+  }
+
+  .calendar-navigator,
+  .action-buttons {
+    width: 100%;
+  }
+
+  .calendar-navigator > .btn-nav,
+  .action-buttons > button {
+    flex: 1 1 0;
+  }
+
+  .picker-wrapper {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
 }

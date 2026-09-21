@@ -70,6 +70,7 @@
 }
 
 .form-group {
+  flex: 1 1 190px;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -153,6 +154,27 @@
   color: #64748b;
   padding: 2rem !important;
   text-align: center !important;
+}
+
+@media (max-width: 600px) {
+  .history-card {
+    padding: 1rem;
+  }
+
+  .section-heading,
+  .filters {
+    align-items: stretch;
+  }
+
+  .section-heading > button,
+  .form-group,
+  .filter-actions {
+    width: 100%;
+  }
+
+  .filter-actions > button {
+    flex: 1 1 0;
+  }
 }
 
 @media (max-width: 700px) {

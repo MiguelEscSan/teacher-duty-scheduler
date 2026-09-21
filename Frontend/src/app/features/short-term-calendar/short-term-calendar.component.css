@@ -12,8 +12,10 @@
 
 .section-heading {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 1rem;
   margin-bottom: 1rem;
 }
 
@@ -123,4 +125,18 @@
   color: #94a3b8;
   font-size: 0.85rem;
   font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .calendar-card {
+    padding: 1rem;
+  }
+
+  .section-heading {
+    align-items: stretch;
+  }
+
+  .btn-refresh {
+    align-self: flex-start;
+  }
 }

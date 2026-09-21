@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 1.5rem;
+  width: 100%;
 }
 
 .card {
@@ -29,6 +29,7 @@
 }
 
 .form-group {
+  flex: 1 1 180px;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -65,6 +66,7 @@
 }
 
 .btn-submit {
+  flex: 0 1 auto;
   padding: 0.55rem 1.25rem;
   background-color: #0f172a;
   color: #ffffff;
@@ -223,4 +225,24 @@
   margin: 4px 0;
   border: none;
   border-top: 1px solid #e2e8f0;
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: 1rem;
+  }
+
+  .absence-form {
+    align-items: stretch;
+  }
+
+  .form-group,
+  .btn-submit {
+    width: 100%;
+    flex-basis: 100%;
+  }
+
+  .checkbox-group {
+    margin-bottom: 0;
+  }
 }
