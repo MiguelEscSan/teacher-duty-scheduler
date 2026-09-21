@@ -27,6 +27,7 @@ class AbsenceDB(SQLModel, table=True):
 class SubstitutionSourceType(str, Enum):
     ORDINARY_GUARD = "ORDINARY_GUARD"
     SHORT_TERM_SUBSTITUTION = "SHORT_TERM_SUBSTITUTION"
+    MANUAL = "MANUAL"
 
 
 class StudentGroupDB(SQLModel, table=True):
