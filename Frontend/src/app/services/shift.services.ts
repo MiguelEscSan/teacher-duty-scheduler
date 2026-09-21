@@ -114,7 +114,7 @@ export class GuardiasService {
 
   // 2. Asignar sustitución manual
   assignManualSubstitution(payload: ManualAssignmentPayload): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.url}/assign-manual`, payload);
+    return this.http.post<{ message: string }>(`${this.url}/v1/substitutions/assign-manual`, payload);
   }
 
   markAbsenceAsDoNotCover(payload: {
