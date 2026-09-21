@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-from src.application.common.mediator import Command
 from sqlmodel import Session, select
-from src.application.common.mediator import RequestHandler
+from src.application.common.mediator import Command, RequestHandler
 from src.infrastructure.db.models import AbsenceDB
 
 
@@ -19,7 +18,7 @@ class MarkAbsenceDoNotCoverHandler(
         self.session = session
 
     def handle(self, cmd: MarkAbsenceDoNotCoverCommand) -> dict:
-        absence = self.session.exec(
+        absence_record = self.session.exec(
             select(AbsenceDB).where(
                 AbsenceDB.date == cmd.date,
                 AbsenceDB.period == cmd.period,
@@ -27,13 +26,19 @@ class MarkAbsenceDoNotCoverHandler(
             )
         ).first()
 
-        if absence is None:
+        if absence_record is None:
             raise ValueError("Ausencia no encontrada.")
 
-        absence.resolved = True
-        self.session.add(absence)
+        # 1. Hidratar la entidad de dominio
+        absence = absence_record.to_domain()
+
+        # 2. Ejecutar la regla de negocio pura
+        absence.mark_as_do_not_cover()
+
+        # 3. Persistir los cambios sincronizados
+        absence_record.apply_domain(absence)
+        self.session.add(absence_record)
         self.session.commit()
-        self.session.refresh(absence)
 
         return {
             "message": "Ausencia marcada como no cubrir.",

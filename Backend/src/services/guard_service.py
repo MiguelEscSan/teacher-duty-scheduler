@@ -3,7 +3,7 @@ Caso de uso orquestador para resolución de cuadrantes anclados a fechas reales.
 """
 from datetime import datetime, timedelta
 from src.domain.constants import DAYS, PERIODS
-from src.domain.entities import SlotStatus, Teacher, TeacherSchedule, TimeSlot
+from src.domain import SlotStatus, Teacher, TeacherSchedule, TimeSlot
 from src.infrastructure.repositories import SQLGuardRepository
 from src.services.scheduler import generate_guards_for_slots
 

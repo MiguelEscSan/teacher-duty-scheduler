@@ -1,8 +1,9 @@
 from datetime import datetime
 import uuid
 from sqlmodel import Field, SQLModel
-from enum import Enum
 from typing import Optional
+
+from src.domain import Absence, SubstitutionSourceType
 
 
 def generate_uuid() -> str:
@@ -19,15 +20,24 @@ class BaseScheduleDB(SQLModel, table=True):
 class AbsenceDB(SQLModel, table=True):
     id: str = Field(default_factory=generate_uuid, primary_key=True)
     teacher_id: str = Field(index=True)
-    date: str = Field(index=True)  # "YYYY-MM-DD"
-    period: int  # 0 a 5
+    date: str = Field(index=True)
+    period: int
     reason: str
     resolved: bool = Field(default=False, index=True)
 
-class SubstitutionSourceType(str, Enum):
-    ORDINARY_GUARD = "ORDINARY_GUARD"
-    SHORT_TERM_SUBSTITUTION = "SHORT_TERM_SUBSTITUTION"
-    MANUAL = "MANUAL"
+    def to_domain(self) -> Absence:
+        return Absence(
+            id=self.id,
+            teacher_id=self.teacher_id,
+            date=self.date,
+            period=self.period,
+            reason=self.reason,
+            resolved=self.resolved,
+        )
+
+    def apply_domain(self, domain_entity: Absence) -> None:
+        self.resolved = domain_entity.resolved
+        self.reason = domain_entity.reason
 
 
 class StudentGroupDB(SQLModel, table=True):

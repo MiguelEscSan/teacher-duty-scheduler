@@ -6,12 +6,8 @@ from datetime import datetime
 from sqlmodel import Session
 from src.api.schemas import PeriodResolveResponse, ResolutionAction
 from src.application.common.mediator import RequestHandler
-from src.infrastructure.db.models import (
-    AbsenceDB,
-    StudentGroupDB,
-    SubstitutionSourceType,
-    TeacherDB,
-)
+from src.domain import SubstitutionSourceType
+from src.infrastructure.db.models import AbsenceDB, StudentGroupDB, TeacherDB
 from src.services.substitution_service import SubstitutionService
 
 @dataclass(frozen=True)

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from src.domain.constants import DAY_NAMES, DAYS, PERIOD_HOURS, PERIODS
-from src.domain.entities import AssignmentReport, Teacher
+from src.domain import AssignmentReport, Teacher
 
 
 def export_to_excel(report: AssignmentReport, teachers: list[Teacher], output_path: str | Path) -> None:
@@ -80,5 +80,4 @@ def export_to_excel(report: AssignmentReport, teachers: list[Teacher], output_pa
         ws_grid.column_dimensions[col_letter].width = 30
 
     wb.save(output_path)
-
 

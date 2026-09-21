@@ -3,7 +3,7 @@ Optimizador de guardias basado en OR-Tools CP-SAT con soporte de fechas concreta
 """
 from __future__ import annotations
 from ortools.sat.python import cp_model
-from src.domain.entities import AssignmentReport, GuardAssignment, Teacher, TeacherSchedule, TimeSlot
+from src.domain import AssignmentReport, GuardAssignment, Teacher, TeacherSchedule, TimeSlot
 from src.domain.constants import REQUIRED_TEACHERS_PER_SLOT, PERIODS
 
 
