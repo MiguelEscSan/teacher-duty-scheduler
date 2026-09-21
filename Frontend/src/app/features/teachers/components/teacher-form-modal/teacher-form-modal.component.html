@@ -1,0 +1,29 @@
+<div class="modal-backdrop" (click)="close()">
+  <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="teacherModalTitle"
+           (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div>
+        <h3 id="teacherModalTitle">Registrar profesor</h3>
+        <p>Introduce los datos del nuevo docente.</p>
+      </div>
+      <button type="button" class="btn-close" (click)="close()" aria-label="Cerrar">&times;</button>
+    </header>
+
+    <form (ngSubmit)="submit()" class="form-vertical">
+      <label for="teacherName">Nombre y apellidos</label>
+      <input id="teacherName" type="text" class="input-name" [(ngModel)]="teacher.name"
+             name="teacher_name" required autofocus>
+
+      <label for="teacherDepartment">Departamento</label>
+      <select id="teacherDepartment" class="select-dept" [(ngModel)]="teacher.department"
+              name="teacher_department">
+        <option *ngFor="let department of departments" [value]="department">{{ department }}</option>
+      </select>
+
+      <footer class="modal-actions">
+        <button type="button" class="btn btn-outline" (click)="close()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar profesor</button>
+      </footer>
+    </form>
+  </section>
+</div>

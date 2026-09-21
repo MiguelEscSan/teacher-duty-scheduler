@@ -42,6 +42,48 @@
   border-radius: 9999px;
 }
 
+.sidebar-actions {
+  margin-bottom: 1rem;
+}
+
+.sidebar-actions .btn {
+  width: 100%;
+}
+
+.teacher-search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.teacher-search label {
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.teacher-search input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #1e293b;
+}
+
+.teacher-search input:focus {
+  outline: 2px solid #bfdbfe;
+  border-color: #2563eb;
+}
+
+.empty-search {
+  margin: 1rem 0;
+  color: #64748b;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
 
 .add-box {
   background: #f8fafc;

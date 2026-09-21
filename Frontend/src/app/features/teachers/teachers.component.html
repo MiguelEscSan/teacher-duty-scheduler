@@ -5,24 +5,19 @@
       <span class="badge">{{ teachers.length }} profesores</span>
     </div>
 
-    <div class="add-box">
-      <div class="form-vertical">
-        <input
-          type="text"
-          placeholder="Nombre y Apellidos"
-          class="input-name"
-          [(ngModel)]="newTeacher.name"
-        />
-        <select class="select-dept" [(ngModel)]="newTeacher.department">
-          <option *ngFor="let dep of departments" [value]="dep">{{ dep }}</option>
-        </select>
-        <button class="btn btn-primary" (click)="saveTeacher()">+ Añadir Docente</button>
-      </div>
+    <div class="sidebar-actions">
+      <button class="btn btn-primary" type="button" (click)="openTeacherModal()">+ Añadir docente</button>
+    </div>
+
+    <div class="teacher-search">
+      <label for="teacherSearch">Buscar profesor</label>
+      <input id="teacherSearch" type="search" [(ngModel)]="teacherSearch"
+             placeholder="Nombre o departamento" autocomplete="off">
     </div>
 
     <ul class="teacher-list">
       <li
-        *ngFor="let t of teachers"
+        *ngFor="let t of filteredTeachers"
         [class.active]="selectedTeacher?.id === t.id"
         (click)="selectTeacher(t)"
       >
@@ -38,6 +33,7 @@
         </button>
       </li>
     </ul>
+    <p class="empty-search" *ngIf="filteredTeachers.length === 0">No hay profesores que coincidan.</p>
   </aside>
 
   <!-- Panel Principal: Matriz de Horario Base -->
@@ -102,6 +98,14 @@
     </ng-template>
   </section>
 </div>
+
+<app-teacher-form-modal
+  *ngIf="showTeacherModal"
+  [teacher]="newTeacher"
+  [departments]="departments"
+  (saved)="saveTeacher()"
+  (cancelled)="closeTeacherModal()"
+></app-teacher-form-modal>
 
 <!-- Modal para asignar o quitar Grupo -->
 <div class="modal-backdrop" *ngIf="activeSlot" (click)="closeModal()">

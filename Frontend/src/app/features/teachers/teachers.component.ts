@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GuardiasService } from '../../services/shift.services';
 import { BaseSlot, StudentGroup, Teacher } from '../../models/schedule.model';
+import { TeacherFormModalComponent } from './components/teacher-form-modal/teacher-form-modal.component';
 
 @Component({
   selector: 'app-teachers',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TeacherFormModalComponent],
   templateUrl: './teachers.component.html',
   styleUrls: ['./teachers.component.css']
 })
@@ -18,6 +19,8 @@ export class TeachersComponent implements OnInit {
   groups: StudentGroup[] = [];
   selectedTeacher: Teacher | null = null;
   teacherSchedule: BaseSlot[][] = [];
+  teacherSearch = '';
+  showTeacherModal = false;
 
   // Control del modal de asignación de grupo
   activeSlot: BaseSlot | null = null;
@@ -45,6 +48,15 @@ export class TeachersComponent implements OnInit {
   ngOnInit(): void {
     this.loadTeachers();
     this.api.getGroups().subscribe(g => this.groups = g);
+  }
+
+  get filteredTeachers(): Teacher[] {
+    const search = this.teacherSearch.trim().toLowerCase();
+    if (!search) return this.teachers;
+    return this.teachers.filter(teacher =>
+      teacher.name.toLowerCase().includes(search) ||
+      teacher.department.toLowerCase().includes(search)
+    );
   }
 
   loadTeachers(): void {
@@ -115,7 +127,16 @@ export class TeachersComponent implements OnInit {
       this.newTeacher.name = '';
       this.teachers.push(created);
       this.selectTeacher(created);
+      this.showTeacherModal = false;
     });
+  }
+
+  openTeacherModal(): void {
+    this.showTeacherModal = true;
+  }
+
+  closeTeacherModal(): void {
+    this.showTeacherModal = false;
   }
 
   removeTeacher(id: string): void {
