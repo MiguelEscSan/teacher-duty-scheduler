@@ -15,6 +15,7 @@ from src.api.schemas import (
 )
 from src.application.common.mediator import Mediator
 from src.application.substitutions.commands.assign_manual_substitution import AssignManualSubstitutionCommand
+from src.application.substitutions.commands.mark_absence_do_not_cover import MarkAbsenceDoNotCoverCommand
 from src.application.substitutions.commands.resolve_substitution import ResolveSubstitutionCommand
 from src.application.substitutions.queries.get_available_candidates import GetAvailableCandidatesQuery
 from src.application.substitutions.queries.get_substitution_history import GetSubstitutionHistoryQuery
@@ -68,28 +69,18 @@ def send_substitution_email(
 @router.post("/do-not-cover")
 def mark_absence_as_do_not_cover(
     payload: DoNotCoverRequest,
-    session: Session = Depends(get_session),
+    mediator: Mediator = Depends(get_mediator),
 ):
-    """Marca una ausencia como resuelta sin asignar un sustituto."""
-    absence = session.exec(
-        select(AbsenceDB).where(
-            AbsenceDB.date == payload.date,
-            AbsenceDB.period == payload.period,
-            AbsenceDB.teacher_id == payload.absent_teacher_id,
+    try:
+        return mediator.send(
+            MarkAbsenceDoNotCoverCommand(
+                date=payload.date,
+                period=payload.period,
+                absent_teacher_id=payload.absent_teacher_id,
+            )
         )
-    ).first()
-    if absence is None:
-        raise HTTPException(status_code=404, detail="Ausencia no encontrada.")
-
-    absence.resolved = True
-    session.add(absence)
-    session.commit()
-    session.refresh(absence)
-
-    return {
-        "message": "Ausencia marcada como no cubrir.",
-        "resolved": absence.resolved,
-    }
+    except ValueError as ex:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ex))
 
 
 @router.get("/available-candidates", response_model=List[AvailableTeacherOut])
