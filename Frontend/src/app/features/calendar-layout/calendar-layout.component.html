@@ -1,0 +1,28 @@
+<section class="calendar-view">
+  <div class="calendar-tabs" role="tablist" aria-label="Calendarios">
+    <a
+      class="calendar-tab"
+      routerLink="/calendars/duty"
+      routerLinkActive="active"
+      #dutyActive="routerLinkActive"
+      [routerLinkActiveOptions]="{ exact: true }"
+      [attr.aria-selected]="dutyActive.isActive"
+      role="tab"
+    >
+      <span class="nav-icon">🛡️</span> Guardias fijas
+    </a>
+    <a
+      class="calendar-tab"
+      routerLink="/calendars/short-term"
+      routerLinkActive="active"
+      #shortTermActive="routerLinkActive"
+      [routerLinkActiveOptions]="{ exact: true }"
+      [attr.aria-selected]="shortTermActive.isActive"
+      role="tab"
+    >
+      <span class="nav-icon">🔄</span> Sustituciones cortas
+    </a>
+  </div>
+
+  <router-outlet></router-outlet>
+</section>

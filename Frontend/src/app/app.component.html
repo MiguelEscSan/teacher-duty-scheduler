@@ -11,24 +11,26 @@
     <nav class="nav-bar">
       <button
         class="nav-tab"
-        [class.active]="activeTab === 'teachers'"
-        (click)="activeTab = 'teachers'"
+        routerLink="/teachers"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
       >
         <span class="nav-icon">👨‍🏫</span> Claustro y Horario Base
       </button>
 
       <button
         class="nav-tab"
-        [class.active]="activeTab === 'calendars'"
-        (click)="activeTab = 'calendars'"
+        routerLink="/calendars"
+        routerLinkActive="active"
       >
         <span class="nav-icon">🗓️</span> Calendarios
       </button>
 
       <button
         class="nav-tab"
-        [class.active]="activeTab === 'absences'"
-        (click)="activeTab = 'absences'"
+        routerLink="/absences"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
       >
         <span class="nav-icon">📝</span> Registro de Ausencias
       </button>
@@ -36,16 +38,18 @@
 
       <button
         class="nav-tab"
-        [class.active]="activeTab === 'guards'"
-        (click)="activeTab = 'guards'"
+        routerLink="/guards"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
       >
         <span class="nav-icon">📊</span> Cuadrante de Guardias
       </button>
 
       <button
         class="nav-tab"
-        [class.active]="activeTab === 'history'"
-        (click)="activeTab = 'history'"
+        routerLink="/history"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
       >
         <span class="nav-icon">📚</span> Historial de sustituciones
       </button>
@@ -53,36 +57,6 @@
   </header>
 
   <main class="content-body">
-    <app-teachers *ngIf="activeTab === 'teachers'"></app-teachers>
-    <app-absences *ngIf="activeTab === 'absences'"></app-absences>
-    <section *ngIf="activeTab === 'calendars'" class="calendar-view">
-      <div class="calendar-tabs" role="tablist" aria-label="Calendarios">
-        <button
-          class="calendar-tab"
-          [class.active]="activeCalendarTab === 'duty'"
-          [attr.aria-selected]="activeCalendarTab === 'duty'"
-          role="tab"
-          type="button"
-          (click)="activeCalendarTab = 'duty'"
-        >
-          <span class="nav-icon">🛡️</span> Guardias fijas
-        </button>
-        <button
-          class="calendar-tab"
-          [class.active]="activeCalendarTab === 'short-term'"
-          [attr.aria-selected]="activeCalendarTab === 'short-term'"
-          role="tab"
-          type="button"
-          (click)="activeCalendarTab = 'short-term'"
-        >
-          <span class="nav-icon">🔄</span> Sustituciones cortas
-        </button>
-      </div>
-
-      <app-duty-calendar *ngIf="activeCalendarTab === 'duty'"></app-duty-calendar>
-      <app-short-term-calendar *ngIf="activeCalendarTab === 'short-term'"></app-short-term-calendar>
-    </section>
-    <app-guards *ngIf="activeTab === 'guards'"></app-guards>
-    <app-substitution-history *ngIf="activeTab === 'history'"></app-substitution-history>
+    <router-outlet></router-outlet>
   </main>
 </div>
