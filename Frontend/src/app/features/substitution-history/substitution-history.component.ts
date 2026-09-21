@@ -68,6 +68,7 @@ export class SubstitutionHistoryComponent implements OnInit {
   sourceLabel(source: string): string {
     const labels: Record<string, string> = {
       FIXED_DUTY: 'Guardia fija',
+      ORDINARY_GUARD: 'Guardia Normal',
       SHORT_TERM_SUBSTITUTION: 'Sustitución corta',
       FREE: 'Hora libre',
       MANUAL: 'Manual'
