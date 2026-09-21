@@ -48,7 +48,6 @@ export class GuardiasService {
     });
   }
 
-  // --- Despacho Operativo v1 ---
   previewDayAbsence(teacherId: string, date: string): Observable<AbsencePreviewResponse> {
     return this.http.post<AbsencePreviewResponse>(`${this.url}/absences/preview-day`, {
       teacher_id: teacherId,
@@ -141,8 +140,17 @@ export class GuardiasService {
   }
 
   // Ausencias
-  getAbsences(): Observable<Absence[]> {
-    return this.http.get<Absence[]>(`${this.url}/absences`);
+  getAbsences(filters?: {
+    date?: string;
+    teacher_id?: string;
+    resolved?: boolean;
+  }): Observable<Absence[]> {
+    let params = new HttpParams();
+    if (filters?.date) params = params.set('date', filters.date);
+    if (filters?.teacher_id) params = params.set('teacher_id', filters.teacher_id);
+    if (filters?.resolved !== undefined) params = params.set('resolved', filters.resolved.toString());
+
+    return this.http.get<Absence[]>(`${this.url}/absences`, { params });
   }
 
   addAbsence(absence: Absence): Observable<Absence> {

@@ -18,6 +18,11 @@ export class AbsencesComponent implements OnInit {
 
   teachers: Teacher[] = [];
   absences: Absence[] = [];
+  filters = {
+    date: '',
+    teacher_id: '',
+    status: 'all' as 'all' | 'pending' | 'resolved'
+  };
 
   newAbsence = {
     teacher_id: '',
@@ -47,7 +52,16 @@ export class AbsencesComponent implements OnInit {
   }
 
   loadAbsences(): void {
-    this.api.getAbsences().subscribe(a => this.absences = a);
+    this.api.getAbsences({
+      date: this.filters.date || undefined,
+      teacher_id: this.filters.teacher_id || undefined,
+      resolved: this.filters.status === 'all' ? undefined : this.filters.status === 'resolved'
+    }).subscribe(a => this.absences = a);
+  }
+
+  clearFilters(): void {
+    this.filters = { date: '', teacher_id: '', status: 'all' };
+    this.loadAbsences();
   }
 
   submitAbsence(): void {

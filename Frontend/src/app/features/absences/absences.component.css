@@ -20,6 +20,97 @@
   color: #1e293b;
 }
 
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.section-heading h2 {
+  margin-bottom: 0.25rem;
+}
+
+.section-heading p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.filters {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.filters .form-group {
+  flex: 1 1 190px;
+  min-width: 190px;
+}
+
+.filters .form-group label {
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.filters .form-group input,
+.filters .form-group select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #1e293b;
+  background: #ffffff;
+  font-size: 0.9rem;
+}
+
+.filters .form-group input:focus,
+.filters .form-group select:focus {
+  outline: 2px solid #bfdbfe;
+  border-color: #2563eb;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-filter,
+.btn-clear {
+  border: 0;
+  border-radius: 6px;
+  padding: 0.55rem 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-filter {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.btn-filter:hover {
+  background: #1d4ed8;
+}
+
+.btn-clear {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.btn-clear:hover {
+  background: #cbd5e1;
+}
+
 /* Formulario */
 .absence-form {
   display: flex;
@@ -230,6 +321,20 @@
 @media (max-width: 600px) {
   .card {
     padding: 1rem;
+  }
+
+  .filters,
+  .filter-actions {
+    align-items: stretch;
+  }
+
+  .filters .form-group,
+  .filter-actions {
+    width: 100%;
+  }
+
+  .filter-actions > button {
+    flex: 1 1 0;
   }
 
   .absence-form {

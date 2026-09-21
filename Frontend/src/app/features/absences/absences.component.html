@@ -40,7 +40,38 @@
 
   <!-- Tabla de Clases Desatendidas -->
   <section class="card table-card">
-    <h2>Ausencias Lectivas Detectadas</h2>
+    <div class="section-heading">
+      <div>
+        <h2>Ausencias Lectivas Detectadas</h2>
+        <p>Filtra las ausencias por fecha, docente o estado.</p>
+      </div>
+    </div>
+
+    <form class="filters" (ngSubmit)="loadAbsences()">
+      <div class="form-group">
+        <label for="absenceFilterDate">Fecha</label>
+        <input id="absenceFilterDate" type="date" [(ngModel)]="filters.date" name="filter_date">
+      </div>
+      <div class="form-group">
+        <label for="absenceFilterTeacher">Docente</label>
+        <select id="absenceFilterTeacher" [(ngModel)]="filters.teacher_id" name="filter_teacher">
+          <option value="">Todos</option>
+          <option *ngFor="let teacher of teachers" [value]="teacher.id">{{ teacher.name }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="absenceFilterStatus">Estado</label>
+        <select id="absenceFilterStatus" [(ngModel)]="filters.status" name="filter_status">
+          <option value="all">Todas</option>
+          <option value="pending">Pendientes</option>
+          <option value="resolved">Resueltas</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button type="submit" class="btn-filter">Filtrar</button>
+        <button type="button" class="btn-clear" (click)="clearFilters()">Limpiar</button>
+      </div>
+    </form>
 
     <div class="table-wrapper">
       <table class="data-table">
