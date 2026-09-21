@@ -19,18 +19,10 @@
 
       <button
         class="nav-tab"
-        [class.active]="activeTab === 'duty-calendar'"
-        (click)="activeTab = 'duty-calendar'"
+        [class.active]="activeTab === 'calendars'"
+        (click)="activeTab = 'calendars'"
       >
-        <span class="nav-icon">🗓️</span> Calendario de Guardias
-      </button>
-
-      <button
-        class="nav-tab"
-        [class.active]="activeTab === 'short-term-calendar'"
-        (click)="activeTab = 'short-term-calendar'"
-      >
-        <span class="nav-icon">🔄</span> Sustituciones Cortas
+        <span class="nav-icon">🗓️</span> Calendarios
       </button>
 
       <button
@@ -55,8 +47,33 @@
   <main class="content-body">
     <app-teachers *ngIf="activeTab === 'teachers'"></app-teachers>
     <app-absences *ngIf="activeTab === 'absences'"></app-absences>
-    <app-duty-calendar *ngIf="activeTab === 'duty-calendar'"></app-duty-calendar>
-    <app-short-term-calendar *ngIf="activeTab === 'short-term-calendar'"></app-short-term-calendar>
+    <section *ngIf="activeTab === 'calendars'" class="calendar-view">
+      <div class="calendar-tabs" role="tablist" aria-label="Calendarios">
+        <button
+          class="calendar-tab"
+          [class.active]="activeCalendarTab === 'duty'"
+          [attr.aria-selected]="activeCalendarTab === 'duty'"
+          role="tab"
+          type="button"
+          (click)="activeCalendarTab = 'duty'"
+        >
+          <span class="nav-icon">🛡️</span> Guardias fijas
+        </button>
+        <button
+          class="calendar-tab"
+          [class.active]="activeCalendarTab === 'short-term'"
+          [attr.aria-selected]="activeCalendarTab === 'short-term'"
+          role="tab"
+          type="button"
+          (click)="activeCalendarTab = 'short-term'"
+        >
+          <span class="nav-icon">🔄</span> Sustituciones cortas
+        </button>
+      </div>
+
+      <app-duty-calendar *ngIf="activeCalendarTab === 'duty'"></app-duty-calendar>
+      <app-short-term-calendar *ngIf="activeCalendarTab === 'short-term'"></app-short-term-calendar>
+    </section>
     <app-guards *ngIf="activeTab === 'guards'"></app-guards>
   </main>
 </div>

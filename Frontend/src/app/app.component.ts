@@ -14,5 +14,6 @@ import { ShortTermCalendarComponent } from './features/short-term-calendar/short
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  activeTab: 'teachers' | 'absences' | 'guards' | 'duty-calendar' | 'short-term-calendar' = 'teachers';
+  activeTab: 'teachers' | 'absences' | 'guards' | 'calendars' = 'teachers';
+  activeCalendarTab: 'duty' | 'short-term' = 'duty';
 }
