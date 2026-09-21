@@ -70,7 +70,7 @@ class SQLGuardRepository:
     def create_absence(self, absence):
         return self.absences.save(absence)
 
-    def delete_absence(self, absence_id):
+    def delete_absence(self, absence_id: str):
         return self.absences.delete(absence_id)
 
 

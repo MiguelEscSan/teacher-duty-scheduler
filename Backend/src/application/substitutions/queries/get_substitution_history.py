@@ -36,7 +36,7 @@ class GetSubstitutionHistoryHandler(
         groups = {g.id: g.name for g in self.student_group_repository.get_all()}
         return [
             SubstitutionHistoryOut(
-                id=int(log.id) if str(log.id).isdigit() else log.id,
+                id=log.id,
                 date=log.date,
                 period=log.period,
                 substitute_teacher_id=log.substitute_teacher_id,

@@ -58,7 +58,7 @@ class TeacherDB(SQLModel, table=True):
 class TeacherScheduleDB(SQLModel, table=True):
     __tablename__ = "teacher_schedules"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: str = Field(default_factory=generate_uuid, primary_key=True)
     teacher_id: str = Field(index=True)
     day_of_week: int = Field(index=True)  # 0: Lunes, ..., 4: Viernes
     period: int = Field(index=True)       # 0 a 5
@@ -70,7 +70,7 @@ class FixedDutyDB(SQLModel, table=True):
     """Profesores en guardia ordinaria para una franja semanal concreta."""
     __tablename__ = "fixed_duties"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: str = Field(default_factory=generate_uuid, primary_key=True)
     teacher_id: str = Field(index=True)
     day_of_week: int = Field(index=True)
     period: int = Field(index=True)
@@ -80,7 +80,7 @@ class ShortTermSubstitutionDB(SQLModel, table=True):
     """Lista estipulada de sustitución corta para una franja semanal concreta."""
     __tablename__ = "short_term_substitutions"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: str = Field(default_factory=generate_uuid, primary_key=True)
     teacher_id: str = Field(index=True)
     day_of_week: int = Field(index=True)
     period: int = Field(index=True)
@@ -90,7 +90,7 @@ class SubstitutionLogDB(SQLModel, table=True):
     """Historial de asignaciones para rotación justa y auditoría."""
     __tablename__ = "substitution_logs"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: str = Field(default_factory=generate_uuid, primary_key=True)
     date: str = Field(index=True)  # "YYYY-MM-DD"
     period: int = Field(index=True)
     absent_teacher_id: str = Field(index=True)

@@ -15,7 +15,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent))
 
 from sqlmodel import Session, select
-from src.infrastructure.db.config import engine, init_db
+from src.infrastructure.db.config import SQLITE_FILE_NAME, engine, init_db
 from src.infrastructure.db.models import (
     AbsenceDB,
     FixedDutyDB,
@@ -127,6 +127,11 @@ def seed():
     # Fijar semilla pseudoaleatoria para reproducibilidad idéntica
     random.seed(42)
 
+    # Recreate the schema so SQLite picks up UUID string primary-key types.
+    engine.dispose()
+    database_path = Path(__file__).resolve().parent / SQLITE_FILE_NAME
+    if database_path.exists():
+        database_path.unlink()
     init_db()
 
     with Session(engine) as session:

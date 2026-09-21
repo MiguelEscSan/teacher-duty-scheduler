@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from enum import Enum
 from typing import TYPE_CHECKING
+import uuid
 
 from src.domain.exceptions.invalid_operation_exception import InvalidOperationException
 
@@ -50,6 +51,7 @@ class ScheduleSlot:
     slot: TimeSlot
     status: SlotStatus = SlotStatus.FREE
     assigned_group: StudentGroup | None = None
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
 
     @property
     def time_slot(self) -> TimeSlot:
@@ -84,4 +86,4 @@ class ScheduleEntry:
     period: int
     group_id: str | None = None
     is_teaching: bool = True
-    id: int | None = None
+    id: str | None = None

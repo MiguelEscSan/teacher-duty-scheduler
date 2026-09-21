@@ -129,7 +129,7 @@ class ManualAssignmentIn(BaseModel):
 
 
 class SubstitutionHistoryOut(BaseModel):
-    id: int
+    id: str
     date: str
     period: int
     substitute_teacher_id: str
