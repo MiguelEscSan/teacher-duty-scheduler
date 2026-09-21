@@ -16,6 +16,7 @@ from src.api.schemas import (
 from src.application.common.mediator import Mediator
 from src.application.substitutions.commands.assign_manual_substitution import AssignManualSubstitutionCommand
 from src.application.substitutions.commands.mark_absence_do_not_cover import MarkAbsenceDoNotCoverCommand
+from src.application.substitutions.commands.notify_substitution_assignment import NotifySubstitutionAssignmentCommand
 from src.application.substitutions.commands.resolve_substitution import ResolveSubstitutionCommand
 from src.application.substitutions.queries.get_available_candidates import GetAvailableCandidatesQuery
 from src.application.substitutions.queries.get_substitution_history import GetSubstitutionHistoryQuery
@@ -57,13 +58,23 @@ def resolve_substitution(
     except ValueError as ex:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ex))
 
-@router.post("/send-email")
+# src/api/routes/substitutions.py (Fragmento)
+
+@router.post("/send-email", status_code=status.HTTP_202_ACCEPTED)
 def send_substitution_email(
     payload: SubstitutionEmailRequest,
     background_tasks: BackgroundTasks,
-    session: Session = Depends(get_session),
+    mediator: Mediator = Depends(get_mediator),
 ):
-    return {"message": "Correo de sustitución programado correctamente."}
+    cmd = NotifySubstitutionAssignmentCommand(
+        date=payload.date,
+        period=payload.period,
+        absent_teacher_id=payload.absent_teacher_id,
+        substitute_teacher_id=payload.substitute_teacher_id,
+        group_id=payload.group_id,
+    )
+    background_tasks.add_task(mediator.send, cmd)
+    return {"message": "Notificación de sustitución encolada con éxito."}
 
 
 @router.post("/do-not-cover")
