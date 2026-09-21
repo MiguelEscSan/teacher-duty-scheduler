@@ -1,9 +1,14 @@
-"""
-Proveedores de dependencias para los controladores HTTP.
-"""
 from fastapi import Depends
 from sqlmodel import Session
 
+from src.application.absences.commands.create_absence import CreateAbsenceHandler, CreateAbsenceCommand
+from src.application.absences.commands.delete_absence import DeleteAbsenceHandler, DeleteAbsenceCommand
+from src.application.absences.queries.get_actionable_absences import GetActionableAbsencesHandler, \
+    GetActionableAbsencesQuery
+from src.application.schedules.commands.assign_slot_group import AssignSlotGroupHandler, AssignSlotGroupCommand
+from src.application.schedules.queries.get_student_groups import GetStudentGroupsHandler, GetStudentGroupsQuery
+from src.application.schedules.queries.get_teacher_base_schedule import GetTeacherBaseScheduleQuery, \
+    GetTeacherBaseScheduleHandler
 from src.application.substitutions.commands.mark_absence_do_not_cover import MarkAbsenceDoNotCoverCommand, \
     MarkAbsenceDoNotCoverHandler
 from src.application.substitutions.commands.resolve_substitution import ResolveSubstitutionCommand, ResolveSubstitutionHandler
@@ -44,11 +49,17 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
     mediator.register(GetTeachersQuery, lambda: GetTeachersHandler(session))
     mediator.register(CreateTeacherCommand, lambda: CreateTeacherHandler(session))
     mediator.register(DeleteTeacherCommand, lambda: DeleteTeacherHandler(session))
+    mediator.register(AssignSlotGroupCommand, lambda: AssignSlotGroupHandler(session))
+    mediator.register(CreateAbsenceCommand, lambda: CreateAbsenceHandler(session))
+    mediator.register(DeleteAbsenceCommand, lambda: DeleteAbsenceHandler(session))
 
     # Queries
     mediator.register(GetAvailableCandidatesQuery, lambda: GetAvailableCandidatesHandler(session))
     mediator.register(GetSubstitutionHistoryQuery, lambda: GetSubstitutionHistoryHandler(session))
     mediator.register(GetDutyTeachersQuery, lambda: GetDutyTeachersHandler(session))
     mediator.register(GetShortTermTeachersQuery, lambda: GetShortTermTeachersHandler(session))
+    mediator.register(GetTeacherBaseScheduleQuery, lambda: GetTeacherBaseScheduleHandler(session))
+    mediator.register(GetStudentGroupsQuery, lambda: GetStudentGroupsHandler(session))
+    mediator.register(GetActionableAbsencesQuery, lambda: GetActionableAbsencesHandler(session))
 
     return mediator

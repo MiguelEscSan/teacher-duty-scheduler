@@ -1,32 +1,26 @@
-from datetime import datetime
+from typing import List
+
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from sqlmodel import Session, select
+
 from src.api.dependencies import get_session, get_mediator
 from src.api.schemas import (
-    TeacherResponse,
     AvailableTeacherOut,
-    DutySlotOut,
     ManualAssignmentIn,
     PeriodResolveRequest,
     PeriodResolveResponse,
-    ResolutionAction,
     SubstitutionEmailRequest,
     DoNotCoverRequest,
     SubstitutionHistoryOut,
 )
-from src.application.substitutions.commands.assign_manual_substitution import AssignManualSubstitutionCommand
 from src.application.common.mediator import Mediator
+from src.application.substitutions.commands.assign_manual_substitution import AssignManualSubstitutionCommand
 from src.application.substitutions.commands.resolve_substitution import ResolveSubstitutionCommand
 from src.application.substitutions.queries.get_available_candidates import GetAvailableCandidatesQuery
 from src.application.substitutions.queries.get_substitution_history import GetSubstitutionHistoryQuery
-from src.application.teachers.queries.get_duty_teachers import GetDutyTeachersQuery
-from src.application.teachers.queries.get_short_term_teachers import GetShortTermTeachersQuery
 from src.infrastructure.db.models import AbsenceDB
-from sqlmodel import Session, select
-from typing import List
 
 router = APIRouter(prefix="/api/v1/substitutions", tags=["Sustituciones Operativas"])
-DAY_NAMES = ("Lunes", "Martes", "Miércoles", "Jueves", "Viernes")
-
 
 @router.get("/history", response_model=List[SubstitutionHistoryOut])
 def get_substitution_history(

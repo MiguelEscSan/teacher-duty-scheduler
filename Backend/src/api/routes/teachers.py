@@ -10,7 +10,7 @@ from src.application.teachers.queries.get_duty_teachers import GetDutyTeachersQu
 from src.application.teachers.queries.get_short_term_teachers import GetShortTermTeachersQuery
 from src.application.teachers.queries.get_teachers import GetTeachersQuery
 
-router = APIRouter(prefix="/api/teachers", tags=["Teachers"])
+router = APIRouter(prefix="/api/v1/teachers", tags=["Teachers"])
 
 
 @router.get("", response_model=list[TeacherResponse])
@@ -40,7 +40,7 @@ def delete_teacher(
         )
     return {"message": "Profesor eliminado"}
 
-@router.get("/duty-teachers", response_model=List[DutySlotOut])
+@router.get("/duty", response_model=List[DutySlotOut])
 def get_duty_teachers(
     day_of_week: int | None = Query(default=None, ge=0, le=4),
     period: int | None = Query(default=None, ge=0, le=5),
@@ -49,7 +49,7 @@ def get_duty_teachers(
     return mediator.send(GetDutyTeachersQuery(day_of_week=day_of_week, period=period))
 
 
-@router.get("/short-term-teachers", response_model=List[DutySlotOut])
+@router.get("/short-term", response_model=List[DutySlotOut])
 def get_short_term_teachers(
     day_of_week: int | None = Query(default=None, ge=0, le=4),
     period: int | None = Query(default=None, ge=0, le=5),

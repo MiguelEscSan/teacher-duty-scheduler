@@ -3,7 +3,7 @@ from src.api.dependencies import get_guard_service
 from src.api.schemas import OptimizeRequest
 from src.services.guard_service import GuardService
 
-router = APIRouter(prefix="/api", tags=["Guards Optimization"])
+router = APIRouter(prefix="/api/v1/guards", tags=["Guards Optimization"])
 
 
 @router.post("/optimize")
