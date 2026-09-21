@@ -1,38 +1,42 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
-from src.api.dependencies import get_repository, get_mediator
+from fastapi import APIRouter, Depends, HTTPException, status
+from src.api.dependencies import get_mediator
 from src.api.schemas import TeacherCreate, TeacherResponse, DutySlotOut
 from src.application.common.mediator import Query, Mediator
+from src.application.teachers.commands.create_teacher import CreateTeacherCommand
+from src.application.teachers.commands.delete_teacher import DeleteTeacherCommand
 from src.application.teachers.queries.get_duty_teachers import GetDutyTeachersQuery
 from src.application.teachers.queries.get_short_term_teachers import GetShortTermTeachersQuery
-from src.infrastructure.db.models import TeacherDB
-from src.infrastructure.repositories import SQLGuardRepository
+from src.application.teachers.queries.get_teachers import GetTeachersQuery
 
 router = APIRouter(prefix="/api/teachers", tags=["Teachers"])
 
 
 @router.get("", response_model=list[TeacherResponse])
-def list_teachers(repo: SQLGuardRepository = Depends(get_repository)):
-    return repo.get_all_teachers()
+def list_teachers(mediator: Mediator = Depends(get_mediator)):
+    return mediator.send(GetTeachersQuery())
 
 
-@router.post("", response_model=TeacherResponse)
+@router.post("", response_model=TeacherResponse, status_code=status.HTTP_201_CREATED)
 def create_teacher(
-    dto: TeacherCreate, repo: SQLGuardRepository = Depends(get_repository)
+    dto: TeacherCreate,
+    mediator: Mediator = Depends(get_mediator),
 ):
-    new_teacher = TeacherDB(name=dto.name, department=dto.department)
-    return repo.save_teacher(new_teacher)
+    cmd = CreateTeacherCommand(name=dto.name, department=dto.department)
+    return mediator.send(cmd)
 
 
 @router.delete("/{teacher_id}")
 def delete_teacher(
-    teacher_id: str, repo: SQLGuardRepository = Depends(get_repository)
+    teacher_id: str,
+    mediator: Mediator = Depends(get_mediator),
 ):
-    success = repo.delete_teacher(teacher_id)
+    success = mediator.send(DeleteTeacherCommand(teacher_id=teacher_id))
     if not success:
         raise HTTPException(
-            status_code=404, detail="Profesor no encontrado."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profesor no encontrado.",
         )
     return {"message": "Profesor eliminado"}
 
