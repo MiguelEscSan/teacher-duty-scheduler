@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from typing import Optional
-from src.application.common.mediator import Command
-from sqlmodel import Session, select
-from src.application.common.mediator import RequestHandler
-from src.infrastructure.db.models import TeacherScheduleDB
+
+from src.application.common.mediator import Command, RequestHandler
+from src.domain.repositories.schedule_repository import ScheduleRepository
+from src.domain.schedule import ScheduleEntry
+
 
 @dataclass(frozen=True)
 class AssignSlotGroupCommand(Command[dict]):
@@ -12,38 +13,23 @@ class AssignSlotGroupCommand(Command[dict]):
     period: int
     group_id: Optional[str] = None
 
+
 class AssignSlotGroupHandler(RequestHandler[AssignSlotGroupCommand, dict]):
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(self, schedule_repository: ScheduleRepository):
+        self.schedule_repository = schedule_repository
 
     def handle(self, cmd: AssignSlotGroupCommand) -> dict:
-        entry = self.session.exec(
-            select(TeacherScheduleDB).where(
-                TeacherScheduleDB.teacher_id == cmd.teacher_id,
-                TeacherScheduleDB.day_of_week == cmd.day,
-                TeacherScheduleDB.period == cmd.period,
+        entry = self.schedule_repository.get_slot(cmd.teacher_id, cmd.day, cmd.period)
+        if entry is None:
+            entry = ScheduleEntry(
+                teacher_id=cmd.teacher_id,
+                day_of_week=cmd.day,
+                period=cmd.period,
+                group_id=cmd.group_id,
+                is_teaching=cmd.group_id is not None,
             )
-        ).first()
-
-        if cmd.group_id is None:
-            if entry:
-                entry.is_teaching = False
-                entry.group_id = None
-                self.session.add(entry)
         else:
-            if entry:
-                entry.is_teaching = True
-                entry.group_id = cmd.group_id
-                self.session.add(entry)
-            else:
-                entry = TeacherScheduleDB(
-                    teacher_id=cmd.teacher_id,
-                    day_of_week=cmd.day,
-                    period=cmd.period,
-                    group_id=cmd.group_id,
-                    is_teaching=True,
-                )
-                self.session.add(entry)
-
-        self.session.commit()
+            entry.group_id = cmd.group_id
+            entry.is_teaching = cmd.group_id is not None
+        self.schedule_repository.save(entry)
         return {"status": "OK"}

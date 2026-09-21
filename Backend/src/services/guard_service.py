@@ -28,13 +28,16 @@ class GuardService:
                 all_slots.append(TimeSlot(date=d_str, day_index=day_idx, period=p))
 
         # 3. Extraer entidades y base de datos
-        db_teachers = self.repository.get_all_teachers()
-        if not db_teachers:
+        teachers = self.repository.get_all_teachers()
+        if not teachers:
             return {"error": "No hay profesores registrados."}
 
-        teachers = [Teacher(id=t.id, name=t.name, department=t.department) for t in db_teachers]
         base_schedules = self.repository.get_all_base_schedules()
-        base_map = {(b.teacher_id, b.day, b.period): b.status for b in base_schedules}
+        base_map = {
+            (b.teacher_id, b.day_of_week, b.period):
+            ("TEACHING" if b.is_teaching else "FREE")
+            for b in base_schedules
+        }
 
         # 4. Extraer ausencias que coincidan estrictamente con esas fechas
         absences = self.repository.get_absences_by_dates(dates_iso)

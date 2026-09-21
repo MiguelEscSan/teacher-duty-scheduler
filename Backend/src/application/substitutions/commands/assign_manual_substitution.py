@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from typing import Optional
-from sqlmodel import Session, select
+
 from src.application.common.mediator import Command, RequestHandler
-from src.domain import Absence, SubstitutionSourceType
-from src.infrastructure.db.models import AbsenceDB, SubstitutionLogDB
+from src.domain.absence import Absence
+from src.domain.repositories.absence_repository import AbsenceRepository
+from src.domain.repositories.substitution_repository import SubstitutionRepository
+from src.domain.substitution import SubstitutionSourceType
 
 
 @dataclass(frozen=True)
@@ -17,68 +19,37 @@ class AssignManualSubstitutionCommand(Command[dict]):
 
 
 class AssignManualSubstitutionHandler(RequestHandler[AssignManualSubstitutionCommand, dict]):
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(
+        self,
+        absence_repository: AbsenceRepository,
+        substitution_repository: SubstitutionRepository,
+    ):
+        self.absence_repository = absence_repository
+        self.substitution_repository = substitution_repository
 
     def handle(self, cmd: AssignManualSubstitutionCommand) -> dict:
-        # 1. Obtener o crear la ausencia mediante su entidad de dominio
-        absence_record = self.session.exec(
-            select(AbsenceDB).where(
-                AbsenceDB.date == cmd.date,
-                AbsenceDB.period == cmd.period,
-                AbsenceDB.teacher_id == cmd.absent_teacher_id,
-            )
-        ).first()
-
-        if absence_record:
-            absence = absence_record.to_domain()
-        else:
+        absence = self.absence_repository.get_by_slot(
+            cmd.absent_teacher_id, cmd.date, cmd.period
+        )
+        if absence is None:
             absence = Absence.create(
                 teacher_id=cmd.absent_teacher_id,
                 date=cmd.date,
                 period=cmd.period,
                 reason="Ausencia reportada en asignación manual",
             )
-            absence_record = AbsenceDB(
-                id=absence.id,
-                teacher_id=absence.teacher_id,
-                date=absence.date,
-                period=absence.period,
-                reason=absence.reason,
-            )
-
-        # 2. El dominio resuelve la ausencia y genera el log de auditoría
-        sub_log = absence.resolve_with_substitute(
-            substitute_teacher_id=cmd.substitute_teacher_id,
-            source_type=SubstitutionSourceType.MANUAL,
-            group_id=cmd.group_id,
+        log = absence.resolve_with_substitute(
+            cmd.substitute_teacher_id, SubstitutionSourceType.MANUAL, cmd.group_id
         )
-
-        absence_record.apply_domain(absence)
-        self.session.add(absence_record)
-
-        # 3. Guardar log generado por el dominio
-        existing_log = self.session.exec(
-            select(SubstitutionLogDB).where(
-                SubstitutionLogDB.date == cmd.date,
-                SubstitutionLogDB.period == cmd.period,
-                SubstitutionLogDB.absent_teacher_id == cmd.absent_teacher_id,
-            )
-        ).first()
-
-        if existing_log:
-            existing_log.substitute_teacher_id = sub_log.substitute_teacher_id
-            existing_log.source_type = sub_log.source_type
-            self.session.add(existing_log)
+        self.absence_repository.save(absence)
+        existing = self.substitution_repository.get_all(
+            date=cmd.date, absent_teacher_id=cmd.absent_teacher_id
+        )
+        if existing:
+            existing[0].substitute_teacher_id = log.substitute_teacher_id
+            existing[0].group_id = log.group_id
+            existing[0].source_type = log.source_type
+            self.substitution_repository.save(existing[0])
         else:
-            self.session.add(SubstitutionLogDB(
-                date=sub_log.date,
-                period=sub_log.period,
-                absent_teacher_id=sub_log.absent_teacher_id,
-                substitute_teacher_id=sub_log.substitute_teacher_id,
-                group_id=sub_log.group_id,
-                source_type=sub_log.source_type,
-            ))
-
-        self.session.commit()
+            self.substitution_repository.save(log)
         return {"message": "Sustitución manual asignada correctamente"}

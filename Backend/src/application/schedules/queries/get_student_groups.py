@@ -1,18 +1,17 @@
 from dataclasses import dataclass
-from src.application.common.mediator import Query
-from sqlmodel import Session, select
-from src.application.common.mediator import RequestHandler
-from src.infrastructure.db.models import StudentGroupDB
+
+from src.application.common.mediator import Query, RequestHandler
+from src.domain.repositories.student_group_repository import StudentGroupRepository
+
 
 @dataclass(frozen=True)
-class GetStudentGroupsQuery(Query[list[StudentGroupDB]]):
+class GetStudentGroupsQuery(Query[list]):
     pass
 
-class GetStudentGroupsHandler(
-    RequestHandler[GetStudentGroupsQuery, list[StudentGroupDB]]
-):
-    def __init__(self, session: Session):
-        self.session = session
 
-    def handle(self, query: GetStudentGroupsQuery) -> list[StudentGroupDB]:
-        return list(self.session.exec(select(StudentGroupDB)).all())
+class GetStudentGroupsHandler(RequestHandler[GetStudentGroupsQuery, list]):
+    def __init__(self, student_group_repository: StudentGroupRepository):
+        self.student_group_repository = student_group_repository
+
+    def handle(self, query: GetStudentGroupsQuery) -> list:
+        return self.student_group_repository.get_all()

@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from typing import Optional
-from src.application.common.mediator import Query
 
-from sqlmodel import Session, select
 from src.api.schemas import DutySlotOut, TeacherResponse
-from src.application.common.mediator import RequestHandler
+from src.application.common.mediator import Query, RequestHandler
 from src.domain.constants import DAY_NAMES
-from src.infrastructure.db.models import FixedDutyDB, TeacherDB
+from src.domain.repositories.schedule_repository import ScheduleRepository
+from src.domain.repositories.teacher_repository import TeacherRepository
+
 
 @dataclass(frozen=True)
 class GetDutyTeachersQuery(Query[list[DutySlotOut]]):
@@ -14,57 +14,31 @@ class GetDutyTeachersQuery(Query[list[DutySlotOut]]):
     period: Optional[int] = None
 
 
-
 class GetDutyTeachersHandler(RequestHandler[GetDutyTeachersQuery, list[DutySlotOut]]):
-
-    DAY_NAMES = ("Lunes", "Martes", "Miércoles", "Jueves", "Viernes")
-
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(self, schedule_repository: ScheduleRepository, teacher_repository: TeacherRepository):
+        self.schedule_repository = schedule_repository
+        self.teacher_repository = teacher_repository
 
     def handle(self, query: GetDutyTeachersQuery) -> list[DutySlotOut]:
-        duty_query = select(FixedDutyDB)
-        if query.day_of_week is not None:
-            duty_query = duty_query.where(FixedDutyDB.day_of_week == query.day_of_week)
-        if query.period is not None:
-            duty_query = duty_query.where(FixedDutyDB.period == query.period)
-
-        duties = self.session.exec(duty_query).all()
-        teacher_ids = {duty.teacher_id for duty in duties}
-        teachers = {
-            t.id: t
-            for t in self.session.exec(
-                select(TeacherDB).where(TeacherDB.id.in_(teacher_ids))
-            ).all()
-        }
-
-        teachers_by_slot: dict[tuple[int, int], list[TeacherResponse]] = {}
-        for duty in duties:
-            teacher = teachers.get(duty.teacher_id)
-            if teacher is None:
-                continue
-
-            teachers_by_slot.setdefault((duty.day_of_week, duty.period), []).append(
-                TeacherResponse(
-                    id=teacher.id,
-                    name=teacher.name,
-                    department=teacher.department,
-                )
-            )
-
         days = [query.day_of_week] if query.day_of_week is not None else range(5)
         periods = [query.period] if query.period is not None else range(6)
-
+        teachers = {t.id: t for t in self.teacher_repository.get_all()}
+        by_slot: dict[tuple[int, int], list[TeacherResponse]] = {}
+        for day in days:
+            for period in periods:
+                for teacher_id in self.schedule_repository.get_fixed_duty_teacher_ids(day, period):
+                    teacher = teachers.get(teacher_id)
+                    if teacher:
+                        by_slot.setdefault((day, period), []).append(
+                            TeacherResponse(id=teacher.id, name=teacher.name, department=teacher.department)
+                        )
         return [
             DutySlotOut(
-                day_of_week=d,
-                day_name=DAY_NAMES[d],
-                period=p,
-                teachers=sorted(
-                    teachers_by_slot.get((d, p), []),
-                    key=lambda t: t.name.lower(),
-                ),
+                day_of_week=day,
+                day_name=DAY_NAMES[day],
+                period=period,
+                teachers=sorted(by_slot.get((day, period), []), key=lambda t: t.name.lower()),
             )
-            for d in days
-            for p in periods
+            for day in days
+            for period in periods
         ]

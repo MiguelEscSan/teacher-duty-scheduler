@@ -73,3 +73,15 @@ class TeacherSchedule:
 
     def is_available(self, slot: TimeSlot) -> bool:
         return self.slots.get((slot.date, slot.period), SlotStatus.FREE) == SlotStatus.FREE
+
+
+@dataclass
+class ScheduleEntry:
+    """A persisted weekly schedule slot represented without database concerns."""
+
+    teacher_id: str
+    day_of_week: int
+    period: int
+    group_id: str | None = None
+    is_teaching: bool = True
+    id: int | None = None

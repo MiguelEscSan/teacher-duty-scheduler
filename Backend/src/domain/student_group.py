@@ -11,17 +11,17 @@ from src.domain.exceptions.invalid_operation_exception import InvalidOperationEx
 class StudentGroup:
     id: str
     name: str
-    student_count: int = 0
+    student_count: int | None = 0
     max_capacity: int = 30
 
     def __post_init__(self) -> None:
         if not self.id.strip() or not self.name.strip():
             raise InvalidOperationException("El grupo debe tener identificador y nombre.")
-        if self.student_count < 0:
+        if self.student_count is not None and self.student_count < 0:
             raise InvalidOperationException("El número de alumnos no puede ser negativo.")
         if self.max_capacity <= 0:
             raise InvalidOperationException("El aforo debe ser mayor que cero.")
-        if self.student_count > self.max_capacity:
+        if self.student_count is not None and self.student_count > self.max_capacity:
             raise CapacityExceededException(
                 f"El grupo '{self.name}' supera su aforo de {self.max_capacity} alumnos."
             )
@@ -46,7 +46,7 @@ class StudentGroup:
         return self.max_capacity
 
     def merge_with(self, other: StudentGroup) -> StudentGroup:
-        total = self.student_count + other.student_count
+        total = (self.student_count or 0) + (other.student_count or 0)
         if total > self.max_capacity:
             raise CapacityExceededException(
                 f"La fusión de '{self.name}' y '{other.name}' supera el aforo de "

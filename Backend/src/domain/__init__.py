@@ -1,6 +1,6 @@
 from src.domain.absence import Absence
 from src.domain.guard import AssignmentReport, GuardAssignment
-from src.domain.schedule import ScheduleSlot, SlotStatus, TeacherSchedule, TimeSlot
+from src.domain.schedule import ScheduleEntry, ScheduleSlot, SlotStatus, TeacherSchedule, TimeSlot
 from src.domain.student_group import StudentGroup
 from src.domain.substitution import SubstitutionLog, SubstitutionSourceType
 from src.domain.teacher import CorporateEmail, Teacher
@@ -13,5 +13,5 @@ __all__ = [
     "CapacityExceededException", "CorporateEmail", "DomainException",
     "GuardAssignment", "InvalidOperationException", "ScheduleSlot",
     "SlotCollisionException", "SlotStatus", "StudentGroup", "SubstitutionLog",
-    "SubstitutionSourceType", "Teacher", "TeacherSchedule", "TimeSlot",
+    "SubstitutionSourceType", "Teacher", "TeacherSchedule", "TimeSlot", "ScheduleEntry",
 ]

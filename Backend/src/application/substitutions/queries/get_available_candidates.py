@@ -1,20 +1,13 @@
-# src/application/queries/get_available_candidates/query.py
 from dataclasses import dataclass
-from src.api.schemas import AvailableTeacherOut
-from src.application.common.mediator import Query
 from datetime import datetime
-from sqlmodel import Session, func, select
 
 from src.api.schemas import AvailableTeacherOut
-from src.application.common.mediator import RequestHandler
-from src.infrastructure.db.models import (
-    AbsenceDB,
-    FixedDutyDB,
-    ShortTermSubstitutionDB,
-    SubstitutionLogDB,
-    TeacherDB,
-    TeacherScheduleDB,
-)
+from src.application.common.mediator import Query, RequestHandler
+from src.domain.repositories.absence_repository import AbsenceRepository
+from src.domain.repositories.schedule_repository import ScheduleRepository
+from src.domain.repositories.substitution_repository import SubstitutionRepository
+from src.domain.repositories.teacher_repository import TeacherRepository
+
 
 @dataclass(frozen=True)
 class GetAvailableCandidatesQuery(Query[list[AvailableTeacherOut]]):
@@ -25,114 +18,49 @@ class GetAvailableCandidatesQuery(Query[list[AvailableTeacherOut]]):
 class GetAvailableCandidatesHandler(
     RequestHandler[GetAvailableCandidatesQuery, list[AvailableTeacherOut]]
 ):
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(
+        self,
+        teacher_repository: TeacherRepository,
+        absence_repository: AbsenceRepository,
+        schedule_repository: ScheduleRepository,
+        substitution_repository: SubstitutionRepository,
+    ):
+        self.teacher_repository = teacher_repository
+        self.absence_repository = absence_repository
+        self.schedule_repository = schedule_repository
+        self.substitution_repository = substitution_repository
 
     def handle(self, request: GetAvailableCandidatesQuery) -> list[AvailableTeacherOut]:
-        target_date = datetime.strptime(request.date_str, "%Y-%m-%d").date()
-        day_of_week = target_date.weekday()  # 0: Lunes, 4: Viernes
-
-        # Regla de dominio: fuera de días lectivos no hay candidatos
-        if day_of_week > 4:
+        day = datetime.strptime(request.date_str, "%Y-%m-%d").weekday()
+        if day > 4:
             return []
-
-        # 1. Conjunto de IDs bloqueados: ausentes ese día y periodo
-        absent_ids = set(
-            self.session.exec(
-                select(AbsenceDB.teacher_id).where(
-                    AbsenceDB.date == request.date_str,
-                    AbsenceDB.period == request.period,
-                )
-            ).all()
+        absent_ids = {
+            item.teacher_id for item in self.absence_repository.get_all(date=request.date_str)
+            if item.period == request.period
+        }
+        busy_ids = self.substitution_repository.get_busy_teacher_ids(
+            request.date_str, request.period
         )
-
-        # 2. Conjunto de IDs bloqueados: ya asignados a otra sustitución en este periodo
-        busy_ids = set(
-            self.session.exec(
-                select(SubstitutionLogDB.substitute_teacher_id).where(
-                    SubstitutionLogDB.date == request.date_str,
-                    SubstitutionLogDB.period == request.period,
-                )
-            ).all()
-        )
-
-        # 3. Conjunto de IDs bloqueados: clase lectiva propia frente a alumnos
-        teaching_ids = set(
-            self.session.exec(
-                select(TeacherScheduleDB.teacher_id).where(
-                    TeacherScheduleDB.day_of_week == day_of_week,
-                    TeacherScheduleDB.period == request.period,
-                    TeacherScheduleDB.is_teaching == True,
-                )
-            ).all()
-        )
-
-        unavailable_ids = absent_ids | busy_ids | teaching_ids
-
-        # 4. Docentes con Guardia Ordinaria Fija en esta franja
-        fixed_duties = set(
-            self.session.exec(
-                select(FixedDutyDB.teacher_id).where(
-                    FixedDutyDB.day_of_week == day_of_week,
-                    FixedDutyDB.period == request.period,
-                )
-            ).all()
-        )
-
-        # 5. Docentes en lista de Sustitución Corta en esta franja
-        short_term_duties = set(
-            self.session.exec(
-                select(ShortTermSubstitutionDB.teacher_id).where(
-                    ShortTermSubstitutionDB.day_of_week == day_of_week,
-                    ShortTermSubstitutionDB.period == request.period,
-                )
-            ).all()
-        )
-
-        # 6. Conteo agregado de intervenciones (evita el query N+1 original en bucle)
-        intervention_counts = dict(
-            self.session.exec(
-                select(
-                    SubstitutionLogDB.substitute_teacher_id,
-                    func.count(SubstitutionLogDB.id),
-                ).group_by(SubstitutionLogDB.substitute_teacher_id)
-            ).all()
-        )
-
-        # 7. Obtener profesores no bloqueados y clasificarlos
-        all_teachers = self.session.exec(select(TeacherDB)).all()
-        candidates: list[AvailableTeacherOut] = []
-
-        for teacher in all_teachers:
-            if teacher.id in unavailable_ids:
+        teaching_ids = {
+            item.teacher_id for item in self.schedule_repository.get_all()
+            if item.day_of_week == day and item.period == request.period and item.is_teaching
+        }
+        unavailable = absent_ids | busy_ids | teaching_ids
+        fixed = set(self.schedule_repository.get_fixed_duty_teacher_ids(day, request.period))
+        short = set(self.schedule_repository.get_short_term_teacher_ids(day, request.period))
+        counts = self.substitution_repository.get_intervention_counts()
+        priority = {"FIXED_DUTY": 0, "SHORT_TERM": 1, "FREE": 2}
+        candidates = []
+        for teacher in self.teacher_repository.get_all():
+            if teacher.id in unavailable:
                 continue
-
-            # Categorización del tipo de guardia
-            if teacher.id in fixed_duties:
-                duty_type = "FIXED_DUTY"
-            elif teacher.id in short_term_duties:
-                duty_type = "SHORT_TERM"
-            else:
-                duty_type = "FREE"
-
+            duty_type = "FIXED_DUTY" if teacher.id in fixed else "SHORT_TERM" if teacher.id in short else "FREE"
             candidates.append(
                 AvailableTeacherOut(
-                    id=teacher.id,
-                    name=teacher.name,
-                    department=teacher.department,
-                    duty_type=duty_type,
-                    interventions_count=intervention_counts.get(teacher.id, 0),
+                    id=teacher.id, name=teacher.name, department=teacher.department,
+                    duty_type=duty_type, interventions_count=counts.get(teacher.id, 0),
                 )
             )
-
-        # Ordenar: primero guardia fija (0), luego corta (1), luego libres (2), seguido de carga acumulada y nombre
-        order_priority = {"FIXED_DUTY": 0, "SHORT_TERM": 1, "FREE": 2}
-        candidates.sort(
-            key=lambda c: (
-                order_priority[c.duty_type],
-                c.interventions_count,
-                c.name.lower(),
-            )
-        )
-
-        return candidates
+        return sorted(candidates, key=lambda item: (
+            priority[item.duty_type], item.interventions_count, item.name.lower()
+        ))

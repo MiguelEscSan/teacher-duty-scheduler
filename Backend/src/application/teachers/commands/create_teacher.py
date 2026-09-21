@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from src.application.common.mediator import Command
-from sqlmodel import Session
+
 from src.api.schemas import TeacherResponse
-from src.application.common.mediator import RequestHandler
-from src.infrastructure.db.models import TeacherDB
+from src.application.common.mediator import Command, RequestHandler
+from src.domain.repositories.teacher_repository import TeacherRepository
+from src.domain.teacher import CorporateEmail, Teacher
 
 
 @dataclass(frozen=True)
@@ -13,29 +13,18 @@ class CreateTeacherCommand(Command[TeacherResponse]):
 
 
 class CreateTeacherHandler(RequestHandler[CreateTeacherCommand, TeacherResponse]):
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(self, teacher_repository: TeacherRepository):
+        self.teacher_repository = teacher_repository
 
     def handle(self, cmd: CreateTeacherCommand) -> TeacherResponse:
-        # Generar correo corporativo estándar por convención
-        alias = (
-            cmd.name.split(",")[0].strip().lower().replace(" ", "")
-            .replace("á", "a").replace("é", "e").replace("í", "i")
-            .replace("ó", "o").replace("ú", "u").replace("ñ", "n")
-        )
-        email = f"{alias}@centroeducativo.es"
-
-        new_teacher = TeacherDB(
+        teacher = Teacher.create(
             name=cmd.name,
             department=cmd.department,
-            email=email,
+            email=CorporateEmail.from_teacher_name(cmd.name, "centroeducativo.es"),
         )
-        self.session.add(new_teacher)
-        self.session.commit()
-        self.session.refresh(new_teacher)
-
+        saved = self.teacher_repository.save(teacher)
         return TeacherResponse(
-            id=new_teacher.id,
-            name=new_teacher.name,
-            department=new_teacher.department,
+            id=saved.id,
+            name=saved.name,
+            department=saved.department,
         )

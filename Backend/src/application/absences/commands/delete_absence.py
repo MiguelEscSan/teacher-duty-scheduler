@@ -1,22 +1,17 @@
 from dataclasses import dataclass
-from src.application.common.mediator import Command
-from sqlmodel import Session
-from src.application.common.mediator import RequestHandler
-from src.infrastructure.db.models import AbsenceDB
+
+from src.application.common.mediator import Command, RequestHandler
+from src.domain.repositories.absence_repository import AbsenceRepository
+
 
 @dataclass(frozen=True)
 class DeleteAbsenceCommand(Command[bool]):
     absence_id: str
 
+
 class DeleteAbsenceHandler(RequestHandler[DeleteAbsenceCommand, bool]):
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(self, absence_repository: AbsenceRepository):
+        self.absence_repository = absence_repository
 
     def handle(self, cmd: DeleteAbsenceCommand) -> bool:
-        item = self.session.get(AbsenceDB, cmd.absence_id)
-        if not item:
-            return False
-
-        self.session.delete(item)
-        self.session.commit()
-        return True
+        return self.absence_repository.delete(cmd.absence_id)

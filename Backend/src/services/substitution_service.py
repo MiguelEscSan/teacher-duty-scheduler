@@ -1,230 +1,143 @@
 from datetime import datetime
 from typing import Optional
-from sqlmodel import Session, select
-from src.infrastructure.db.models import (
-    AbsenceDB,
-    FixedDutyDB,
-    ShortTermSubstitutionDB,
-    StudentGroupDB,
-    SubstitutionLogDB,
-    SubstitutionSourceType,
-    TeacherDB,
-    TeacherScheduleDB,
-)
+
+from src.domain.repositories.absence_repository import AbsenceRepository
+from src.domain.repositories.schedule_repository import ScheduleRepository
+from src.domain.repositories.student_group_repository import StudentGroupRepository
+from src.domain.repositories.substitution_repository import SubstitutionRepository
+from src.domain.repositories.teacher_repository import TeacherRepository
+from src.domain.substitution import SubstitutionLog, SubstitutionSourceType
 
 
 class SubstitutionService:
-    def __init__(self, session: Session):
-        self.session = session
+    """Domain use-case service backed exclusively by repository ports."""
+
+    def __init__(
+        self,
+        teacher_repository: TeacherRepository,
+        absence_repository: AbsenceRepository,
+        schedule_repository: ScheduleRepository,
+        substitution_repository: SubstitutionRepository,
+        student_group_repository: StudentGroupRepository | None = None,
+    ):
+        self.teacher_repository = teacher_repository
+        self.absence_repository = absence_repository
+        self.schedule_repository = schedule_repository
+        self.substitution_repository = substitution_repository
+        self.student_group_repository = student_group_repository
 
     def preview_day_absence(self, teacher_id: str, date_str: str) -> dict:
-        """
-        Calcula las horas con docencia efectiva frente a alumnos.
-        Si hay co-docencia en el aula, marca que ya hay un docente titular presente.
-        """
         date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
         day_of_week = date_obj.weekday()
-
         if day_of_week > 4:
             return {"error": "La fecha seleccionada corresponde a un fin de semana."}
-
-        target_teacher = self.session.get(TeacherDB, teacher_id)
-        if not target_teacher:
+        target = self.teacher_repository.get_by_id(teacher_id)
+        if not target:
             return {"error": "Docente no encontrado."}
-
-        # 1. Obtener franjas donde el profesor tiene grupo asignado (clase con alumnos)
-        teaching_slots = self.session.exec(
-            select(TeacherScheduleDB).where(
-                TeacherScheduleDB.teacher_id == teacher_id,
-                TeacherScheduleDB.day_of_week == day_of_week,
-                TeacherScheduleDB.is_teaching == True,
-                TeacherScheduleDB.group_id.is_not(None),
-            )
-        ).all()
-
-        periods_to_cover = []
-        for slot in sorted(teaching_slots, key=lambda s: s.period):
-            group = self.session.get(StudentGroupDB, slot.group_id)
-            group_name = group.name if group else "Grupo Desconocido"
-            group_students = group.student_count if group else None
-
-            # 2. Detección de Co-docencia / Asignaturas compartidas
-            co_teachers = self.session.exec(
-                select(TeacherScheduleDB).where(
-                    TeacherScheduleDB.day_of_week == day_of_week,
-                    TeacherScheduleDB.period == slot.period,
-                    TeacherScheduleDB.group_id == slot.group_id,
-                    TeacherScheduleDB.teacher_id != teacher_id,
-                )
-            ).all()
-
-            active_co_teacher = None
-            if co_teachers:
-                # Comprobar si el co-docente no está ausente ese mismo día y hora
-                for ct in co_teachers:
-                    ct_absence = self.session.exec(
-                        select(AbsenceDB).where(
-                            AbsenceDB.teacher_id == ct.teacher_id,
-                            AbsenceDB.date == date_str,
-                            AbsenceDB.period == slot.period,
-                        )
-                    ).first()
-                    if not ct_absence:
-                        t_obj = self.session.get(TeacherDB, ct.teacher_id)
-                        active_co_teacher = t_obj.name if t_obj else ct.teacher_id
-                        break
-
-            periods_to_cover.append({
-                "period": slot.period,
-                "group_id": slot.group_id,
-                "group_name": group_name,
-                "student_count": group_students,
-                "has_co_teacher": active_co_teacher is not None,
-                "co_teacher_name": active_co_teacher,
-                "requires_action": active_co_teacher is None,
+        groups = {
+            g.id: g for g in self.student_group_repository.get_all()
+        } if self.student_group_repository else {}
+        entries = [
+            entry for entry in self.schedule_repository.get_for_teacher(teacher_id)
+            if entry.day_of_week == day_of_week and entry.is_teaching and entry.group_id
+        ]
+        result = []
+        for entry in sorted(entries, key=lambda item: item.period):
+            group = groups.get(entry.group_id)
+            co_teacher_name = None
+            for other in self.schedule_repository.get_all():
+                if (
+                    other.teacher_id != teacher_id
+                    and other.day_of_week == day_of_week
+                    and other.period == entry.period
+                    and other.group_id == entry.group_id
+                    and not self.absence_repository.get_by_slot(
+                        other.teacher_id, date_str, entry.period
+                    )
+                ):
+                    co_teacher = self.teacher_repository.get_by_id(other.teacher_id)
+                    co_teacher_name = co_teacher.name if co_teacher else other.teacher_id
+                    break
+            result.append({
+                "period": entry.period,
+                "group_id": entry.group_id,
+                "group_name": group.name if group else "Grupo Desconocido",
+                "student_count": group.student_count if group else None,
+                "has_co_teacher": co_teacher_name is not None,
+                "co_teacher_name": co_teacher_name,
+                "requires_action": co_teacher_name is None,
             })
-
         return {
             "teacher_id": teacher_id,
-            "teacher_name": target_teacher.name,
+            "teacher_name": target.name,
             "date": date_str,
             "day_of_week": day_of_week,
-            "slots": periods_to_cover,
+            "slots": result,
         }
 
     def _get_active_absent_teacher_ids(self, date_str: str, period: int) -> set[str]:
-        absences = self.session.exec(
-            select(AbsenceDB.teacher_id).where(
-                AbsenceDB.date == date_str, AbsenceDB.period == period
-            )
-        ).all()
-        return set(absences)
+        return {
+            item.teacher_id
+            for item in self.absence_repository.get_all(date=date_str)
+            if item.period == period
+        }
 
-    def _get_least_recently_used(
-            self, candidate_ids: list[str], period: int
-    ) -> Optional[str]:
-        """
-        Selecciona al docente cuya última intervención en esta franja sea la más antigua.
-        Si nunca intervino, tiene máxima prioridad.
-        """
+    def _get_least_recently_used(self, candidate_ids: list[str], period: int) -> str | None:
         if not candidate_ids:
             return None
-
-        # Historial de intervenciones en este periodo
-        logs = self.session.exec(
-            select(SubstitutionLogDB)
-            .where(
-                SubstitutionLogDB.substitute_teacher_id.in_(candidate_ids),
-                SubstitutionLogDB.period == period,
-            )
-            .order_by(SubstitutionLogDB.created_at.desc())
-        ).all()
-
-        last_used_map: dict[str, datetime] = {}
-        for log in logs:
-            if log.substitute_teacher_id not in last_used_map:
-                last_used_map[log.substitute_teacher_id] = log.created_at
-
-        never_used = [cid for cid in candidate_ids if cid not in last_used_map]
-        if never_used:
-            return never_used[0]
-
-        return min(last_used_map, key=lambda cid: last_used_map[cid])
+        last_used = self.substitution_repository.get_last_used_at(candidate_ids, period)
+        never_used = [item for item in candidate_ids if item not in last_used]
+        return never_used[0] if never_used else min(last_used, key=last_used.get)
 
     def find_ordinary_guard_substitute(
-            self, date_str: str, day_of_week: int, period: int
-    ) -> tuple[Optional[TeacherDB], Optional[TeacherDB], str]:
-        """
-        Regla de la Sala de Profesores:
-        Total disponibles = N.
-        Para poder salir al aula debe haber al menos 2 profesores (N >= 2).
-        1 se queda obligatoriamente en la sala de profesores.
-        Devuelve: (sustituto_aula, profesor_en_sala, mensaje_estado)
-        """
-        fixed_duties = self.session.exec(
-            select(FixedDutyDB).where(
-                FixedDutyDB.day_of_week == day_of_week,
-                FixedDutyDB.period == period,
+        self, date_str: str, day_of_week: int, period: int
+    ) -> tuple[object | None, object | None, str]:
+        candidate_ids = self.schedule_repository.get_fixed_duty_teacher_ids(day_of_week, period)
+        unavailable = self._get_active_absent_teacher_ids(date_str, period)
+        unavailable |= self.substitution_repository.get_busy_teacher_ids(date_str, period)
+        available = [item for item in candidate_ids if item not in unavailable]
+        if len(available) < 2:
+            keeper = self.teacher_repository.get_by_id(available[0]) if len(available) == 1 else None
+            return None, keeper, (
+                "Sin cupo de guardia ordinaria: Se requiere mínimo 1 profesor permanente "
+                "en Sala de Profesores."
             )
-        ).all()
-        candidate_ids = [fd.teacher_id for fd in fixed_duties]
-
-        absent_ids = self._get_active_absent_teacher_ids(date_str, period)
-        # Quitar ausentes y los que ya estén asignados a cubrir otra aula en ese mismo periodo hoy
-        busy_logs = self.session.exec(
-            select(SubstitutionLogDB.substitute_teacher_id).where(
-                SubstitutionLogDB.date == date_str,
-                SubstitutionLogDB.period == period,
-            )
-        ).all()
-        unavailable_ids = absent_ids.union(set(busy_logs))
-
-        available_candidate_ids = [cid for cid in candidate_ids if cid not in unavailable_ids]
-        n_available = len(available_candidate_ids)
-
-        if n_available < 2:
-            return (
-                None,
-                self.session.get(TeacherDB, available_candidate_ids[0]) if n_available == 1 else None,
-                "Sin cupo de guardia ordinaria: Se requiere mínimo 1 profesor permanente en Sala de Profesores.",
-            )
-
-        # Seleccionar por rotación para salir al aula
-        chosen_id = self._get_least_recently_used(available_candidate_ids, period)
-        remaining_ids = [cid for cid in available_candidate_ids if cid != chosen_id]
-
-        # El profesor que se queda en la sala es cualquiera de los que restan
-        staff_room_teacher = self.session.get(TeacherDB, remaining_ids[0])
-        chosen_teacher = self.session.get(TeacherDB, chosen_id)
-
-        return (chosen_teacher, staff_room_teacher, "Asignado desde guardia ordinaria.")
+        chosen_id = self._get_least_recently_used(available, period)
+        remaining = [item for item in available if item != chosen_id]
+        return (
+            self.teacher_repository.get_by_id(chosen_id),
+            self.teacher_repository.get_by_id(remaining[0]),
+            "Asignado desde guardia ordinaria.",
+        )
 
     def find_short_term_substitute(
-            self, date_str: str, day_of_week: int, period: int
-    ) -> tuple[Optional[TeacherDB], str]:
-        """Busca en la lista estipulada de sustitución corta mediante turno rotativo propio."""
-        entries = self.session.exec(
-            select(ShortTermSubstitutionDB).where(
-                ShortTermSubstitutionDB.day_of_week == day_of_week,
-                ShortTermSubstitutionDB.period == period,
-            )
-        ).all()
-        candidate_ids = [e.teacher_id for e in entries]
-
-        absent_ids = self._get_active_absent_teacher_ids(date_str, period)
-        busy_logs = self.session.exec(
-            select(SubstitutionLogDB.substitute_teacher_id).where(
-                SubstitutionLogDB.date == date_str,
-                SubstitutionLogDB.period == period,
-            )
-        ).all()
-        unavailable = absent_ids.union(set(busy_logs))
-
-        available = [cid for cid in candidate_ids if cid not in unavailable]
+        self, date_str: str, day_of_week: int, period: int
+    ) -> tuple[object | None, str]:
+        candidate_ids = self.schedule_repository.get_short_term_teacher_ids(day_of_week, period)
+        unavailable = self._get_active_absent_teacher_ids(date_str, period)
+        unavailable |= self.substitution_repository.get_busy_teacher_ids(date_str, period)
+        available = [item for item in candidate_ids if item not in unavailable]
         if not available:
             return None, "Lista de sustitución corta agotada o no disponible."
-
-        chosen_id = self._get_least_recently_used(available, period)
-        return self.session.get(TeacherDB, chosen_id), "Asignado por lista de sustitución corta."
+        chosen = self._get_least_recently_used(available, period)
+        return self.teacher_repository.get_by_id(chosen), "Asignado por lista de sustitución corta."
 
     def register_log(
-            self,
-            date_str: str,
-            period: int,
-            absent_teacher_id: str,
-            substitute_teacher_id: str,
-            group_id: Optional[str],
-            source: SubstitutionSourceType,
-    ) -> SubstitutionLogDB:
-        log = SubstitutionLogDB(
-            date=date_str,
-            period=period,
-            absent_teacher_id=absent_teacher_id,
-            substitute_teacher_id=substitute_teacher_id,
-            group_id=group_id,
-            source_type=source,
+        self,
+        date_str: str,
+        period: int,
+        absent_teacher_id: str,
+        substitute_teacher_id: str,
+        group_id: Optional[str],
+        source: SubstitutionSourceType,
+    ) -> SubstitutionLog:
+        return self.substitution_repository.save(
+            SubstitutionLog.create(
+                date=date_str,
+                period=period,
+                absent_teacher_id=absent_teacher_id,
+                substitute_teacher_id=substitute_teacher_id,
+                group_id=group_id,
+                source_type=source,
+            )
         )
-        self.session.add(log)
-        self.session.commit()
-        self.session.refresh(log)
-        return log

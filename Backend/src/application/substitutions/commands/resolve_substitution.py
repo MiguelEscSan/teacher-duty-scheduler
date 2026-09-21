@@ -1,14 +1,17 @@
 from dataclasses import dataclass
-from typing import Optional
-from src.api.schemas import PeriodResolveResponse, ResolutionAction
-from src.application.common.mediator import Command
 from datetime import datetime
-from sqlmodel import Session
+from typing import Optional
+
 from src.api.schemas import PeriodResolveResponse, ResolutionAction
-from src.application.common.mediator import RequestHandler
-from src.domain import SubstitutionSourceType
-from src.infrastructure.db.models import AbsenceDB, StudentGroupDB, TeacherDB
-from src.services.substitution_service import SubstitutionService
+from src.application.common.mediator import Command, RequestHandler
+from src.domain.absence import Absence
+from src.domain.repositories.absence_repository import AbsenceRepository
+from src.domain.repositories.schedule_repository import ScheduleRepository
+from src.domain.repositories.student_group_repository import StudentGroupRepository
+from src.domain.repositories.substitution_repository import SubstitutionRepository
+from src.domain.repositories.teacher_repository import TeacherRepository
+from src.domain.substitution import SubstitutionSourceType
+
 
 @dataclass(frozen=True)
 class ResolveSubstitutionCommand(Command[PeriodResolveResponse]):
@@ -23,123 +26,143 @@ class ResolveSubstitutionCommand(Command[PeriodResolveResponse]):
 class ResolveSubstitutionHandler(
     RequestHandler[ResolveSubstitutionCommand, PeriodResolveResponse]
 ):
-    def __init__(self, session: Session):
-        self.session = session
-        self.service = SubstitutionService(session)
+    def __init__(
+        self,
+        teacher_repository: TeacherRepository,
+        absence_repository: AbsenceRepository,
+        schedule_repository: ScheduleRepository,
+        substitution_repository: SubstitutionRepository,
+        student_group_repository: StudentGroupRepository,
+    ):
+        self.teacher_repository = teacher_repository
+        self.absence_repository = absence_repository
+        self.schedule_repository = schedule_repository
+        self.substitution_repository = substitution_repository
+        self.student_group_repository = student_group_repository
+
+    def _available_ids(self, date: str, period: int, ids: list[str]) -> list[str]:
+        absent = {
+            item.teacher_id
+            for item in self.absence_repository.get_all(date=date)
+            if item.period == period
+        }
+        busy = self.substitution_repository.get_busy_teacher_ids(date, period)
+        return [item for item in ids if item not in absent and item not in busy]
+
+    def _choose(self, ids: list[str], period: int) -> str | None:
+        if not ids:
+            return None
+        last_used = self.substitution_repository.get_last_used_at(ids, period)
+        never_used = [item for item in ids if item not in last_used]
+        return never_used[0] if never_used else min(last_used, key=last_used.get)
+
+    def _ordinary(self, date: str, day: int, period: int):
+        available = self._available_ids(
+            date, period,
+            self.schedule_repository.get_fixed_duty_teacher_ids(day, period),
+        )
+        if len(available) < 2:
+            keeper = self.teacher_repository.get_by_id(available[0]) if available else None
+            return None, keeper, (
+                "Sin cupo de guardia ordinaria: Se requiere mínimo 1 profesor permanente "
+                "en Sala de Profesores."
+            )
+        chosen = self._choose(available, period)
+        keeper_id = next(item for item in available if item != chosen)
+        return (
+            self.teacher_repository.get_by_id(chosen),
+            self.teacher_repository.get_by_id(keeper_id),
+            "Asignado desde guardia ordinaria.",
+        )
+
+    def _short_term(self, date: str, day: int, period: int):
+        available = self._available_ids(
+            date, period,
+            self.schedule_repository.get_short_term_teacher_ids(day, period),
+        )
+        if not available:
+            return None, "Lista de sustitución corta agotada o no disponible."
+        return (
+            self.teacher_repository.get_by_id(self._choose(available, period)),
+            "Asignado por lista de sustitución corta.",
+        )
 
     def handle(self, cmd: ResolveSubstitutionCommand) -> PeriodResolveResponse:
-        date_obj = datetime.strptime(cmd.date, "%Y-%m-%d").date()
-        day_of_week = date_obj.weekday()
-
-        absent_teacher = self.session.get(TeacherDB, cmd.absent_teacher_id)
+        day_of_week = datetime.strptime(cmd.date, "%Y-%m-%d").weekday()
+        absent_teacher = self.teacher_repository.get_by_id(cmd.absent_teacher_id)
         if not absent_teacher:
             raise ValueError(f"Profesor ausente {cmd.absent_teacher_id} no encontrado.")
-
-        group = self.session.get(StudentGroupDB, cmd.group_id) if cmd.group_id else None
+        group = (
+            self.student_group_repository.get_by_id(cmd.group_id)
+            if cmd.group_id else None
+        )
         group_name = group.name if group else "Sin Grupo"
-
-        # 1. Asegurar registro de ausencia
-        absence = self.session.query(AbsenceDB).filter_by(
-            teacher_id=cmd.absent_teacher_id,
-            date=cmd.date,
-            period=cmd.period
-        ).first()
-        if not absence:
-            absence = AbsenceDB(
-                teacher_id=cmd.absent_teacher_id,
-                date=cmd.date,
-                period=cmd.period,
-                reason="Ausencia reportada en despacho",
+        absence = self.absence_repository.get_by_slot(
+            cmd.absent_teacher_id, cmd.date, cmd.period
+        )
+        if absence is None:
+            absence = Absence.create(
+                cmd.absent_teacher_id, cmd.date, cmd.period,
+                "Ausencia reportada en despacho",
             )
-            self.session.add(absence)
-            self.session.commit()
-
-        # 2. Excursión
+            self.absence_repository.save(absence)
         if cmd.action == ResolutionAction.EXCURSION:
-            absence.resolved = True
-            self.session.add(absence)
-            self.session.commit()
+            absence.resolve_by_excursion()
+            self.absence_repository.save(absence)
             return PeriodResolveResponse(
-                date=cmd.date,
-                period=cmd.period,
-                resolved=True,
-                action_applied=ResolutionAction.EXCURSION.value,
+                date=cmd.date, period=cmd.period, resolved=True,
+                action_applied=cmd.action.value,
                 details=f"Grupo [{group_name}] en excursión. No se requiere sustituto.",
             )
-
-        # 3. Fusión Manual de Clases
         if cmd.action == ResolutionAction.MERGE_GROUPS:
-            target_group = self.session.get(StudentGroupDB, cmd.merged_with_group_id)
-            target_name = target_group.name if target_group else "otro grupo"
-            target_count = target_group.student_count if target_group and target_group.student_count is not None else 0
+            target = (
+                self.student_group_repository.get_by_id(cmd.merged_with_group_id)
+                if cmd.merged_with_group_id else None
+            )
             current_count = group.student_count if group and group.student_count is not None else 0
-
-            absence.resolved = True
-            self.session.add(absence)
-            self.session.commit()
+            target_count = target.student_count if target and target.student_count is not None else 0
+            absence.resolve_by_group_merge()
+            self.absence_repository.save(absence)
+            target_name = target.name if target else "otro grupo"
             return PeriodResolveResponse(
-                date=cmd.date,
-                period=cmd.period,
-                resolved=True,
-                action_applied=ResolutionAction.MERGE_GROUPS.value,
+                date=cmd.date, period=cmd.period, resolved=True,
+                action_applied=cmd.action.value,
                 details=(
                     f"Fusión manual: [{group_name}] ({current_count} alum.) integrado en "
-                    f"[{target_name}] ({target_count} alum.). Total aprox: {current_count + target_count} alumnos."
+                    f"[{target_name}] ({target_count} alum.). Total aprox: "
+                    f"{current_count + target_count} alumnos."
                 ),
             )
-
-        # 4. Asignación Automática / Forzar Corta
         substitute = None
-        source = None
         staff_room_keeper = None
+        source = None
         details = ""
-
         if cmd.action == ResolutionAction.AUTO_ASSIGN:
-            substitute, staff_room_keeper, details = self.service.find_ordinary_guard_substitute(
+            substitute, staff_room_keeper, details = self._ordinary(
                 cmd.date, day_of_week, cmd.period
             )
             if substitute:
                 source = SubstitutionSourceType.ORDINARY_GUARD
-
         if not substitute or cmd.action == ResolutionAction.FORCE_SHORT_TERM:
-            substitute, details = self.service.find_short_term_substitute(
-                cmd.date, day_of_week, cmd.period
-            )
+            substitute, details = self._short_term(cmd.date, day_of_week, cmd.period)
             if substitute:
                 source = SubstitutionSourceType.SHORT_TERM_SUBSTITUTION
             else:
                 return PeriodResolveResponse(
-                    date=cmd.date,
-                    period=cmd.period,
-                    resolved=False,
+                    date=cmd.date, period=cmd.period, resolved=False,
                     action_applied=cmd.action.value,
                     details="ALERTA: Sin profesores disponibles en guardia ni en sustitución corta.",
                 )
-
-        absence.resolved = True
-        self.session.add(absence)
-        self.session.commit()
-
-        self.service.register_log(
-            date_str=cmd.date,
-            period=cmd.period,
-            absent_teacher_id=cmd.absent_teacher_id,
-            substitute_teacher_id=substitute.id,
-            group_id=cmd.group_id,
-            source=source,
-        )
-
+        log = absence.resolve_with_substitute(substitute.id, source, cmd.group_id)
+        self.absence_repository.save(absence)
+        self.substitution_repository.save(log)
         return PeriodResolveResponse(
-            date=cmd.date,
-            period=cmd.period,
-            resolved=True,
-            action_applied=source.value,
-            substitute_id=substitute.id,
-            substitute_name=substitute.name,
-            substitute_email=substitute.email,
+            date=cmd.date, period=cmd.period, resolved=True,
+            action_applied=source.value, substitute_id=substitute.id,
+            substitute_name=substitute.name, substitute_email=str(substitute.email),
             source_type=source.value,
-            is_short_term_substitute=(source == SubstitutionSourceType.SHORT_TERM_SUBSTITUTION),
-            is_fixed_duty_substitute=(source == SubstitutionSourceType.ORDINARY_GUARD),
+            is_short_term_substitute=source == SubstitutionSourceType.SHORT_TERM_SUBSTITUTION,
+            is_fixed_duty_substitute=source == SubstitutionSourceType.ORDINARY_GUARD,
             staff_room_keeper_name=staff_room_keeper.name if staff_room_keeper else None,
             details=details,
         )

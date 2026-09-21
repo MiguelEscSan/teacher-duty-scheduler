@@ -1,62 +1,53 @@
 from dataclasses import dataclass
-from src.application.common.mediator import Query
 from typing import Any
-from sqlmodel import Session, select
-from src.application.common.mediator import RequestHandler
-from src.infrastructure.db.models import StudentGroupDB, TeacherDB, TeacherScheduleDB
+
+from src.application.common.mediator import Query, RequestHandler
+from src.domain.repositories.schedule_repository import ScheduleRepository
+from src.domain.repositories.student_group_repository import StudentGroupRepository
+from src.domain.repositories.teacher_repository import TeacherRepository
+
 
 @dataclass(frozen=True)
 class GetTeacherBaseScheduleQuery(Query[list[list[dict[str, Any]]]]):
     teacher_id: str
 
+
 class GetTeacherBaseScheduleHandler(
     RequestHandler[GetTeacherBaseScheduleQuery, list[list[dict[str, Any]]]]
 ):
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(
+        self,
+        schedule_repository: ScheduleRepository,
+        student_group_repository: StudentGroupRepository,
+        teacher_repository: TeacherRepository,
+    ):
+        self.schedule_repository = schedule_repository
+        self.student_group_repository = student_group_repository
+        self.teacher_repository = teacher_repository
 
     def handle(self, query: GetTeacherBaseScheduleQuery) -> list[list[dict[str, Any]]]:
-        if not self.session.get(TeacherDB, query.teacher_id):
+        if not self.teacher_repository.get_by_id(query.teacher_id):
             raise ValueError("Profesor no encontrado.")
-
-        entries = self.session.exec(
-            select(TeacherScheduleDB).where(
-                TeacherScheduleDB.teacher_id == query.teacher_id
-            )
-        ).all()
-
-        groups = {g.id: g.name for g in self.session.exec(select(StudentGroupDB)).all()}
-
-        slot_map: dict[tuple[int, int], dict[str, Any]] = {}
-        for e in entries:
-            if e.is_teaching and e.group_id:
-                slot_map[(e.day_of_week, e.period)] = {
-                    "status": "TEACHING",
-                    "group_id": e.group_id,
-                    "group_name": groups.get(e.group_id, e.group_id),
+        entries = self.schedule_repository.get_for_teacher(query.teacher_id)
+        groups = {g.id: g.name for g in self.student_group_repository.get_all()}
+        slot_map = {}
+        for entry in entries:
+            slot_map[(entry.day_of_week, entry.period)] = {
+                "status": "TEACHING" if entry.is_teaching and entry.group_id else "FREE",
+                "group_id": entry.group_id if entry.is_teaching else None,
+                "group_name": groups.get(entry.group_id) if entry.is_teaching else None,
+            }
+        return [
+            [
+                {
+                    "day": day,
+                    "period": period,
+                    **slot_map.get(
+                        (day, period),
+                        {"status": "FREE", "group_id": None, "group_name": None},
+                    ),
                 }
-            else:
-                slot_map[(e.day_of_week, e.period)] = {
-                    "status": "FREE",
-                    "group_id": None,
-                    "group_name": None,
-                }
-
-        grid: list[list[dict[str, Any]]] = []
-        for p in range(6):
-            row = []
-            for d in range(5):
-                info = slot_map.get(
-                    (d, p),
-                    {"status": "FREE", "group_id": None, "group_name": None},
-                )
-                row.append({
-                    "day": d,
-                    "period": p,
-                    "status": info["status"],
-                    "group_id": info["group_id"],
-                    "group_name": info["group_name"],
-                })
-            grid.append(row)
-
-        return grid
+                for day in range(5)
+            ]
+            for period in range(6)
+        ]
