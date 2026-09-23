@@ -1,0 +1,27 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Backend/Dockerfile
+    env_file:
+      - .env
+    environment:
+      DB_DIR: /app/data
+    volumes:
+      - backend-data:/app/data
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Frontend/Dockerfile
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    restart: unless-stopped
+
+volumes:
+  backend-data:
