@@ -1,80 +1,54 @@
-# 🏫 Teacher Duty Scheduler (GuardPlan)
+# 📚 Teacher Duty Scheduler
 
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![Angular](https://img.shields.io/badge/Angular-18+-DD0031?style=flat-square&logo=angular&logoColor=white)](https://angular.dev/)
-[![OR-Tools](https://img.shields.io/badge/Google%20OR--Tools-CP--SAT-4285F4?style=flat-square&logo=google&logoColor=white)](https://developers.google.com/optimization)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen.svg)]()
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-> **Sistema inteligente de planificación y optimización combinatoria de guardias docentes para centros educativos.**
+> Sistema inteligente y automatizado para la asignación y planificación equitativa de guardias docentes en centros educativos.
 
 ---
 
-## 📌 Descripción del Proyecto
+## 📖 Descripción
 
-En los centros de educación secundaria y primaria, la asignación de guardias lectivas semanales suele ser un proceso manual propenso a desbalances, fatiga de personal y errores humanos ante bajas médicas de última hora.
+**Teacher Duty Scheduler** es una herramienta diseñada para centros escolares e institutos que simplifica la compleja tarea de organizar las guardias del profesorado (patios, pasillos, biblioteca, sustituciones en aula, etc.). 
 
-**Teacher Duty Scheduler** resuelve este problema formulándolo como un modelo matemático de **Programación con Restricciones (Constraint Programming / CP-SAT)** a través de **Google OR-Tools**. La plataforma desacopla el horario lectivo base (fijo durante el curso escolar) de las ausencias imprevistas por fechas de calendario reales, garantizando un reparto equitativo de carga lectiva y cobertura óptima.
-
----
-
-## ✨ Características Principales
-
-- **Optimización Matemática Robusta (CP-SAT)**:
-  - **Restricciones Duras (Hard Constraints)**: Respeto inquebrantable a clases lectivas (`TEACHING`), permisos/bajas médicas puntuales (`ABSENCE`) y no duplicidad de un docente en el mismo periodo.
-  - **Restricciones Blandas (Soft Constraints)**: Minimización de la brecha de guardias entre docentes (equidad/varianza mínima) y penalización de horas consecutivas (anti-fatiga).
-  - **Tolerancia a Déficit (Subcobertura Controlada)**: Variables de holgura que permiten resolver el cuadrante sin fallar cuando hay menos profesores libres que los 2 requeridos por bloque, generando alertas formales.
-- **Gestión de Claustro y Departamentos**:
-  - Identificación por GUID (UUID v4) automático.
-  - Catalogación por departamentos didácticos (Matemáticas, Lengua, Ciencias, etc.).
-- **Calendario Real**:
-  - Proyección de semanas ancladas a fechas ISO (`YYYY-MM-DD`).
-  - Navegador quincenal y semanal directo (adelantar/retrasar 7 días).
-- **Persistencia Ligera**: SQLite gestionado con **SQLModel / SQLAlchemy** en un único fichero local (`guardias.db`).
-- **Arquitectura Limpia (Clean Architecture)**:
-  - Dominio puro desacoplado de frameworks.
-  - Casos de uso e interfaces con inversión de dependencias.
-  - Frontend modular con Angular Standalone Components y CSS encapsulado.
-- **Despliegue Rápido**: Preparado para producción local mediante **Docker Compose** y Nginx.
+A través de un algoritmo de asignación con restricciones, el sistema distribuye los turnos de manera equilibrada y justa, respetando los horarios lectivos, preferencias, descansos y limitaciones de cada docente.
 
 ---
 
-## 🛠️ Stack Tecnológico
+## ✨ Características principales
 
-### Backend
-- **Lenguaje**: Python 3.11+
-- **Framework API**: FastAPI + Uvicorn
-- **Motor de Optimización**: Google OR-Tools (`cp_model`)
-- **ORM / Persistencia**: SQLModel + SQLite
-- **Exportación**: OpenPyXL (Excel)
-
-### Frontend
-- **Framework**: Angular 18+ (Standalone Components, Inyección de dependencias moderna con `inject()`)
-- **Estilos**: CSS Vanilla con variables y responsive design (Flexbox/Grid)
-- **Servidor Web Producción**: Nginx Alpine
+- **⚖️ Reparto Equitativo:** Algoritmo optimizado para balancear el número de guardias semanales/mensuales entre todo el claustro.
+- **🚫 Resolución de Conflictos y Restricciones:**
+  - Evita solapamientos con horas lectivas de clase.
+  - Respeta reducciones de jornada, cargos directivos o días libres.
+  - Límites máximos y mínimos de guardias por profesor y periodo.
+- **📍 Multizona / Múltiples Puntos de Guardia:** Gestión de distintos puestos (patio infantil, patio primaria, biblioteca, cafetería, accesos, etc.).
+- **📅 Visualización de Cuadrantes:** Generación de horarios visuales por docente, por día y por zona.
+- **📊 Exportación e Informes:** Capacidad de exportar los cuadrantes a formatos estándar (Excel/CSV, PDF, etc.).
+- **🔄 Gestión de Sustituciones y Modificaciones:** Registro dinámico de cambios puntuales o bajas de última hora.
 
 ---
 
-## 📂 Estructura del Repositorio
+## 🛠️ Tecnologías
 
-```text
-teacher-duty-scheduler/
-├── docker-compose.yml              # Orquestador multi-contenedor
-├── Backend/
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   ├── seed_demo.py               # Generador de datos y casos de prueba
-│   └── src/
-│       ├── domain/                # Entidades y constantes de negocio puras
-│       ├── services/              # Motor CP-SAT y caso de uso orquestador
-│       ├── infrastructure/        # Modelos SQLModel, repositorios y exporters
-│       ├── api/                   # Controladores FastAPI, esquemas e inyección
-│       └── main.py                # Punto de entrada de la API
-└── Frontend/
-    ├── Dockerfile                 # Multi-stage build (Node -> Nginx)
-    ├── nginx.conf                 # Proxy inverso y servidor estático
-    └── src/app/
-        ├── models/                # Interfaces TypeScript
-        ├── services/              # Clientes HTTP
-        └── features/              # Componentes funcionales (teachers, absences, guards)
+- **Backend / Algoritmo:** Python 
+- **Frontend :** Interfaz Web (Angular)
+- **Base de Datos / Almacenamiento:** SQLite 
+
+---
+
+## 🚀 Instalación y Puesta en Marcha
+
+### Prerrequisitos
+
+- [Git](https://git-scm.com/) instalado.
+- Entorno de ejecución según corresponda:
+  - **Python 3.10+** (si es un proyecto Python)
+  - **Node.js 18+** (si es un proyecto JavaScript/TypeScript)
+
+### 1. Clonar el repositorio
+
+```bash
+git clone [https://github.com/MiguelEscSan/teacher-duty-scheduler.git](https://github.com/MiguelEscSan/teacher-duty-scheduler.git)
+cd teacher-duty-scheduler
