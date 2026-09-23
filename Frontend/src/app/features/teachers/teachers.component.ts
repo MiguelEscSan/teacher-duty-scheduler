@@ -1,7 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GuardiasService } from '../../services/shift.services';
+import { BaseScheduleService } from '../../services/base-schedule.service';
+import { TeachersService } from '../../services/teachers.service';
 import { BaseSlot, StudentGroup, Teacher } from '../../models/schedule.model';
 import { TeacherFormModalComponent } from './components/teacher-form-modal/teacher-form-modal.component';
 
@@ -13,7 +14,8 @@ import { TeacherFormModalComponent } from './components/teacher-form-modal/teach
   styleUrls: ['./teachers.component.css']
 })
 export class TeachersComponent implements OnInit {
-  private api = inject(GuardiasService);
+  private teachersApi = inject(TeachersService);
+  private scheduleApi = inject(BaseScheduleService);
 
   teachers: Teacher[] = [];
   groups: StudentGroup[] = [];
@@ -47,7 +49,7 @@ export class TeachersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadTeachers();
-    this.api.getGroups().subscribe(g => this.groups = g);
+    this.scheduleApi.getGroups().subscribe(g => this.groups = g);
   }
 
   get filteredTeachers(): Teacher[] {
@@ -60,7 +62,7 @@ export class TeachersComponent implements OnInit {
   }
 
   loadTeachers(): void {
-    this.api.getTeachers().subscribe(t => {
+    this.teachersApi.getTeachers().subscribe(t => {
       this.teachers = t;
       if (!this.selectedTeacher && t.length > 0) {
         this.selectTeacher(t[0]);
@@ -71,7 +73,7 @@ export class TeachersComponent implements OnInit {
   selectTeacher(teacher: Teacher): void {
     this.selectedTeacher = teacher;
     this.isLoadingSchedule = true;
-    this.api.getBaseSchedule(teacher.id!).subscribe({
+    this.scheduleApi.getBaseSchedule(teacher.id!).subscribe({
       next: (schedule) => {
         this.teacherSchedule = schedule;
         this.isLoadingSchedule = false;
@@ -93,7 +95,7 @@ export class TeachersComponent implements OnInit {
   confirmGroupAssignment(): void {
     if (!this.selectedTeacher?.id || !this.activeSlot) return;
 
-    this.api.assignSlotGroup(
+    this.scheduleApi.assignSlotGroup(
       this.selectedTeacher.id,
       this.activeSlot.day,
       this.activeSlot.period,
@@ -107,7 +109,7 @@ export class TeachersComponent implements OnInit {
   setSlotFree(): void {
     if (!this.selectedTeacher?.id || !this.activeSlot) return;
 
-    this.api.assignSlotGroup(
+    this.scheduleApi.assignSlotGroup(
       this.selectedTeacher.id,
       this.activeSlot.day,
       this.activeSlot.period,
@@ -120,7 +122,7 @@ export class TeachersComponent implements OnInit {
 
   saveTeacher(): void {
     if (!this.newTeacher.name.trim()) return;
-    this.api.addTeacher({
+    this.teachersApi.addTeacher({
       name: this.newTeacher.name.trim(),
       department: this.newTeacher.department
     }).subscribe((created) => {
@@ -141,7 +143,7 @@ export class TeachersComponent implements OnInit {
 
   removeTeacher(id: string): void {
     if (!confirm('¿Eliminar a este docente?')) return;
-    this.api.deleteTeacher(id).subscribe(() => {
+    this.teachersApi.deleteTeacher(id).subscribe(() => {
       this.teachers = this.teachers.filter(t => t.id !== id);
       this.selectedTeacher = this.teachers.length > 0 ? this.teachers[0] : null;
       if (this.selectedTeacher) this.selectTeacher(this.selectedTeacher);

@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GuardiasService } from '../../services/shift.services';
+import { GuardsOptimizationService } from '../../services/guards-optimization.service';
 import { OptimizationResponse } from '../../models/schedule.model';
 
 @Component({
@@ -12,7 +12,7 @@ import { OptimizationResponse } from '../../models/schedule.model';
   styleUrls: ['./guards.component.css']
 })
 export class GuardsComponent implements OnInit {
-  private api = inject(GuardiasService);
+  private api = inject(GuardsOptimizationService);
 
   selectedDate: string = '';
   results: OptimizationResponse | null = null;

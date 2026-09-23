@@ -1,7 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GuardiasService } from '../../services/shift.services';
+import { SubstitutionsService } from '../../services/substitutions.service';
+import { TeachersService } from '../../services/teachers.service';
 import { SubstitutionHistory } from '../../models/substitutions.model';
 import { Teacher } from '../../models/schedule.model';
 
@@ -13,7 +14,8 @@ import { Teacher } from '../../models/schedule.model';
   styleUrls: ['./substitution-history.component.css']
 })
 export class SubstitutionHistoryComponent implements OnInit {
-  private api = inject(GuardiasService);
+  private substitutionsApi = inject(SubstitutionsService);
+  private teachersApi = inject(TeachersService);
 
   history: SubstitutionHistory[] = [];
   teachers: Teacher[] = [];
@@ -26,7 +28,7 @@ export class SubstitutionHistoryComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.api.getTeachers().subscribe({
+    this.teachersApi.getTeachers().subscribe({
       next: teachers => this.teachers = teachers,
       error: () => this.errorMessage = 'No se pudo cargar la lista de profesores.'
     });
@@ -36,7 +38,7 @@ export class SubstitutionHistoryComponent implements OnInit {
   loadHistory(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.api.getSubstitutionHistory(this.filters).subscribe({
+    this.substitutionsApi.getSubstitutionHistory(this.filters).subscribe({
       next: history => {
         this.history = history;
         this.loading = false;

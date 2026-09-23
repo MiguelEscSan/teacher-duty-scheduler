@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DutySlot, Teacher } from '../../models/schedule.model';
-import { GuardiasService } from '../../services/shift.services';
+import { TeachersService } from '../../services/teachers.service';
 
 @Component({
   selector: 'app-duty-calendar',
@@ -11,7 +11,7 @@ import { GuardiasService } from '../../services/shift.services';
   styleUrls: ['./duty-calendar.component.css']
 })
 export class DutyCalendarComponent implements OnInit {
-  private api = inject(GuardiasService);
+  private api = inject(TeachersService);
 
   dutySlots: DutySlot[] = [];
   isLoading = false;

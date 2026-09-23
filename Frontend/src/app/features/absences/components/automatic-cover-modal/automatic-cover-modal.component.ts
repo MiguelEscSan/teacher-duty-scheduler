@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GuardiasService } from '../../../../services/shift.services';
+import { SubstitutionsService } from '../../../../services/substitutions.service';
 import { Absence } from '../../../../models/schedule.model';
 import { PeriodResolveResponse } from '../../../../models/substitutions.model';
 
@@ -16,7 +16,7 @@ export class AutomaticCoverModalComponent implements OnInit {
   @Output() confirmed = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
 
-  private guardiasService = inject(GuardiasService);
+  private substitutionsApi = inject(SubstitutionsService);
 
   resolution: PeriodResolveResponse | null = null;
   loading = true;
@@ -33,7 +33,7 @@ export class AutomaticCoverModalComponent implements OnInit {
     this.errorMsg = '';
     this.resolution = null;
 
-    this.guardiasService.resolvePeriod({
+    this.substitutionsApi.resolvePeriod({
       date: this.absence.date,
       period: this.absence.period,
       absent_teacher_id: this.absence.teacher_id,
@@ -56,7 +56,7 @@ export class AutomaticCoverModalComponent implements OnInit {
     if (!this.resolution?.resolved || !this.resolution.substitute_id) return;
 
     this.sendingEmail = true;
-    this.guardiasService.sendSubstitutionEmail({
+    this.substitutionsApi.sendSubstitutionEmail({
       date: this.absence.date,
       period: this.absence.period,
       absent_teacher_id: this.absence.teacher_id,

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {  GuardiasService } from '../../../../services/shift.services';
+import { SubstitutionsService } from '../../../../services/substitutions.service';
 import {
   AvailableTeacher,
   ManualAssignmentPayload
@@ -19,7 +19,7 @@ export class ManualCoverModalComponent implements OnInit {
   @Output() confirmed = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
 
-  private guardiasService = inject(GuardiasService);
+  private substitutionsApi = inject(SubstitutionsService);
 
   candidates: AvailableTeacher[] = [];
   selectedTeacher: AvailableTeacher | null = null;
@@ -35,7 +35,7 @@ export class ManualCoverModalComponent implements OnInit {
     this.loading = true;
     this.errorMsg = '';
 
-    this.guardiasService.getAvailableCandidates(this.absence.date, this.absence.period).subscribe({
+    this.substitutionsApi.getAvailableCandidates(this.absence.date, this.absence.period).subscribe({
       next: (data) => {
         this.candidates = data;
         this.loading = false;
@@ -75,7 +75,7 @@ export class ManualCoverModalComponent implements OnInit {
       group_id: this.absence.group_id
     };
 
-    this.guardiasService.assignManualSubstitution(payload).subscribe({
+    this.substitutionsApi.assignManualSubstitution(payload).subscribe({
       next: () => {
         this.submitting = false;
         this.confirmed.emit();

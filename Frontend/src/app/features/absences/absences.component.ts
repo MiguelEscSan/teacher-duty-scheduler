@@ -1,7 +1,9 @@
 import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GuardiasService } from '../../services/shift.services';
+import { AbsencesService } from '../../services/absences.service';
+import { SubstitutionsService } from '../../services/substitutions.service';
+import { TeachersService } from '../../services/teachers.service';
 import { Absence, Teacher } from '../../models/schedule.model';
 import { ManualCoverModalComponent } from './components/manual-cover-modal/manual-cover-modal.component'
 import { AutomaticCoverModalComponent } from './components/automatic-cover-modal/automatic-cover-modal.component';
@@ -15,7 +17,9 @@ import { AbsenceFormModalComponent } from './components/absence-form-modal/absen
   styleUrls: ['./absences.component.css']
 })
 export class AbsencesComponent implements OnInit {
-  private api = inject(GuardiasService);
+  private absencesApi = inject(AbsencesService);
+  private substitutionsApi = inject(SubstitutionsService);
+  private teachersApi = inject(TeachersService);
 
   teachers: Teacher[] = [];
   absences: Absence[] = [];
@@ -46,7 +50,7 @@ export class AbsencesComponent implements OnInit {
   showAbsenceModal = false;
 
   ngOnInit(): void {
-    this.api.getTeachers().subscribe(t => {
+    this.teachersApi.getTeachers().subscribe(t => {
       this.teachers = t;
       if (t.length > 0) this.newAbsence.teacher_id = t[0].id!;
     });
@@ -54,7 +58,7 @@ export class AbsencesComponent implements OnInit {
   }
 
   loadAbsences(): void {
-    this.api.getAbsences({
+    this.absencesApi.getAbsences({
       date: this.filters.date || undefined,
       teacher_id: this.filters.teacher_id || undefined,
       resolved: this.filters.status === 'all' ? undefined : this.filters.status === 'resolved'
@@ -67,7 +71,7 @@ export class AbsencesComponent implements OnInit {
   }
 
   submitAbsence(): void {
-    this.api.addAbsence(this.newAbsence).subscribe(() => {
+    this.absencesApi.addAbsence(this.newAbsence).subscribe(() => {
       this.loadAbsences();
       this.showAbsenceModal = false;
     });
@@ -113,7 +117,7 @@ export class AbsencesComponent implements OnInit {
     this.activeMenuId = null;
     if (absence.resolved) return;
 
-    this.api.markAbsenceAsDoNotCover({
+    this.substitutionsApi.markAbsenceAsDoNotCover({
       date: absence.date,
       period: absence.period,
       absent_teacher_id: absence.teacher_id
@@ -141,7 +145,7 @@ export class AbsencesComponent implements OnInit {
   remove(id?: number): void {
     this.activeMenuId = null;
     if (id === undefined) return;
-    this.api.deleteAbsence(id).subscribe(() => {
+    this.absencesApi.deleteAbsence(id).subscribe(() => {
       this.loadAbsences();
     });
   }
