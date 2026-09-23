@@ -45,6 +45,7 @@ class AssignManualSubstitutionHandler(RequestHandler[AssignManualSubstitutionCom
         existing = self.substitution_repository.get_all(
             date=cmd.date, absent_teacher_id=cmd.absent_teacher_id
         )
+        existing = [item for item in existing if item.period == cmd.period]
         if existing:
             existing[0].substitute_teacher_id = log.substitute_teacher_id
             existing[0].group_id = log.group_id
