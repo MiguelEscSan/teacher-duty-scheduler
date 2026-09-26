@@ -16,7 +16,7 @@ import {
 })
 export class ManualCoverModalComponent implements OnInit {
   @Input() absence: any;
-  @Output() confirmed = new EventEmitter<void>();
+  @Output() confirmed = new EventEmitter<string>();
   @Output() cancelled = new EventEmitter<void>();
 
   private substitutionsApi = inject(SubstitutionsService);
@@ -67,22 +67,21 @@ export class ManualCoverModalComponent implements OnInit {
     if (!this.selectedTeacher) return;
 
     this.submitting = true;
+    const substituteTeacherId = this.selectedTeacher.id;
     const payload: ManualAssignmentPayload = {
       date: this.absence.date,
       period: this.absence.period,
       absent_teacher_id: this.absence.teacher_id,
-      substitute_teacher_id: this.selectedTeacher.id,
+      substitute_teacher_id: substituteTeacherId,
       group_id: this.absence.group_id
     };
-
     this.substitutionsApi.assignManualSubstitution(payload).subscribe({
       next: () => {
         this.submitting = false;
-        this.confirmed.emit();
+        this.confirmed.emit(substituteTeacherId);
       },
-      error: (err) => {
-        console.error(err);
-        alert('Hubo un error al registrar la sustitución manual.');
+      error: () => {
+        this.errorMsg = 'Hubo un error al registrar la sustitución manual.';
         this.submitting = false;
       }
     });

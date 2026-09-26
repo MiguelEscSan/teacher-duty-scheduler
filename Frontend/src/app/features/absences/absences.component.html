@@ -1,4 +1,9 @@
 <div class="absences-view">
+  <div *ngIf="bulkFailureMessage" class="bulk-warning">
+    <strong>Registro parcialmente completado</strong>
+    <p>{{ bulkFailureMessage }}</p>
+    <button type="button" class="btn-filter" (click)="goToBulkHistory()">Ir al historial</button>
+  </div>
   <!-- Tabla de Clases Desatendidas -->
   <section class="card table-card">
     <div class="section-heading absence-list-heading">
@@ -37,10 +42,21 @@
       </div>
     </form>
 
+    <div *ngIf="selectedAbsenceIds.size" class="bulk-actions">
+      <span>{{ selectedAbsenceIds.size }} ausencias seleccionadas</span>
+      <div>
+        <button type="button" class="btn-bulk" (click)="markSelectedAsDoNotCover()" [disabled]="bulkActionLoading">No cubrir</button>
+        <button type="button" class="btn-bulk primary" (click)="openBulkManualCover()" [disabled]="bulkActionLoading">Cubrir manualmente</button>
+        <button type="button" class="btn-bulk primary" (click)="autoCoverSelected()" [disabled]="bulkActionLoading">Cubrir automáticamente</button>
+        <button type="button" class="btn-bulk clear" (click)="clearAbsenceSelection()" [disabled]="bulkActionLoading">Cancelar</button>
+      </div>
+    </div>
+
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
         <tr>
+          <th>Seleccionar</th>
           <th>Fecha</th>
           <th>Periodo</th>
           <th>Docente Ausente</th>
@@ -51,7 +67,7 @@
         </thead>
         <tbody>
         <tr *ngFor="let item of absences">
-          <td colspan="6" *ngIf="item.is_duty_absence" class="duty-alert">
+          <td colspan="7" *ngIf="item.is_duty_absence" class="duty-alert">
             <strong>⚠️ {{ item.alert_message || 'Docente ausente en franja de retén/guardia' }}</strong>
             <button type="button" (click)="autoCoverDuties(item)" [disabled]="autoCoverLoading">{{ autoCoverLoading ? 'Resolviendo...' : 'Auto-cubrir guardias' }}</button>
             <button type="button" (click)="openManualCoverModal(item)">Cubrir a mano</button>
@@ -59,6 +75,7 @@
         </tr>
         <tr *ngFor="let item of absences">
           <ng-container *ngIf="!item.is_duty_absence">
+          <td><input type="checkbox" [checked]="isAbsenceSelected(item.id)" (change)="toggleAbsenceSelection(item.id)" [disabled]="item.resolved" aria-label="Seleccionar ausencia"></td>
           <td>{{ item.date }}</td>
           <td><span class="period-badge">P{{ item.period }}</span></td>
           <td><strong>{{ item.teacher_name || 'Desconocido' }}</strong></td>
@@ -139,7 +156,7 @@
         </tr>
 
         <tr *ngIf="absences.length === 0">
-          <td colspan="6" class="empty-state">No hay clases desatendidas registradas.</td>
+          <td colspan="7" class="empty-state">No hay clases desatendidas registradas.</td>
         </tr>
         </tbody>
       </table>
@@ -153,6 +170,7 @@
   [absence]="newAbsence"
   [hours]="hours"
   (saved)="submitAbsence()"
+  (bulkSaved)="submitBulkAbsences($event)"
   (cancelled)="closeAbsenceModal()"
 ></app-absence-form-modal>
 
@@ -160,7 +178,7 @@
 <app-manual-cover-modal
   *ngIf="selectedAbsenceForManualCover"
   [absence]="selectedAbsenceForManualCover"
-  (confirmed)="onManualCoverConfirmed()"
+  (confirmed)="onManualCoverConfirmed($event)"
   (cancelled)="onManualCoverCancelled()"
 >
 </app-manual-cover-modal>

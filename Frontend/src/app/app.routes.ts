@@ -11,6 +11,7 @@ export const routes: Routes = [
   { path: 'absences', component: AbsencesComponent },
   { path: 'guards', component: GuardsComponent },
   { path: 'history', component: SubstitutionHistoryComponent },
+  { path: 'substitutions/history', component: SubstitutionHistoryComponent },
   {
     path: 'calendars',
     component: CalendarLayoutComponent,

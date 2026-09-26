@@ -37,7 +37,7 @@ export class AutomaticCoverModalComponent implements OnInit {
       date: this.absence.date,
       period: this.absence.period,
       absent_teacher_id: this.absence.teacher_id,
-      group_id: this.absence.group_id,
+      group_id: this.absence.group_id || undefined,
       action: 'AUTO_ASSIGN'
     }).subscribe({
       next: (response) => {
@@ -61,7 +61,7 @@ export class AutomaticCoverModalComponent implements OnInit {
       period: this.absence.period,
       absent_teacher_id: this.absence.teacher_id,
       substitute_teacher_id: this.resolution.substitute_id,
-      group_id: this.absence.group_id
+      group_id: this.absence.group_id || null
     }).subscribe({
       next: () => {
         this.sendingEmail = false;

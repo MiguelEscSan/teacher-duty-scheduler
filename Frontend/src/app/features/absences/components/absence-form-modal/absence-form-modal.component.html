@@ -9,7 +9,12 @@
       <button type="button" class="btn-close" (click)="close()" aria-label="Cerrar">&times;</button>
     </header>
 
-    <form (ngSubmit)="submit()" class="absence-form">
+    <div class="mode-toggle" role="group" aria-label="Modo de registro">
+      <button type="button" [class.active]="mode === 'simple'" (click)="mode = 'simple'">Registro simple</button>
+      <button type="button" [class.active]="mode === 'bulk'" (click)="mode = 'bulk'; buildPreview()">Registro múltiple / masivo</button>
+    </div>
+
+    <form *ngIf="mode === 'simple'" (ngSubmit)="submit()" class="absence-form">
       <div class="form-group">
         <label for="teacherSelect">Profesor</label>
         <select id="teacherSelect" [(ngModel)]="absence.teacher_id" name="teacher_id" required>
@@ -47,6 +52,56 @@
       <footer class="modal-footer">
         <button type="button" class="btn-secondary" (click)="close()">Cancelar</button>
         <button type="submit" class="btn-primary">Guardar ausencia</button>
+      </footer>
+    </form>
+
+    <form *ngIf="mode === 'bulk'" [formGroup]="bulkForm" (ngSubmit)="submitBulk()" class="absence-form bulk-form">
+      <div class="form-group full-width">
+        <label for="teacherSearch">Docentes ({{ bulkForm.controls.teacherIds.value?.length || 0 }} seleccionados)</label>
+        <input id="teacherSearch" type="search" [(ngModel)]="teacherSearch" [ngModelOptions]="{standalone: true}" placeholder="Buscar por nombre">
+        <div class="teacher-picker">
+          <button type="button" *ngFor="let teacher of filteredTeachers" [class.selected]="isTeacherSelected(teacher.id)" (click)="toggleTeacher(teacher.id)">
+            {{ teacher.name }}<span *ngIf="isTeacherSelected(teacher.id)"> ✓</span>
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="bulkStartDate">Desde</label>
+        <input id="bulkStartDate" type="date" formControlName="startDate" (change)="buildPreview()">
+      </div>
+      <div class="form-group">
+        <label for="bulkEndDate">Hasta</label>
+        <input id="bulkEndDate" type="date" formControlName="endDate" (change)="buildPreview()">
+      </div>
+      <div class="form-group full-width">
+        <label>Periodos</label>
+        <label class="inline-check"><input type="checkbox" [checked]="bulkForm.controls.allDay.value" (change)="setAllDay($any($event.target).checked)"> Toda la jornada (P0 a P5)</label>
+        <div class="period-picker" *ngIf="!bulkForm.controls.allDay.value">
+          <label *ngFor="let period of periods"><input type="checkbox" [checked]="(bulkForm.controls.periods.value || []).includes(period)" (change)="togglePeriod(period)"> P{{ period }}</label>
+        </div>
+      </div>
+      <div class="form-group full-width">
+        <label for="bulkReason">Motivo</label>
+        <select id="bulkReason" formControlName="reason" (change)="buildPreview()">
+          <option>Baja médica</option>
+          <option>Asunto propio</option>
+          <option>Excursión / Actividad complementaria</option>
+          <option>Comisión de servicio</option>
+        </select>
+      </div>
+      <div class="preview full-width">
+        <strong>Se registrarán {{ preview.length }} ausencias</strong>
+        <p *ngIf="preview.length === 0" class="hint">Selecciona docentes, fechas y periodos para continuar.</p>
+        <div class="preview-list">
+          <div *ngFor="let item of preview; let i = index">
+            <span>{{ item.date }} · {{ teacherName(item.teacher_id) }} · P{{ item.period }}</span>
+            <button type="button" (click)="removePreview(i)" aria-label="Eliminar registro">×</button>
+          </div>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="close()" [disabled]="isSaving">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="isSaving || bulkForm.invalid || preview.length === 0">{{ isSaving ? 'Preparando...' : 'Registrar ausencias' }}</button>
       </footer>
     </form>
   </section>

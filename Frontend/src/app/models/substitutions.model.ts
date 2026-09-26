@@ -56,6 +56,7 @@ export interface SubstitutionHistory {
   source_type: string;
   created_at: string;
   reassigned?: boolean;
+  notified?: boolean;
 }
 
 export interface AutoCoverDutiesResponse {

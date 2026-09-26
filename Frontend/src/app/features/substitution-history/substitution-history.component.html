@@ -51,12 +51,19 @@
   <section class="card history-card">
     <div *ngIf="errorMessage" class="error-banner">{{ errorMessage }}</div>
     <div *ngIf="toastMessage" class="toast" (click)="toastMessage = ''">{{ toastMessage }}</div>
+    <div *ngIf="selectedIds.size" class="bulk-actions">
+      <span>{{ selectedIds.size }} seleccionadas</span>
+      <button type="button" class="btn-filter" (click)="sendSelectedEmails()" [disabled]="emailBatchSending">
+        {{ emailBatchSending ? 'Enviando...' : 'Enviar correo a seleccionados (' + selectedIds.size + ')' }}
+      </button>
+    </div>
     <div *ngIf="loading" class="loading-label">Cargando histórico...</div>
 
     <div class="table-wrapper" *ngIf="!loading">
       <table class="history-table">
         <thead>
           <tr>
+            <th>Seleccionar</th>
             <th>Fecha</th>
             <th>Periodo</th>
             <th>Docente ausente</th>
@@ -64,10 +71,12 @@
             <th>Grupo</th>
             <th>Origen</th>
             <th>Registrada</th>
+            <th>Notificación</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let item of history">
+            <td><input type="checkbox" [checked]="isSelected(item.id)" (change)="toggleSelected(item.id)" aria-label="Seleccionar sustitución"></td>
             <td>{{ item.date }}</td>
             <td><span class="period-badge">P{{ item.period }}</span></td>
             <td>{{ item.absent_teacher_name }}</td>
@@ -88,9 +97,15 @@
             <td>{{ item.group_name || '—' }}</td>
             <td><span class="source-badge">{{ sourceLabel(item.source_type) }}</span></td>
             <td>{{ formatDateTime(item.created_at) }}</td>
+            <td class="notification-cell">
+              <span *ngIf="item.notified" class="notified-badge">Notificado</span>
+              <button *ngIf="!item.notified" type="button" class="email-action" (click)="sendEmail(item)" [disabled]="emailSendingIds.has(item.id)" title="Enviar correo de aviso al sustituto">
+                {{ emailSendingIds.has(item.id) ? 'Enviando...' : '✉ Enviar' }}
+              </button>
+            </td>
           </tr>
           <tr *ngIf="history.length === 0">
-            <td colspan="7" class="empty-state">No hay sustituciones registradas con los filtros seleccionados.</td>
+            <td colspan="9" class="empty-state">No hay sustituciones registradas con los filtros seleccionados.</td>
           </tr>
         </tbody>
       </table>

@@ -26,7 +26,7 @@ export class SubstitutionsService {
     period: number;
     absent_teacher_id: string;
     substitute_teacher_id: string;
-    group_id?: string;
+    group_id: string | null;
   }): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${API_URL}/substitutions/send-email`, payload);
   }
