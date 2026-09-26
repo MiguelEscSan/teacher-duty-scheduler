@@ -41,6 +41,25 @@ class StudentGroupResponse(BaseModel):
     name: str
     student_count: Optional[int] = None
 
+StudentGroupResponseDto = StudentGroupResponse
+
+
+class StudentGroupCreate(BaseModel):
+    name: str = Field(
+        min_length=1, max_length=50,
+        description="Nombre único del grupo (ej. 1ºA_ESO)",
+    )
+    student_count: Optional[int] = Field(
+        default=None, ge=0, description="Número de alumnos asignados al aula"
+    )
+
+
+class StudentGroupUpdate(BaseModel):
+    name: str = Field(min_length=1, max_length=50, description="Nuevo nombre del grupo")
+    student_count: Optional[int] = Field(
+        default=None, ge=0, description="Nuevo número de alumnos"
+    )
+
 
 # --- Ausencias ---
 class AbsenceCreate(BaseModel):

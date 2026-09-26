@@ -4,9 +4,16 @@ Punto de entrada de la aplicación FastAPI.
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request
+from fastapi.responses import JSONResponse
 
-from src.api.routes import guards, schedules, teachers, substitutions, absences
+from src.api.routes import absences, guards, groups, schedules, substitutions, teachers
 from src.infrastructure.db.config import init_db
+from src.domain.exceptions.assignment_exceptions import (
+    ConflictException,
+    EntityNotFoundException,
+)
+from src.domain.exceptions.invalid_operation_exception import InvalidOperationException
 
 
 @asynccontextmanager
@@ -21,6 +28,25 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+@app.exception_handler(ConflictException)
+async def conflict_exception_handler(request: Request, exc: ConflictException):
+    return JSONResponse(status_code=409, content={"detail": str(exc)})
+
+
+@app.exception_handler(EntityNotFoundException)
+async def entity_not_found_exception_handler(
+    request: Request, exc: EntityNotFoundException
+):
+    return JSONResponse(status_code=404, content={"detail": str(exc)})
+
+
+@app.exception_handler(InvalidOperationException)
+async def invalid_operation_exception_handler(
+    request: Request, exc: InvalidOperationException
+):
+    return JSONResponse(status_code=400, content={"detail": str(exc)})
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:4200", "http://127.0.0.1:4200"],
@@ -32,6 +58,7 @@ app.add_middleware(
 # Montaje de routers organizados por responsabilidad
 app.include_router(teachers.router)
 app.include_router(schedules.router)
+app.include_router(groups.router)
 app.include_router(guards.router)
 app.include_router(substitutions.router)
 app.include_router(absences.router)

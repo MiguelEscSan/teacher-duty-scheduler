@@ -30,16 +30,32 @@ class StudentGroup:
     def create(
         cls,
         name: str,
-        student_count: int = 0,
-        max_capacity: int = 30,
+        student_count: int | None = None,
+        max_capacity: int | None = None,
         group_id: str | None = None,
     ) -> StudentGroup:
+        clean_name = name.strip()
+        if not clean_name:
+            raise InvalidOperationException("El nombre del grupo no puede estar vacío.")
+        if student_count is not None and student_count < 0:
+            raise InvalidOperationException("El aforo de alumnos no puede ser negativo.")
+        capacity = max_capacity if max_capacity is not None else max(30, student_count or 0)
         return cls(
             id=group_id.strip() if group_id else str(uuid.uuid4()),
-            name=name,
+            name=clean_name,
             student_count=student_count,
-            max_capacity=max_capacity,
+            max_capacity=capacity,
         )
+
+    def update(self, name: str, student_count: int | None = None) -> None:
+        clean_name = name.strip()
+        if not clean_name:
+            raise InvalidOperationException("El nombre del grupo no puede estar vacío.")
+        if student_count is not None and student_count < 0:
+            raise InvalidOperationException("El aforo de alumnos no puede ser negativo.")
+        self.name = clean_name
+        self.student_count = student_count
+        self.max_capacity = max(self.max_capacity, student_count or 0)
 
     @property
     def capacity(self) -> int:

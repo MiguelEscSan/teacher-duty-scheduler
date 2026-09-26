@@ -20,9 +20,36 @@ class SQLStudentGroupRepository(StudentGroupRepository):
             max_capacity=capacity,
         )
 
-    def get_all(self):
+    def get_all(self) -> list[StudentGroup]:
         return [self._to_domain(item) for item in self.session.exec(select(StudentGroupDB)).all()]
 
-    def get_by_id(self, group_id):
+    def get_by_id(self, group_id: str) -> StudentGroup | None:
         item = self.session.get(StudentGroupDB, group_id)
         return self._to_domain(item) if item else None
+
+    def get_by_name(self, name: str) -> StudentGroup | None:
+        item = self.session.exec(
+            select(StudentGroupDB).where(StudentGroupDB.name == name)
+        ).first()
+        return self._to_domain(item) if item else None
+
+    def save(self, group: StudentGroup) -> None:
+        record = self.session.get(StudentGroupDB, group.id)
+        if record is None:
+            record = StudentGroupDB(
+                id=group.id,
+                name=group.name,
+                student_count=group.student_count,
+            )
+            self.session.add(record)
+        else:
+            record.name = group.name
+            record.student_count = group.student_count
+        self.session.commit()
+
+    def delete(self, group_id: str) -> None:
+        record = self.session.get(StudentGroupDB, group_id)
+        if record is None:
+            return
+        self.session.delete(record)
+        self.session.commit()
