@@ -1,4 +1,17 @@
-<div class="teachers-layout">
+<nav class="teachers-tabs" role="tablist" aria-label="Claustro y horario base">
+  <button type="button" role="tab" [class.active]="activeTab === 'teachers'"
+          [attr.aria-selected]="activeTab === 'teachers'" (click)="activeTab = 'teachers'">
+    👨‍🏫 Claustro y horario base
+  </button>
+  <button type="button" role="tab" [class.active]="activeTab === 'groups'"
+          [attr.aria-selected]="activeTab === 'groups'" (click)="activeTab = 'groups'">
+    👥 Grupos
+  </button>
+</nav>
+
+<app-groups *ngIf="activeTab === 'groups'"></app-groups>
+
+<div class="teachers-layout" *ngIf="activeTab === 'teachers'">
   <aside class="sidebar-card">
     <div class="card-header">
       <h3>Claustro Docente</h3>

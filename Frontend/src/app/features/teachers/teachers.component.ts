@@ -5,11 +5,12 @@ import { BaseScheduleService } from '../../services/base-schedule.service';
 import { TeachersService } from '../../services/teachers.service';
 import { BaseSlot, StudentGroup, Teacher } from '../../models/schedule.model';
 import { TeacherFormModalComponent } from './components/teacher-form-modal/teacher-form-modal.component';
+import { GroupsComponent } from '../groups/groups.component';
 
 @Component({
   selector: 'app-teachers',
   standalone: true,
-  imports: [CommonModule, FormsModule, TeacherFormModalComponent],
+  imports: [CommonModule, FormsModule, TeacherFormModalComponent, GroupsComponent],
   templateUrl: './teachers.component.html',
   styleUrls: ['./teachers.component.css']
 })
@@ -23,6 +24,7 @@ export class TeachersComponent implements OnInit {
   teacherSchedule: BaseSlot[][] = [];
   teacherSearch = '';
   showTeacherModal = false;
+  activeTab: 'teachers' | 'groups' = 'teachers';
 
   // Control del modal de asignación de grupo
   activeSlot: BaseSlot | null = null;
