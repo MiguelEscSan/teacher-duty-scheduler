@@ -2,8 +2,6 @@ import { Routes } from '@angular/router';
 import { TeachersComponent } from './features/teachers/teachers.component';
 import { AbsencesComponent } from './features/absences/absences.component';
 import { GuardsComponent } from './features/guards/guards.component';
-import { DutyCalendarComponent } from './features/duty-calendar/duty-calendar.component';
-import { ShortTermCalendarComponent } from './features/short-term-calendar/short-term-calendar.component';
 import { SubstitutionHistoryComponent } from './features/substitution-history/substitution-history.component';
 import { CalendarLayoutComponent } from './features/calendar-layout/calendar-layout.component';
 import { GroupsComponent } from './features/groups/groups.component';
@@ -18,11 +16,6 @@ export const routes: Routes = [
   {
     path: 'calendars',
     component: CalendarLayoutComponent,
-    children: [
-      { path: '', pathMatch: 'full', redirectTo: 'duty' },
-      { path: 'duty', component: DutyCalendarComponent },
-      { path: 'short-term', component: ShortTermCalendarComponent }
-    ]
   },
   { path: '**', redirectTo: 'teachers' }
 ];

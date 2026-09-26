@@ -1,28 +1,25 @@
 <section class="calendar-view">
   <div class="calendar-tabs" role="tablist" aria-label="Calendarios">
-    <a
+    <button
       class="calendar-tab"
-      routerLink="/calendars/duty"
-      routerLinkActive="active"
-      #dutyActive="routerLinkActive"
-      [routerLinkActiveOptions]="{ exact: true }"
-      [attr.aria-selected]="dutyActive.isActive"
+      [class.active]="activeTab === 'duty'"
+      [attr.aria-selected]="activeTab === 'duty'"
+      (click)="activeTab = 'duty'"
       role="tab"
     >
       <span class="nav-icon">🛡️</span> Guardias fijas
-    </a>
-    <a
+    </button>
+    <button
       class="calendar-tab"
-      routerLink="/calendars/short-term"
-      routerLinkActive="active"
-      #shortTermActive="routerLinkActive"
-      [routerLinkActiveOptions]="{ exact: true }"
-      [attr.aria-selected]="shortTermActive.isActive"
+      [class.active]="activeTab === 'short-term'"
+      [attr.aria-selected]="activeTab === 'short-term'"
+      (click)="activeTab = 'short-term'"
       role="tab"
     >
       <span class="nav-icon">🔄</span> Sustituciones cortas
-    </a>
+    </button>
   </div>
 
-  <router-outlet></router-outlet>
+  <app-duty-calendar *ngIf="activeTab === 'duty'"></app-duty-calendar>
+  <app-short-term-calendar *ngIf="activeTab === 'short-term'"></app-short-term-calendar>
 </section>
