@@ -9,7 +9,15 @@ export class BaseScheduleService {
   private readonly http = inject(HttpClient);
 
   getGroups(): Observable<StudentGroup[]> {
-    return this.http.get<StudentGroup[]>(`${API_URL}/base-schedule/groups`);
+    return this.http.get<StudentGroup[]>(`${API_URL}/groups`);
+  }
+
+  createGroup(payload: { name: string; student_count: number | null }): Observable<StudentGroup> {
+    return this.http.post<StudentGroup>(`${API_URL}/groups`, payload);
+  }
+
+  updateGroup(id: string, payload: { name: string; student_count: number | null }): Observable<StudentGroup> {
+    return this.http.put<StudentGroup>(`${API_URL}/groups/${id}`, payload);
   }
 
   assignSlotGroup(teacherId: string, day: number, period: number, groupId: string | null): Observable<any> {

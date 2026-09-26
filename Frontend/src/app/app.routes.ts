@@ -6,6 +6,8 @@ import { DutyCalendarComponent } from './features/duty-calendar/duty-calendar.co
 import { ShortTermCalendarComponent } from './features/short-term-calendar/short-term-calendar.component';
 import { SubstitutionHistoryComponent } from './features/substitution-history/substitution-history.component';
 import { CalendarLayoutComponent } from './features/calendar-layout/calendar-layout.component';
+import { GroupsComponent } from './features/groups/groups.component';
+import { DashboardComponent } from './features/dashboard/dashboard.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'teachers' },
@@ -13,6 +15,8 @@ export const routes: Routes = [
   { path: 'absences', component: AbsencesComponent },
   { path: 'guards', component: GuardsComponent },
   { path: 'history', component: SubstitutionHistoryComponent },
+  { path: 'groups', component: GroupsComponent },
+  { path: 'dashboard', component: DashboardComponent },
   {
     path: 'calendars',
     component: CalendarLayoutComponent,

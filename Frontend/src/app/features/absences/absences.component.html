@@ -51,6 +51,14 @@
         </thead>
         <tbody>
         <tr *ngFor="let item of absences">
+          <td colspan="6" *ngIf="item.is_duty_absence" class="duty-alert">
+            <strong>⚠️ {{ item.alert_message || 'Docente ausente en franja de retén/guardia' }}</strong>
+            <button type="button" (click)="autoCoverDuties(item)" [disabled]="autoCoverLoading">{{ autoCoverLoading ? 'Resolviendo...' : 'Auto-cubrir guardias' }}</button>
+            <button type="button" (click)="openManualCoverModal(item)">Cubrir a mano</button>
+          </td>
+        </tr>
+        <tr *ngFor="let item of absences">
+          <ng-container *ngIf="!item.is_duty_absence">
           <td>{{ item.date }}</td>
           <td><span class="period-badge">P{{ item.period }}</span></td>
           <td><strong>{{ item.teacher_name || 'Desconocido' }}</strong></td>
@@ -127,6 +135,7 @@
               </div>
             </div>
           </td>
+          </ng-container>
         </tr>
 
         <tr *ngIf="absences.length === 0">
@@ -163,3 +172,12 @@
   (cancelled)="onAutomaticCoverCancelled()"
 >
 </app-automatic-cover-modal>
+
+<div class="modal-backdrop" *ngIf="autoCoverResult" (click)="closeAutoCoverResult()">
+  <section class="cover-result" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <h3>Resumen de auto-cobertura</h3>
+    <p *ngFor="let coverage of autoCoverResult.coverages">P{{ coverage.period }}: {{ coverage.message }}<span *ngIf="coverage.substitute_teacher_name"> — {{ coverage.substitute_teacher_name }}</span></p>
+    <p *ngFor="let alert of autoCoverResult.alerts" class="warning">⚠️ {{ alert }}</p>
+    <button type="button" class="btn-filter" (click)="closeAutoCoverResult()">Cerrar</button>
+  </section>
+</div>

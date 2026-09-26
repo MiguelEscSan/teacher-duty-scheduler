@@ -1,6 +1,18 @@
 :host {
   display: block;
 }
+.teacher-pill { display:flex; justify-content:space-between; gap:.35rem; }
+.chip-remove,.add-duty { border:0; background:transparent; color:#7e22ce; cursor:pointer; font-weight:700; }
+.add-duty { display:block; font-size:.75rem; }
+.toast { position:fixed; right:1.5rem; bottom:1.5rem; background:#166534; color:#fff; padding:.8rem 1rem; border-radius:8px; z-index:10; }
+.modal-backdrop { position:fixed; inset:0; background:rgba(15,23,42,.45); display:grid; place-items:center; z-index:20; }
+.teacher-modal { background:#fff; border-radius:12px; padding:1.25rem; width:min(92vw,430px); }
+.modal-heading { display:flex; justify-content:space-between; align-items:center; }
+.modal-heading button { border:0; background:transparent; font-size:1.4rem; }
+.teacher-search { width:100%; margin:.75rem 0; padding:.65rem; border:1px solid #cbd5e1; border-radius:6px; }
+.teacher-options { max-height:300px; overflow:auto; display:grid; gap:.4rem; }
+.teacher-options button { text-align:left; padding:.7rem; border:1px solid #e2e8f0; background:#faf5ff; border-radius:7px; }
+.teacher-options small { display:block; color:#64748b; }
 
 .calendar-card {
   background: #ffffff;

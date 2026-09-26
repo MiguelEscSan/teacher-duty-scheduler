@@ -37,6 +37,8 @@ export interface Absence {
   group_name?: string;
   student_count?: number | null;
   reason: string;
+  is_duty_absence?: boolean;
+  alert_message?: string;
 }
 
 export interface DayMetadata {
@@ -79,6 +81,16 @@ export interface DutySlot {
   day_name: string;
   period: number;
   teachers: Teacher[];
+}
+
+export interface SubstitutionSummary {
+  teacher_id: string;
+  teacher_name: string;
+  department?: string;
+  ordinary_guard_count: number;
+  short_term_count: number;
+  manual_count: number;
+  total_interventions: number;
 }
 
 export interface ManualAssignmentPayload {

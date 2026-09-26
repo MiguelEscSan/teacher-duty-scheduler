@@ -27,4 +27,18 @@ export class TeachersService {
   getShortTermTeachers(): Observable<DutySlot[]> {
     return this.http.get<DutySlot[]>(`${API_URL}/teachers/short-term`);
   }
+
+  assignDuty(payload: {
+    teacher_id: string; day_of_week: number; period: number;
+    duty_type: 'FIXED_DUTY' | 'SHORT_TERM';
+  }): Observable<unknown> {
+    return this.http.post(`${API_URL}/teachers/duty-assignment`, payload);
+  }
+
+  removeDuty(payload: {
+    teacher_id: string; day_of_week: number; period: number;
+    duty_type: 'FIXED_DUTY' | 'SHORT_TERM';
+  }): Observable<unknown> {
+    return this.http.delete(`${API_URL}/teachers/duty-assignment`, { body: payload });
+  }
 }

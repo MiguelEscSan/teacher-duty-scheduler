@@ -21,6 +21,9 @@ export class SubstitutionHistoryComponent implements OnInit {
   teachers: Teacher[] = [];
   loading = false;
   errorMessage = '';
+  toastMessage = '';
+  editingId: number | string | null = null;
+  selectedTeacherId = '';
   filters = {
     date: '',
     substitute_teacher_id: '',
@@ -76,5 +79,34 @@ export class SubstitutionHistoryComponent implements OnInit {
       MANUAL: 'Manual'
     };
     return labels[source] || source;
+  }
+
+  startReassign(item: SubstitutionHistory): void {
+    this.editingId = item.id;
+    this.selectedTeacherId = item.substitute_teacher_id;
+  }
+
+  cancelReassign(): void { this.editingId = null; }
+
+  saveReassign(item: SubstitutionHistory): void {
+    if (!this.selectedTeacherId || this.selectedTeacherId === item.absent_teacher_id) {
+      this.errorMessage = 'Selecciona un docente distinto del ausente.';
+      return;
+    }
+    this.substitutionsApi.reassignSubstitute(item.id, this.selectedTeacherId).subscribe({
+      next: updated => {
+        item.substitute_teacher_id = updated.substitute_teacher_id;
+        item.substitute_teacher_name = updated.substitute_teacher_name;
+        item.source_type = 'MANUAL';
+        item.reassigned = true;
+        this.editingId = null;
+        this.toastMessage = 'Sustituto reasignado correctamente.';
+      },
+      error: err => this.errorMessage = err?.error?.detail || 'No se pudo reasignar el sustituto.'
+    });
+  }
+
+  availableTeachers(item: SubstitutionHistory): Teacher[] {
+    return this.teachers.filter(t => t.id !== item.absent_teacher_id);
   }
 }

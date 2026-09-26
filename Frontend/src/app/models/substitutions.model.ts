@@ -44,7 +44,7 @@ export interface PeriodResolveResponse {
 }
 
 export interface SubstitutionHistory {
-  id: number;
+  id: number | string;
   date: string;
   period: number;
   substitute_teacher_id: string;
@@ -55,4 +55,13 @@ export interface SubstitutionHistory {
   group_name: string | null;
   source_type: string;
   created_at: string;
+  reassigned?: boolean;
+}
+
+export interface AutoCoverDutiesResponse {
+  total_duties_found: number;
+  successfully_covered: number;
+  uncovered_duties: number;
+  coverages: Array<{ period: number; covered: boolean; substitute_teacher_name?: string; message: string }>;
+  alerts: string[];
 }

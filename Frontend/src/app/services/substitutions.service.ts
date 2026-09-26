@@ -2,7 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AvailableTeacher, ManualAssignmentPayload } from '../models/schedule.model';
-import { PeriodResolveResponse, SubstitutionHistory } from '../models/substitutions.model';
+import { AutoCoverDutiesResponse, PeriodResolveResponse, SubstitutionHistory } from '../models/substitutions.model';
+import { SubstitutionSummary } from '../models/schedule.model';
 import { API_URL } from './api-url';
 
 @Injectable({ providedIn: 'root' })
@@ -62,5 +63,23 @@ export class SubstitutionsService {
       `${API_URL}/substitutions/do-not-cover`,
       payload
     );
+  }
+
+  reassignSubstitute(id: number | string, teacherId: string): Observable<SubstitutionHistory> {
+    return this.http.patch<SubstitutionHistory>(`${API_URL}/substitutions/${id}/substitute`, {
+      new_substitute_teacher_id: teacherId
+    });
+  }
+
+  getSummary(): Observable<SubstitutionSummary[]> {
+    return this.http.get<SubstitutionSummary[]>(`${API_URL}/substitutions/summary`);
+  }
+
+  autoCoverDuties(payload: { date: string; teacher_id: string }): Observable<AutoCoverDutiesResponse> {
+    return this.http.post<AutoCoverDutiesResponse>(`${API_URL}/substitutions/auto-cover-duties`, payload);
+  }
+
+  coverDutyManual(payload: { date: string; period: number; absent_teacher_id: string; substitute_teacher_id: string }): Observable<unknown> {
+    return this.http.post(`${API_URL}/substitutions/cover-duty-manual`, payload);
   }
 }

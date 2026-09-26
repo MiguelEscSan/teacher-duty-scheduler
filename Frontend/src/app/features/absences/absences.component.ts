@@ -48,6 +48,9 @@ export class AbsencesComponent implements OnInit {
   selectedAbsenceForManualCover: Absence | null = null;
   selectedAbsenceForAutomaticCover: Absence | null = null;
   showAbsenceModal = false;
+  errorMessage = '';
+  autoCoverLoading = false;
+  autoCoverResult: { alerts: string[]; coverages: Array<{ period: number; covered: boolean; substitute_teacher_name?: string; message: string }> } | null = null;
 
   ngOnInit(): void {
     this.teachersApi.getTeachers().subscribe(t => {
@@ -131,6 +134,17 @@ export class AbsencesComponent implements OnInit {
     this.activeMenuId = null;
     this.selectedAbsenceForAutomaticCover = absence;
   }
+
+  autoCoverDuties(absence: Absence): void {
+    if (!absence.teacher_id) return;
+    this.autoCoverLoading = true;
+    this.substitutionsApi.autoCoverDuties({ date: absence.date, teacher_id: absence.teacher_id }).subscribe({
+      next: result => { this.autoCoverResult = result; this.autoCoverLoading = false; this.loadAbsences(); },
+      error: err => { this.errorMessage = err?.error?.detail || 'No se pudieron auto-cubrir las guardias.'; this.autoCoverLoading = false; }
+    });
+  }
+
+  closeAutoCoverResult(): void { this.autoCoverResult = null; }
 
   onAutomaticCoverConfirmed(): void {
     this.selectedAbsenceForAutomaticCover = null;

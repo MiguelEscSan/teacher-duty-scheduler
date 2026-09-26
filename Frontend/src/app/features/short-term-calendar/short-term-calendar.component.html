@@ -10,6 +10,7 @@
   </div>
 
   <div *ngIf="errorMessage" class="error-banner">⚠️ {{ errorMessage }}</div>
+  <div *ngIf="toastMessage" class="toast" (click)="toastMessage = ''">{{ toastMessage }}</div>
   <div *ngIf="isLoading" class="loading-label">Cargando calendario...</div>
 
   <div class="table-wrapper" *ngIf="!isLoading && !errorMessage">
@@ -31,11 +32,12 @@
         <td *ngFor="let day of days" class="short-term-cell">
           <ng-container *ngIf="getTeachers(day, period).length; else noTeacher">
             <div *ngFor="let teacher of getTeachers(day, period)" class="teacher-pill">
-              👤 {{ teacher.name }}
+              <span>👤 {{ teacher.name }}</span><button type="button" class="chip-remove" (click)="removeTeacher(teacher, day, period)">×</button>
             </div>
+            <button type="button" class="add-duty" (click)="openAdd(day, period)">+ Añadir docente</button>
           </ng-container>
           <ng-template #noTeacher>
-            <span class="empty-slot">Sin asignar</span>
+            <span class="empty-slot">Sin asignar</span><button type="button" class="add-duty" (click)="openAdd(day, period)">+ Añadir docente</button>
           </ng-template>
         </td>
       </tr>
@@ -43,3 +45,10 @@
     </table>
   </div>
 </section>
+<div class="modal-backdrop" *ngIf="selectedSlot" (click)="closeAdd()">
+  <section class="teacher-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="modal-heading"><h3>Añadir docente a P{{ selectedSlot.period }}</h3><button type="button" (click)="closeAdd()">×</button></div>
+    <input class="teacher-search" [(ngModel)]="teacherSearch" placeholder="Buscar por nombre o departamento">
+    <div class="teacher-options"><button type="button" *ngFor="let teacher of filteredTeachers()" (click)="addTeacher(teacher)"><strong>{{ teacher.name }}</strong><small>{{ teacher.department }}</small></button></div>
+  </section>
+</div>

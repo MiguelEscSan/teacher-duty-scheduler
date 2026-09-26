@@ -38,6 +38,7 @@
 
   <section class="card history-card">
     <div *ngIf="errorMessage" class="error-banner">{{ errorMessage }}</div>
+    <div *ngIf="toastMessage" class="toast" (click)="toastMessage = ''">{{ toastMessage }}</div>
     <div *ngIf="loading" class="loading-label">Cargando histórico...</div>
 
     <div class="table-wrapper" *ngIf="!loading">
@@ -58,7 +59,20 @@
             <td>{{ item.date }}</td>
             <td><span class="period-badge">P{{ item.period }}</span></td>
             <td>{{ item.absent_teacher_name }}</td>
-            <td><strong>{{ item.substitute_teacher_name }}</strong></td>
+            <td class="substitute-cell">
+              <ng-container *ngIf="editingId !== item.id; else editSubstitute">
+                <strong>{{ item.substitute_teacher_name }}</strong>
+                <button type="button" class="edit-action" (click)="startReassign(item)" aria-label="Cambiar sustituto">✎</button>
+                <span *ngIf="item.reassigned || item.source_type === 'MANUAL'" class="manual-badge">MANUAL / REASIGNADO</span>
+              </ng-container>
+              <ng-template #editSubstitute>
+                <select [(ngModel)]="selectedTeacherId" aria-label="Nuevo sustituto">
+                  <option *ngFor="let teacher of availableTeachers(item)" [value]="teacher.id">{{ teacher.name }}</option>
+                </select>
+                <button type="button" class="save-action" (click)="saveReassign(item)">Guardar</button>
+                <button type="button" class="cancel-action" (click)="cancelReassign()">Cancelar</button>
+              </ng-template>
+            </td>
             <td>{{ item.group_name || '—' }}</td>
             <td><span class="source-badge">{{ sourceLabel(item.source_type) }}</span></td>
             <td>{{ formatDateTime(item.created_at) }}</td>

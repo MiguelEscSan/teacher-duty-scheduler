@@ -1,12 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { DutySlot, Teacher } from '../../models/schedule.model';
 import { TeachersService } from '../../services/teachers.service';
 
 @Component({
   selector: 'app-duty-calendar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './duty-calendar.component.html',
   styleUrls: ['./duty-calendar.component.css']
 })
@@ -16,6 +17,10 @@ export class DutyCalendarComponent implements OnInit {
   dutySlots: DutySlot[] = [];
   isLoading = false;
   errorMessage = '';
+  toastMessage = '';
+  selectedSlot: { day: number; period: number } | null = null;
+  teacherSearch = '';
+  teachers: Teacher[] = [];
 
   readonly days = [0, 1, 2, 3, 4];
   readonly dayNames = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
@@ -25,6 +30,7 @@ export class DutyCalendarComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.api.getTeachers().subscribe({ next: teachers => this.teachers = teachers });
     this.loadCalendar();
   }
 
@@ -52,5 +58,38 @@ export class DutyCalendarComponent implements OnInit {
 
   getDutyTeachers(day: number, period: number): Teacher[] {
     return this.getDutySlot(day, period)?.teachers ?? [];
+  }
+
+  openAdd(day: number, period: number): void {
+    this.selectedSlot = { day, period };
+    this.teacherSearch = '';
+  }
+
+  closeAdd(): void { this.selectedSlot = null; }
+
+  filteredTeachers(): Teacher[] {
+    const query = this.teacherSearch.toLowerCase().trim();
+    return this.teachers.filter(teacher => !query || `${teacher.name} ${teacher.department}`.toLowerCase().includes(query));
+  }
+
+  addTeacher(teacher: Teacher): void {
+    if (!this.selectedSlot || !teacher.id) return;
+    const slot = this.selectedSlot;
+    this.api.assignDuty({ teacher_id: teacher.id, day_of_week: slot.day, period: slot.period, duty_type: 'FIXED_DUTY' }).subscribe({
+      next: () => { this.toastMessage = `${teacher.name} añadido a la guardia.`; this.closeAdd(); this.loadCalendar(); },
+      error: err => this.showError(err)
+    });
+  }
+
+  removeTeacher(teacher: Teacher, day: number, period: number): void {
+    if (!teacher.id || !confirm(`¿Quitar a ${teacher.name} de esta guardia?`)) return;
+    this.api.removeDuty({ teacher_id: teacher.id, day_of_week: day, period, duty_type: 'FIXED_DUTY' }).subscribe({
+      next: () => { this.toastMessage = `${teacher.name} desasignado.`; this.loadCalendar(); },
+      error: err => this.showError(err)
+    });
+  }
+
+  private showError(err: any): void {
+    this.errorMessage = err?.error?.detail || 'No se pudo actualizar la guardia.';
   }
 }

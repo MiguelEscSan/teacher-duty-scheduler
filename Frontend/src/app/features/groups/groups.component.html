@@ -1,0 +1,16 @@
+<section class="groups-view">
+  <div class="heading"><div><h2>Catálogo de grupos</h2><p>Configura el nombre y el aforo de cada grupo.</p></div><button type="button" class="primary" (click)="open()">+ Nuevo grupo</button></div>
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div><div *ngIf="toastMessage" class="toast" (click)="toastMessage=''">{{ toastMessage }}</div>
+  <div class="table-wrap"><table><thead><tr><th>Nombre del grupo</th><th>Aforo / Nº alumnos</th><th>Acciones</th></tr></thead><tbody>
+    <tr *ngFor="let group of groups"><td><strong>{{ group.name }}</strong></td><td>{{ group.student_count ?? '—' }}</td><td><button type="button" class="link" (click)="open(group)">Editar</button></td></tr>
+    <tr *ngIf="!loading && !groups.length"><td colspan="3" class="empty">No hay grupos registrados.</td></tr>
+  </tbody></table></div>
+</section>
+<div class="backdrop" *ngIf="showModal" (click)="close()">
+  <form class="modal" (ngSubmit)="save()" (click)="$event.stopPropagation()">
+    <h3>{{ editing ? 'Editar grupo' : 'Nuevo grupo' }}</h3>
+    <label>Nombre<input name="name" [(ngModel)]="form.name" required><small *ngIf="!form.name.trim()">El nombre es obligatorio.</small></label>
+    <label>Nº de alumnos<input name="count" type="number" min="0" [(ngModel)]="form.student_count"><small *ngIf="form.student_count !== null && form.student_count < 0">Debe ser igual o mayor que 0.</small></label>
+    <div class="actions"><button type="button" class="secondary" (click)="close()">Cancelar</button><button type="submit" class="primary" [disabled]="!form.name.trim() || (form.student_count !== null && form.student_count < 0)">Guardar</button></div>
+  </form>
+</div>

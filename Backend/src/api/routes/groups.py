@@ -18,7 +18,7 @@ from src.application.schedules.commands.update_student_group import (
 )
 from src.application.schedules.queries.get_student_groups import GetStudentGroupsQuery
 
-router = APIRouter(prefix="/api/v1/base-schedule/groups", tags=["Student Groups"])
+router = APIRouter(prefix="/api/v1/groups", tags=["Student Groups"])
 
 
 @router.get("", response_model=list[StudentGroupResponse])

@@ -155,6 +155,13 @@
   padding: 2rem !important;
   text-align: center !important;
 }
+.substitute-cell { min-width: 260px; }
+.edit-action,.save-action,.cancel-action { border:0; border-radius:5px; padding:.3rem .45rem; cursor:pointer; margin-left:.35rem; }
+.edit-action { color:#2563eb; background:transparent; }
+.save-action { color:#fff; background:#2563eb; }
+.cancel-action { color:#475569; background:#e2e8f0; }
+.manual-badge { display:inline-block; margin-left:.4rem; background:#ffedd5; color:#9a3412; border-radius:5px; padding:.2rem .35rem; font-size:.65rem; font-weight:800; }
+.toast { position:fixed; right:1.5rem; bottom:1.5rem; background:#166534; color:#fff; padding:.8rem 1rem; border-radius:8px; z-index:10; }
 
 @media (max-width: 600px) {
   .history-card {
