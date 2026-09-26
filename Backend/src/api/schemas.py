@@ -183,6 +183,15 @@ class SubstitutionHistoryOut(BaseModel):
     created_at: datetime
 
 
+class SubstitutionInterventionsSummaryOut(BaseModel):
+    teacher_id: str
+    teacher_name: str
+    ordinary_guard_count: int
+    short_term_count: int
+    manual_count: int
+    total_interventions: int
+
+
 class ReassignSubstituteRequest(BaseModel):
     new_substitute_teacher_id: str
 

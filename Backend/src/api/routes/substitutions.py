@@ -14,6 +14,7 @@ from src.api.schemas import (
     ReassignSubstituteRequest,
     ReassignSubstituteResponse,
     SubstitutionHistoryOut,
+    SubstitutionInterventionsSummaryOut,
 )
 from src.application.common.mediator import Mediator
 from src.application.substitutions.commands.assign_manual_substitution import AssignManualSubstitutionCommand
@@ -25,6 +26,9 @@ from src.domain.exceptions.assignment_exceptions import EntityNotFoundException
 from src.domain.exceptions.invalid_operation_exception import InvalidOperationException
 from src.application.substitutions.queries.get_available_candidates import GetAvailableCandidatesQuery
 from src.application.substitutions.queries.get_substitution_history import GetSubstitutionHistoryQuery
+from src.application.substitutions.queries.get_interventions_summary import (
+    GetSubstitutionInterventionsSummaryQuery,
+)
 from src.infrastructure.db.models import AbsenceDB
 
 router = APIRouter(prefix="/api/v1/substitutions", tags=["Sustituciones Operativas"])
@@ -65,6 +69,13 @@ def get_substitution_history(
             absent_teacher_id=absent_teacher_id,
         )
     )
+
+@router.get("/summary", response_model=List[SubstitutionInterventionsSummaryOut])
+def get_substitution_interventions_summary(
+    mediator: Mediator = Depends(get_mediator),
+):
+    return mediator.send(GetSubstitutionInterventionsSummaryQuery())
+
 
 @router.post("/resolve", response_model=PeriodResolveResponse)
 def resolve_substitution(

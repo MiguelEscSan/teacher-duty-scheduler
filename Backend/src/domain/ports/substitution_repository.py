@@ -39,5 +39,10 @@ class SubstitutionRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def get_interventions_breakdown_by_teacher(self) -> dict[str, dict[str, int]]:
+        """Return intervention counts grouped by substitute teacher and source."""
+        raise NotImplementedError
+
+    @abstractmethod
     def get_last_used_at(self, teacher_ids: list[str], period: int) -> dict[str, datetime]:
         raise NotImplementedError

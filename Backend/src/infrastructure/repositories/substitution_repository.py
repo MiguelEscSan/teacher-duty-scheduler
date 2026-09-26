@@ -98,6 +98,35 @@ class SQLSubstitutionRepository(SubstitutionRepository):
         ).all()
         return dict(rows)
 
+    def get_interventions_breakdown_by_teacher(self):
+        rows = self.session.exec(
+            select(
+                SubstitutionLogDB.substitute_teacher_id,
+                SubstitutionLogDB.source_type,
+                func.count(SubstitutionLogDB.id),
+            ).group_by(
+                SubstitutionLogDB.substitute_teacher_id,
+                SubstitutionLogDB.source_type,
+            )
+        ).all()
+        result = {}
+        for teacher_id, source_type, count in rows:
+            source = source_type.value if isinstance(source_type, SubstitutionSourceType) else str(source_type)
+            bucket = result.setdefault(
+                teacher_id,
+                {
+                    "ORDINARY_GUARD": 0,
+                    "SHORT_TERM_SUBSTITUTION": 0,
+                    "MANUAL": 0,
+                    "TOTAL": 0,
+                },
+            )
+            if source not in ("ORDINARY_GUARD", "SHORT_TERM_SUBSTITUTION"):
+                source = "MANUAL"
+            bucket[source] += count
+            bucket["TOTAL"] += count
+        return result
+
     def get_last_used_at(self, teacher_ids, period):
         if not teacher_ids:
             return {}

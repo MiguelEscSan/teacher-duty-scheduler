@@ -171,6 +171,25 @@ class FakeSubstitutionRepository:
             result[item.substitute_teacher_id] = result.get(item.substitute_teacher_id, 0) + 1
         return result
 
+    def get_interventions_breakdown_by_teacher(self):
+        result = {}
+        for item in self.logs:
+            counts = result.setdefault(
+                item.substitute_teacher_id,
+                {
+                    "ORDINARY_GUARD": 0,
+                    "SHORT_TERM_SUBSTITUTION": 0,
+                    "MANUAL": 0,
+                    "TOTAL": 0,
+                },
+            )
+            source = item.source_type.value
+            if source not in ("ORDINARY_GUARD", "SHORT_TERM_SUBSTITUTION"):
+                source = "MANUAL"
+            counts[source] += 1
+            counts["TOTAL"] += 1
+        return result
+
     def get_last_used_at(self, teacher_ids, period):
         return {teacher_id: max(
             (item.created_at for item in self.logs

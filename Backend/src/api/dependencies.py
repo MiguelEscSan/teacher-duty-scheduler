@@ -81,6 +81,10 @@ from src.application.substitutions.queries.get_substitution_history import (
     GetSubstitutionHistoryHandler,
     GetSubstitutionHistoryQuery,
 )
+from src.application.substitutions.queries.get_interventions_summary import (
+    GetSubstitutionInterventionsSummaryHandler,
+    GetSubstitutionInterventionsSummaryQuery,
+)
 from src.application.teachers.commands.create_teacher import (
     CreateTeacherCommand,
     CreateTeacherHandler,
@@ -236,6 +240,12 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
         GetSubstitutionHistoryQuery,
         lambda: GetSubstitutionHistoryHandler(
             substitution_repository, teacher_repository, student_group_repository
+        ),
+    )
+    mediator.register(
+        GetSubstitutionInterventionsSummaryQuery,
+        lambda: GetSubstitutionInterventionsSummaryHandler(
+            substitution_repository, teacher_repository
         ),
     )
     mediator.register(
