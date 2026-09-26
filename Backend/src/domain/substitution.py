@@ -34,3 +34,21 @@ class SubstitutionLog:
         if absent_teacher_id == substitute_teacher_id:
             raise InvalidOperationException("Un docente no puede sustituirse a sí mismo.")
         return cls(generate_id(), date, period, absent_teacher_id, substitute_teacher_id, source_type, group_id)
+
+    def reassign_substitute(
+        self,
+        new_substitute_teacher_id: str,
+        new_source_type: SubstitutionSourceType | None = None,
+    ) -> None:
+        if new_substitute_teacher_id == self.absent_teacher_id:
+            raise InvalidOperationException(
+                "El docente sustituto no puede ser el mismo que el ausente."
+            )
+        if new_substitute_teacher_id == self.substitute_teacher_id:
+            return
+        self.substitute_teacher_id = new_substitute_teacher_id
+        self.source_type = (
+            new_source_type
+            if new_source_type is not None
+            else SubstitutionSourceType.MANUAL
+        )

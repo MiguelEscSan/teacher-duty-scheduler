@@ -164,6 +164,22 @@ class SubstitutionHistoryOut(BaseModel):
     created_at: datetime
 
 
+class ReassignSubstituteRequest(BaseModel):
+    new_substitute_teacher_id: str
+
+
+class ReassignSubstituteResponse(BaseModel):
+    id: str
+    date: str
+    period: int
+    absent_teacher_id: str
+    substitute_teacher_id: str
+    source_type: str
+    absent_teacher_name: str
+    substitute_teacher_name: str
+    message: str = "Sustituto reasignado correctamente."
+
+
 class DoNotCoverRequest(BaseModel):
     date: str
     period: int = Field(ge=0, le=5)

@@ -11,6 +11,8 @@ from src.api.schemas import (
     PeriodResolveResponse,
     SubstitutionEmailRequest,
     DoNotCoverRequest,
+    ReassignSubstituteRequest,
+    ReassignSubstituteResponse,
     SubstitutionHistoryOut,
 )
 from src.application.common.mediator import Mediator
@@ -18,11 +20,36 @@ from src.application.substitutions.commands.assign_manual_substitution import As
 from src.application.substitutions.commands.mark_absence_do_not_cover import MarkAbsenceDoNotCoverCommand
 from src.application.substitutions.commands.notify_substitution_assignment import NotifySubstitutionAssignmentCommand
 from src.application.substitutions.commands.resolve_substitution import ResolveSubstitutionCommand
+from src.application.substitutions.commands.reassign_substitution import ReassignSubstitutionCommand
+from src.domain.exceptions.assignment_exceptions import EntityNotFoundException
+from src.domain.exceptions.invalid_operation_exception import InvalidOperationException
 from src.application.substitutions.queries.get_available_candidates import GetAvailableCandidatesQuery
 from src.application.substitutions.queries.get_substitution_history import GetSubstitutionHistoryQuery
 from src.infrastructure.db.models import AbsenceDB
 
 router = APIRouter(prefix="/api/v1/substitutions", tags=["Sustituciones Operativas"])
+
+
+@router.patch(
+    "/{substitution_id}/substitute",
+    response_model=ReassignSubstituteResponse,
+)
+def reassign_substitute(
+    substitution_id: str,
+    payload: ReassignSubstituteRequest,
+    mediator: Mediator = Depends(get_mediator),
+):
+    try:
+        return mediator.send(
+            ReassignSubstitutionCommand(
+                substitution_id=substitution_id,
+                new_substitute_teacher_id=payload.new_substitute_teacher_id,
+            )
+        )
+    except EntityNotFoundException as ex:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ex))
+    except InvalidOperationException as ex:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(ex))
 
 @router.get("/history", response_model=List[SubstitutionHistoryOut])
 def get_substitution_history(
@@ -117,4 +144,3 @@ def assign_manual_substitution(
         notes=payload.notes,
     )
     return mediator.send(cmd)
-

@@ -25,6 +25,20 @@ class SQLSubstitutionRepository(SubstitutionRepository):
             created_at=item.created_at,
         )
 
+    def get_by_id(self, substitution_id):
+        item = self.session.get(SubstitutionLogDB, substitution_id)
+        return self._to_domain(item) if item else None
+
+    def get_by_slot(self, date, period, absent_teacher_id):
+        item = self.session.exec(
+            select(SubstitutionLogDB).where(
+                SubstitutionLogDB.date == date,
+                SubstitutionLogDB.period == period,
+                SubstitutionLogDB.absent_teacher_id == absent_teacher_id,
+            )
+        ).first()
+        return self._to_domain(item) if item else None
+
     def get_all(self, date=None, substitute_teacher_id=None, absent_teacher_id=None):
         query = select(SubstitutionLogDB)
         if date is not None:
@@ -43,18 +57,27 @@ class SQLSubstitutionRepository(SubstitutionRepository):
     def save(self, log):
         item = self.session.get(SubstitutionLogDB, log.id)
         if item is None:
-            item = SubstitutionLogDB(id=log.id)
+            item = SubstitutionLogDB(
+                id=log.id,
+                date=log.date,
+                period=log.period,
+                absent_teacher_id=log.absent_teacher_id,
+                substitute_teacher_id=log.substitute_teacher_id,
+                group_id=log.group_id,
+                source_type=log.source_type,
+                created_at=log.created_at,
+            )
+        else:
+            item.substitute_teacher_id = log.substitute_teacher_id
+            item.source_type = log.source_type
         item.date = log.date
         item.period = log.period
         item.absent_teacher_id = log.absent_teacher_id
-        item.substitute_teacher_id = log.substitute_teacher_id
         item.group_id = log.group_id
-        item.source_type = log.source_type
         item.created_at = log.created_at
         self.session.add(item)
         self.session.commit()
         self.session.refresh(item)
-        return self._to_domain(item)
 
     def get_busy_teacher_ids(self, date, period):
         return set(

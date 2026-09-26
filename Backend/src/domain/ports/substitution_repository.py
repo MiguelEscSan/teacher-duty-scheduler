@@ -8,6 +8,16 @@ class SubstitutionRepository(ABC):
     """Port for substitution audit logs and rotation queries."""
 
     @abstractmethod
+    def get_by_id(self, substitution_id: str) -> SubstitutionLog | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_by_slot(
+        self, date: str, period: int, absent_teacher_id: str
+    ) -> SubstitutionLog | None:
+        raise NotImplementedError
+
+    @abstractmethod
     def get_all(
         self,
         date: str | None = None,
@@ -17,7 +27,7 @@ class SubstitutionRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def save(self, log: SubstitutionLog) -> SubstitutionLog:
+    def save(self, log: SubstitutionLog) -> None:
         raise NotImplementedError
 
     @abstractmethod

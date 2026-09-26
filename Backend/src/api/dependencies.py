@@ -54,6 +54,10 @@ from src.application.substitutions.commands.resolve_substitution import (
     ResolveSubstitutionCommand,
     ResolveSubstitutionHandler,
 )
+from src.application.substitutions.commands.reassign_substitution import (
+    ReassignSubstitutionCommand,
+    ReassignSubstitutionHandler,
+)
 from src.application.substitutions.queries.get_available_candidates import (
     GetAvailableCandidatesHandler,
     GetAvailableCandidatesQuery,
@@ -139,6 +143,12 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
         lambda: ResolveSubstitutionHandler(
             teacher_repository, absence_repository, schedule_repository,
             substitution_repository, student_group_repository,
+        ),
+    )
+    mediator.register(
+        ReassignSubstitutionCommand,
+        lambda: ReassignSubstitutionHandler(
+            substitution_repository, teacher_repository
         ),
     )
     mediator.register(
