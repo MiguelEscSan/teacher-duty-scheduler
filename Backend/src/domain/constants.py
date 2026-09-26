@@ -1,7 +1,6 @@
 """
 Constantes de negocio para el cuadrante escolar y asignación de guardias.
 """
-
 WEEKS: int = 2
 DAYS: int = 5
 PERIODS: int = 6

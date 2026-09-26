@@ -33,3 +33,4 @@ def assign_slot_group(payload: SlotToggleRequest, mediator: Mediator = Depends(g
         group_id=payload.group_id,
     )
     return mediator.send(cmd)
+

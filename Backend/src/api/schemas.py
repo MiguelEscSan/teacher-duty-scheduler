@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from enum import Enum
 from typing import Optional
 from datetime import datetime
+from src.domain.duty_type import DutyType
 
 # --- Docentes ---
 class TeacherCreate(BaseModel):
@@ -124,6 +125,21 @@ class DutySlotOut(BaseModel):
     day_name: str
     period: int
     teachers: list[TeacherResponse]
+
+
+class DutyAssignmentRequest(BaseModel):
+    teacher_id: str
+    day_of_week: int = Field(ge=0, le=4, description="0: Lunes ... 4: Viernes")
+    period: int = Field(ge=0, le=5, description="0 a 5")
+    duty_type: DutyType
+
+
+class DutyAssignmentResponse(BaseModel):
+    message: str
+    teacher_id: str
+    day_of_week: int
+    period: int
+    duty_type: DutyType
 
 class ManualAssignmentIn(BaseModel):
     date: str  # 'YYYY-MM-DD'

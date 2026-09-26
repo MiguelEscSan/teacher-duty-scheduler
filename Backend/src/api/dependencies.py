@@ -22,6 +22,14 @@ from src.application.schedules.commands.assign_slot_group import (
     AssignSlotGroupCommand,
     AssignSlotGroupHandler,
 )
+from src.application.teachers.commands.manage_duty_assignment import (
+    AssignTeacherDutyCommand,
+    AssignTeacherDutyHandler,
+)
+from src.application.teachers.commands.remove_duty_assignment import (
+    RemoveTeacherDutyCommand,
+    RemoveTeacherDutyHandler,
+)
 from src.application.schedules.queries.get_student_groups import (
     GetStudentGroupsHandler,
     GetStudentGroupsQuery,
@@ -153,6 +161,14 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
     )
     mediator.register(
         AssignSlotGroupCommand, lambda: AssignSlotGroupHandler(schedule_repository)
+    )
+    mediator.register(
+        AssignTeacherDutyCommand,
+        lambda: AssignTeacherDutyHandler(teacher_repository),
+    )
+    mediator.register(
+        RemoveTeacherDutyCommand,
+        lambda: RemoveTeacherDutyHandler(teacher_repository),
     )
     mediator.register(
         CreateAbsenceCommand,
