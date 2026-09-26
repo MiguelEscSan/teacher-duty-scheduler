@@ -5,7 +5,12 @@ from typing import Optional
 from src.application.common.mediator import Command, RequestHandler
 from src.domain.absence import Absence
 from src.domain.ports.absence_repository import AbsenceRepository
+from src.domain.ports.substitution_repository import SubstitutionRepository
 from src.domain.ports.teacher_repository import TeacherRepository
+from src.domain.substitution import SubstitutionSourceType
+from src.application.substitutions.services.auto_cover_teacher_duties import (
+    AutoCoverTeacherDutiesService,
+)
 
 
 @dataclass(frozen=True)
@@ -18,9 +23,17 @@ class CreateAbsenceCommand(Command[dict]):
 
 
 class CreateAbsenceHandler(RequestHandler[CreateAbsenceCommand, dict]):
-    def __init__(self, absence_repository: AbsenceRepository, teacher_repository: TeacherRepository):
+    def __init__(
+        self,
+        absence_repository: AbsenceRepository,
+        teacher_repository: TeacherRepository,
+        substitution_repository: SubstitutionRepository,
+        auto_cover_service: AutoCoverTeacherDutiesService,
+    ):
         self.absence_repository = absence_repository
         self.teacher_repository = teacher_repository
+        self.substitution_repository = substitution_repository
+        self.auto_cover_service = auto_cover_service
 
     def handle(self, cmd: CreateAbsenceCommand) -> dict:
         if not self.teacher_repository.get_by_id(cmd.teacher_id):
@@ -36,7 +49,39 @@ class CreateAbsenceHandler(RequestHandler[CreateAbsenceCommand, dict]):
             raise ValueError("Debes indicar un periodo o marcar 'Todo el día'.")
         for period in periods:
             if self.absence_repository.get_by_slot(cmd.teacher_id, cmd.date, period) is None:
-                self.absence_repository.save(
-                    Absence.create(cmd.teacher_id, cmd.date, period, cmd.reason)
+                self.absence_repository.save(Absence.create(cmd.teacher_id, cmd.date, period, cmd.reason))
+        active_duties = [
+            log
+            for log in self.substitution_repository.get_all(
+                date=cmd.date,
+                substitute_teacher_id=cmd.teacher_id,
+            )
+            if (
+                log.period in periods
+                and log.group_id is None
+                and log.source_type
+                in (
+                    SubstitutionSourceType.ORDINARY_GUARD,
+                    SubstitutionSourceType.SHORT_TERM_SUBSTITUTION,
                 )
-        return {"message": "Ausencias registradas correctamente", "count": len(periods)}
+            )
+        ]
+        result = (
+            self.auto_cover_service.cover(cmd.teacher_id, cmd.date, periods)
+            if active_duties
+            else {
+                "teacher_id": cmd.teacher_id,
+                "teacher_name": self.teacher_repository.get_by_id(cmd.teacher_id).name,
+                "date": cmd.date,
+                "total_duties_found": 0,
+                "successfully_covered": 0,
+                "uncovered_duties": 0,
+                "coverages": [],
+                "alerts": [],
+            }
+        )
+        return {
+            "message": "Ausencias registradas correctamente",
+            "count": len(periods),
+            **result,
+        }

@@ -1,7 +1,7 @@
 # src/api/routes/absences.py
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from src.api.dependencies import get_mediator
-from src.api.schemas import AbsenceCreate, AbsenceResponse
+from src.api.schemas import AbsenceCreate, AbsenceResponse, AutoCoverDutiesResponse
 from src.application.absences.commands.create_absence import CreateAbsenceCommand
 from src.application.absences.commands.delete_absence import DeleteAbsenceCommand
 from src.application.absences.queries.get_actionable_absences import GetActionableAbsencesQuery
@@ -26,7 +26,7 @@ def get_actionable_absences(
     ))
 
 
-@router.post("", status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=AutoCoverDutiesResponse, status_code=status.HTTP_201_CREATED)
 def create_absence(dto: AbsenceCreate, mediator: Mediator = Depends(get_mediator)):
     try:
         cmd = CreateAbsenceCommand(

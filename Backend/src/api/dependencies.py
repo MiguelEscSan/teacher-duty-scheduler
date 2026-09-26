@@ -9,6 +9,9 @@ from src.application.absences.commands.delete_absence import (
     DeleteAbsenceCommand,
     DeleteAbsenceHandler,
 )
+from src.application.substitutions.services.auto_cover_teacher_duties import (
+    AutoCoverTeacherDutiesService,
+)
 from src.application.absences.queries.get_actionable_absences import (
     GetActionableAbsencesHandler,
     GetActionableAbsencesQuery,
@@ -125,6 +128,12 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
     student_group_repository = SQLStudentGroupRepository(session)
     substitution_repository = SQLSubstitutionRepository(session)
     email_sender = SMTPEmailSender()
+    auto_cover_service = AutoCoverTeacherDutiesService(
+        teacher_repository,
+        absence_repository,
+        schedule_repository,
+        substitution_repository,
+    )
     optimizer = ORToolsGuardOptimizer()
     mediator = Mediator()
 
@@ -182,7 +191,12 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
     )
     mediator.register(
         CreateAbsenceCommand,
-        lambda: CreateAbsenceHandler(absence_repository, teacher_repository),
+        lambda: CreateAbsenceHandler(
+            absence_repository,
+            teacher_repository,
+            substitution_repository,
+            auto_cover_service,
+        ),
     )
     mediator.register(
         DeleteAbsenceCommand, lambda: DeleteAbsenceHandler(absence_repository)

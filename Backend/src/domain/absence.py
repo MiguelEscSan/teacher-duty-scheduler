@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from src.domain.exceptions.absence_already_resolved_exception import AbsenceAlreadyResolvedException
@@ -20,6 +20,7 @@ class Absence:
     period: int
     reason: str
     resolved: bool = False
+    resolution_notes: list[str] = field(default_factory=list)
 
     @classmethod
     def create(cls, teacher_id: str, date: str, period: int, reason: str = "Permiso / Asunto propio") -> Absence:

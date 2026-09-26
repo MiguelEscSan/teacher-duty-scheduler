@@ -184,3 +184,22 @@ class DoNotCoverRequest(BaseModel):
     date: str
     period: int = Field(ge=0, le=5)
     absent_teacher_id: str
+
+
+class DutyCoverageItem(BaseModel):
+    period: int
+    covered: bool
+    substitute_teacher_id: str | None = None
+    substitute_teacher_name: str | None = None
+    message: str
+
+
+class AutoCoverDutiesResponse(BaseModel):
+    teacher_id: str
+    teacher_name: str
+    date: str
+    total_duties_found: int
+    successfully_covered: int
+    uncovered_duties: int
+    coverages: list[DutyCoverageItem]
+    alerts: list[str]
