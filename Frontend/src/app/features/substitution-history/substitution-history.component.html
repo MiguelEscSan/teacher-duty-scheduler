@@ -1,4 +1,16 @@
 <div class="history-view">
+  <nav class="history-tabs" role="tablist" aria-label="Seguimiento de sustituciones">
+    <button type="button" role="tab" [class.active]="activeTab === 'history'" [attr.aria-selected]="activeTab === 'history'" (click)="activeTab = 'history'">
+      Histórico de sustituciones
+    </button>
+    <button type="button" role="tab" [class.active]="activeTab === 'balance'" [attr.aria-selected]="activeTab === 'balance'" (click)="activeTab = 'balance'">
+      Balance de intervenciones
+    </button>
+  </nav>
+
+  <app-dashboard *ngIf="activeTab === 'balance'"></app-dashboard>
+
+  <ng-container *ngIf="activeTab === 'history'">
   <section class="card history-card">
     <div class="section-heading">
       <div>
@@ -84,4 +96,5 @@
       </table>
     </div>
   </section>
+  </ng-container>
 </div>

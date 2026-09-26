@@ -5,11 +5,12 @@ import { SubstitutionsService } from '../../services/substitutions.service';
 import { TeachersService } from '../../services/teachers.service';
 import { SubstitutionHistory } from '../../models/substitutions.model';
 import { Teacher } from '../../models/schedule.model';
+import { DashboardComponent } from '../dashboard/dashboard.component';
 
 @Component({
   selector: 'app-substitution-history',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DashboardComponent],
   templateUrl: './substitution-history.component.html',
   styleUrls: ['./substitution-history.component.css']
 })
@@ -24,6 +25,7 @@ export class SubstitutionHistoryComponent implements OnInit {
   toastMessage = '';
   editingId: number | string | null = null;
   selectedTeacherId = '';
+  activeTab: 'history' | 'balance' = 'history';
   filters = {
     date: '',
     substitute_teacher_id: '',
