@@ -37,19 +37,6 @@ def create_teacher(
     return mediator.send(cmd)
 
 
-@router.delete("/{teacher_id}")
-def delete_teacher(
-    teacher_id: str,
-    mediator: Mediator = Depends(get_mediator),
-):
-    success = mediator.send(DeleteTeacherCommand(teacher_id=teacher_id))
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profesor no encontrado.",
-        )
-    return {"message": "Profesor eliminado"}
-
 @router.get("/duty", response_model=List[DutySlotOut])
 def get_duty_teachers(
     day_of_week: int | None = Query(default=None, ge=0, le=4),
@@ -102,3 +89,17 @@ def remove_teacher_duty(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ex))
     except InvalidOperationException as ex:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ex))
+
+
+@router.delete("/{teacher_id}")
+def delete_teacher(
+    teacher_id: str,
+    mediator: Mediator = Depends(get_mediator),
+):
+    success = mediator.send(DeleteTeacherCommand(teacher_id=teacher_id))
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profesor no encontrado.",
+        )
+    return {"message": "Profesor eliminado"}
