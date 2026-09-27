@@ -8,27 +8,31 @@
 }
 
 .app-shell {
-  display: flex;
-  flex-direction: column;
-  padding: clamp(1rem, 3vw, 1.5rem) clamp(1rem, 4vw, 2rem);
+  min-height: 100vh;
+  padding: clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 1.5rem) 296px;
 }
 
 .app-header {
+  position: fixed;
+  z-index: 10;
+  inset: 0 auto 0 0;
+  width: 272px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   background: #ffffff;
-  padding: 1rem 1.75rem;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
-  margin-bottom: 2rem;
+  padding: 1.5rem 1rem;
+  border-right: 1px solid #e2e8f0;
+  box-shadow: 4px 0 12px -8px rgba(15, 23, 42, 0.2);
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: 0.85rem;
+  padding: 0.25rem 0.75rem 1.75rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .brand-icon {
@@ -57,9 +61,7 @@
 
 .nav-bar {
   display: flex;
-  flex: 1 1 auto;
-  justify-content: flex-end;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
@@ -69,13 +71,15 @@
   gap: 0.5rem;
   background: transparent;
   border: 1px solid transparent;
-  padding: 0.75rem 1.25rem;
+  width: 100%;
+  padding: 0.8rem 0.9rem;
   border-radius: 8px;
   font-size: 0.95rem;
   font-weight: 600;
   color: #64748b;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-align: left;
 }
 
 .nav-tab:hover {
@@ -104,37 +108,40 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 760px) {
+  .app-shell {
+    padding: 1rem;
+  }
+
   .app-header {
-  flex-direction: column;
-  gap: 1rem;
-  align-items: stretch;
+    position: static;
+    width: 100%;
+    padding: 1rem;
+    border-right: 0;
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    margin-bottom: 1.5rem;
+  }
+
+  .brand {
+    padding: 0 0 1rem;
+    margin-bottom: 1rem;
   }
 
   .nav-bar {
-  width: 100%;
-  justify-content: flex-start;
-  }
-}
-
-@media (max-width: 600px) {
-  .app-header {
-  padding: 1rem;
-  }
-
-  .nav-bar {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .nav-tab {
-  justify-content: center;
-  min-width: 0;
-  padding: 0.7rem 0.5rem;
-  text-align: center;
+    justify-content: center;
+    min-width: 0;
+    padding: 0.7rem 0.5rem;
+    text-align: center;
   }
 
   .nav-tab:last-child {
-  grid-column: 1 / -1;
+    grid-column: 1 / -1;
   }
 }
