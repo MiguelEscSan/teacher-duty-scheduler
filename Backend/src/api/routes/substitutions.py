@@ -96,8 +96,6 @@ def resolve_substitution(
     except ValueError as ex:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ex))
 
-# src/api/routes/substitutions.py (Fragmento)
-
 @router.post("/send-email", status_code=status.HTTP_202_ACCEPTED)
 def send_substitution_email(
     payload: SubstitutionEmailRequest,
