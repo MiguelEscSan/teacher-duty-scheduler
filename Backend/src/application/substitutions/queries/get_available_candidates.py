@@ -43,7 +43,12 @@ class GetAvailableCandidatesHandler(
         )
         teaching_ids = {
             item.teacher_id for item in self.schedule_repository.get_all()
-            if item.day_of_week == day and item.period == request.period and item.is_teaching
+            if (
+                item.day_of_week == day
+                and item.period == request.period
+                and item.effective_status.value
+                in ("TEACHING", "NON_PRESENTIAL")
+            )
         }
         unavailable = absent_ids | busy_ids | teaching_ids
         fixed = set(self.schedule_repository.get_fixed_duty_teacher_ids(day, request.period))

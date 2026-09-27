@@ -52,7 +52,7 @@ class CalculateWeekGuardsHandler(
 
         base_status = {
             (entry.teacher_id, entry.day_of_week, entry.period):
-            ("TEACHING" if entry.is_teaching else "FREE")
+            entry.effective_status.value
             for entry in self.schedule_repository.get_all()
         }
         absences = self.absence_repository.get_by_dates(dates_iso)

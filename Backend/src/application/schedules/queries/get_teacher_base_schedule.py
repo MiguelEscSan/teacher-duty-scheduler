@@ -5,6 +5,7 @@ from src.application.common.mediator import Query, RequestHandler
 from src.domain.ports.schedule_repository import ScheduleRepository
 from src.domain.ports.student_group_repository import StudentGroupRepository
 from src.domain.ports.teacher_repository import TeacherRepository
+from src.domain.schedule import SlotStatus
 
 
 @dataclass(frozen=True)
@@ -32,10 +33,11 @@ class GetTeacherBaseScheduleHandler(
         groups = {g.id: g.name for g in self.student_group_repository.get_all()}
         slot_map = {}
         for entry in entries:
+            status = entry.effective_status
             slot_map[(entry.day_of_week, entry.period)] = {
-                "status": "TEACHING" if entry.is_teaching and entry.group_id else "FREE",
-                "group_id": entry.group_id if entry.is_teaching else None,
-                "group_name": groups.get(entry.group_id) if entry.is_teaching else None,
+                "status": status.value if status != SlotStatus.TEACHING or entry.group_id else "FREE",
+                "group_id": entry.group_id if status == SlotStatus.TEACHING else None,
+                "group_name": groups.get(entry.group_id) if status == SlotStatus.TEACHING else None,
             }
         return [
             [

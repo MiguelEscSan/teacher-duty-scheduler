@@ -64,6 +64,7 @@ class TeacherScheduleDB(SQLModel, table=True):
     period: int = Field(index=True)       # 0 a 5
     group_id: Optional[str] = Field(default=None, index=True)  # Si tiene grupo -> Docencia frente a alumnos
     is_teaching: bool = Field(default=True)  # False si es reunión, coordinación o guardia
+    slot_type: str = Field(default="FREE")  # FREE, TEACHING o NON_PRESENTIAL
 
 
 class FixedDutyDB(SQLModel, table=True):

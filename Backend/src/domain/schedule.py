@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 class SlotStatus(str, Enum):
     FREE = "FREE"
     TEACHING = "TEACHING"
+    NON_PRESENTIAL = "NON_PRESENTIAL"
     ABSENCE = "ABSENCE"
     DUTY = "DUTY"
 
@@ -63,9 +64,15 @@ class ScheduleSlot:
         self.assigned_group = group
         self.status = SlotStatus.TEACHING
 
-    def release_to_free(self) -> None:
+    def release_to_free(self, status: SlotStatus = SlotStatus.FREE) -> None:
+        if status not in (SlotStatus.FREE, SlotStatus.NON_PRESENTIAL):
+            raise InvalidOperationException("Una franja liberada debe ser FREE o NON_PRESENTIAL.")
         self.assigned_group = None
-        self.status = SlotStatus.FREE
+        self.status = status
+
+    def mark_as_non_presential(self) -> None:
+        self.assigned_group = None
+        self.status = SlotStatus.NON_PRESENTIAL
 
 
 @dataclass
@@ -87,3 +94,13 @@ class ScheduleEntry:
     group_id: str | None = None
     is_teaching: bool = True
     id: str | None = None
+    slot_type: str = SlotStatus.FREE.value
+
+    @property
+    def effective_status(self) -> SlotStatus:
+        """Resolve legacy rows using is_teaching before the explicit type."""
+        if self.is_teaching:
+            return SlotStatus.TEACHING
+        if self.slot_type == SlotStatus.NON_PRESENTIAL.value:
+            return SlotStatus.NON_PRESENTIAL
+        return SlotStatus.FREE

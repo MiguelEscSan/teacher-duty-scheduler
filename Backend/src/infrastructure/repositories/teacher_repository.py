@@ -62,6 +62,7 @@ class SQLTeacherRepository(TeacherRepository):
         ).first()
         if schedule is not None:
             schedule.is_teaching = is_teaching
+            schedule.slot_type = "TEACHING" if is_teaching else "FREE"
             self.session.add(schedule)
 
     def add_fixed_duty(self, teacher_id: str, day_of_week: int, period: int) -> None:
@@ -103,6 +104,8 @@ class SQLTeacherRepository(TeacherRepository):
         ).first()
         if schedule is not None:
             schedule.is_teaching = schedule.group_id is not None
+            if schedule.is_teaching:
+                schedule.slot_type = "TEACHING"
             self.session.add(schedule)
         self.session.commit()
         return True

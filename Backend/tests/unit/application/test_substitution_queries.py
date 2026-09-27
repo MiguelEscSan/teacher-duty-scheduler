@@ -46,6 +46,26 @@ def test_available_candidates_excludes_absent_busy_and_teaching_teachers(fakes):
 
 
 @pytest.mark.unit
+def test_available_candidates_excludes_non_presential_teachers(fakes):
+    teachers = [
+        Teacher.create("Non presencial", teacher_id="non-presential"),
+        Teacher.create("Free", teacher_id="free"),
+    ]
+    fakes["teachers"].items = teachers
+    fakes["schedules"].entries = [
+        ScheduleEntry(
+            "non-presential", 0, 1, is_teaching=False, slot_type="NON_PRESENTIAL"
+        )
+    ]
+
+    result = GetAvailableCandidatesHandler(
+        fakes["teachers"], fakes["absences"], fakes["schedules"], fakes["substitutions"]
+    ).handle(GetAvailableCandidatesQuery("2026-09-21", 1))
+
+    assert [item.id for item in result] == ["free"]
+
+
+@pytest.mark.unit
 def test_available_candidates_returns_empty_on_weekend(fakes):
     result = GetAvailableCandidatesHandler(
         fakes["teachers"], fakes["absences"], fakes["schedules"], fakes["substitutions"]

@@ -24,6 +24,7 @@ class SQLScheduleRepository(ScheduleRepository):
             period=item.period,
             group_id=item.group_id,
             is_teaching=item.is_teaching,
+            slot_type=item.slot_type,
         )
 
     def get_for_teacher(self, teacher_id):
@@ -65,6 +66,7 @@ class SQLScheduleRepository(ScheduleRepository):
             )
         item.group_id = entry.group_id
         item.is_teaching = entry.is_teaching
+        item.slot_type = entry.effective_status.value
         self.session.add(item)
         self.session.commit()
         self.session.refresh(item)
@@ -114,5 +116,6 @@ class SQLScheduleRepository(ScheduleRepository):
         for slot in slots:
             slot.group_id = None
             slot.is_teaching = False
+            slot.slot_type = "FREE"
             self.session.add(slot)
         self.session.commit()

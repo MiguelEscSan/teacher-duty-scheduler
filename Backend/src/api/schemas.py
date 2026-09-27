@@ -1,7 +1,7 @@
 from typing import Any
 from pydantic import BaseModel, Field
 from enum import Enum
-from typing import Optional
+from typing import Literal, Optional
 from datetime import datetime
 from src.domain.duty_type import DutyType
 
@@ -23,6 +23,14 @@ class SlotToggleRequest(BaseModel):
     day: int = Field(ge=0, le=4)
     period: int = Field(ge=0, le=5)
     group_id: Optional[str] = None  # None = Libre, string = ID o Nombre del Grupo
+
+
+class SlotStatusUpdateRequest(BaseModel):
+    teacher_id: str
+    day: int = Field(ge=0, le=4)
+    period: int = Field(ge=0, le=5)
+    status: Literal["FREE", "NON_PRESENTIAL", "TEACHING"]
+    group_id: Optional[str] = None
 
 class ToggleSlotResponse(BaseModel):
     teacher_id: str

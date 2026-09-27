@@ -25,6 +25,10 @@ from src.application.schedules.commands.assign_slot_group import (
     AssignSlotGroupCommand,
     AssignSlotGroupHandler,
 )
+from src.application.schedules.commands.update_slot_status import (
+    ToggleSlotTypeCommand,
+    ToggleSlotTypeHandler,
+)
 from src.application.schedules.commands.create_student_group import (
     CreateStudentGroupCommand,
     CreateStudentGroupHandler,
@@ -196,6 +200,9 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
     )
     mediator.register(
         AssignSlotGroupCommand, lambda: AssignSlotGroupHandler(schedule_repository)
+    )
+    mediator.register(
+        ToggleSlotTypeCommand, lambda: ToggleSlotTypeHandler(schedule_repository)
     )
     mediator.register(
         CreateStudentGroupCommand,

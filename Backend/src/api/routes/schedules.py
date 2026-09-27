@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.api.dependencies import get_mediator
-from src.api.schemas import SlotToggleRequest
+from src.api.schemas import SlotStatusUpdateRequest, SlotToggleRequest
 from src.application.common.mediator import Mediator
 from src.application.schedules.commands.assign_slot_group import AssignSlotGroupCommand
+from src.application.schedules.commands.update_slot_status import ToggleSlotTypeCommand
 from src.application.schedules.queries.get_teacher_base_schedule import GetTeacherBaseScheduleQuery
 
 router = APIRouter(prefix="/api/v1/base-schedule", tags=["Schedules & Absences"])
@@ -26,3 +27,18 @@ def assign_slot_group(payload: SlotToggleRequest, mediator: Mediator = Depends(g
         group_id=payload.group_id,
     )
     return mediator.send(cmd)
+
+
+@router.put("/slot-status")
+def update_slot_status(
+    payload: SlotStatusUpdateRequest, mediator: Mediator = Depends(get_mediator)
+):
+    return mediator.send(
+        ToggleSlotTypeCommand(
+            teacher_id=payload.teacher_id,
+            day=payload.day,
+            period=payload.period,
+            status=payload.status,
+            group_id=payload.group_id,
+        )
+    )
