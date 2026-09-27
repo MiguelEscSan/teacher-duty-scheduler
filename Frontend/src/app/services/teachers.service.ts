@@ -12,7 +12,7 @@ export class TeachersService {
     return this.http.get<Teacher[]>(`${API_URL}/teachers`);
   }
 
-  addTeacher(teacher: Teacher): Observable<Teacher> {
+  addTeacher(teacher: Pick<Teacher, 'name' | 'department' | 'email'>): Observable<Teacher> {
     return this.http.post<Teacher>(`${API_URL}/teachers`, teacher);
   }
 

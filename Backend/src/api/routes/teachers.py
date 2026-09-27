@@ -33,7 +33,11 @@ def create_teacher(
     dto: TeacherCreate,
     mediator: Mediator = Depends(get_mediator),
 ):
-    cmd = CreateTeacherCommand(name=dto.name, department=dto.department)
+    cmd = CreateTeacherCommand(
+        name=dto.name,
+        department=dto.department,
+        email=dto.email,
+    )
     return mediator.send(cmd)
 
 

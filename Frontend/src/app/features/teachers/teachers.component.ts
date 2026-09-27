@@ -33,9 +33,10 @@ export class TeachersComponent implements OnInit {
   selectedGroupId: string = '';
   slotModalStep: 1 | 2 = 1;
 
-  newTeacher: { name: string; department: string } = {
+  newTeacher: { name: string; department: string; email: string } = {
     name: '',
-    department: 'Matemáticas'
+    department: 'Matemáticas',
+    email: ''
   };
 
   departments = [
@@ -164,9 +165,11 @@ export class TeachersComponent implements OnInit {
     if (!this.newTeacher.name.trim()) return;
     this.teachersApi.addTeacher({
       name: this.newTeacher.name.trim(),
-      department: this.newTeacher.department
+      department: this.newTeacher.department,
+      email: this.newTeacher.email.trim() || undefined
     }).subscribe((created) => {
       this.newTeacher.name = '';
+      this.newTeacher.email = '';
       this.teachers.push(created);
       this.selectTeacher(created);
       this.showTeacherModal = false;

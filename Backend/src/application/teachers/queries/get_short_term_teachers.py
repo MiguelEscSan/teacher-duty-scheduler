@@ -30,7 +30,12 @@ class GetShortTermTeachersHandler(RequestHandler[GetShortTermTeachersQuery, list
                     teacher = teachers.get(teacher_id)
                     if teacher:
                         by_slot.setdefault((day, period), []).append(
-                            TeacherResponse(id=teacher.id, name=teacher.name, department=teacher.department)
+                            TeacherResponse(
+                                id=teacher.id,
+                                name=teacher.name,
+                                department=teacher.department,
+                                email=teacher.email.email if teacher.email else None,
+                            )
                         )
         return [
             DutySlotOut(

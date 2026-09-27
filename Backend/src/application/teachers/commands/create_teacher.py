@@ -10,6 +10,7 @@ from src.domain.teacher import CorporateEmail, Teacher
 class CreateTeacherCommand(Command[TeacherResponse]):
     name: str
     department: str = "General"
+    email: str | None = None
 
 
 class CreateTeacherHandler(RequestHandler[CreateTeacherCommand, TeacherResponse]):
@@ -20,11 +21,12 @@ class CreateTeacherHandler(RequestHandler[CreateTeacherCommand, TeacherResponse]
         teacher = Teacher.create(
             name=cmd.name,
             department=cmd.department,
-            email=CorporateEmail.from_teacher_name(cmd.name, "centroeducativo.es"),
+            email=cmd.email,
         )
         saved = self.teacher_repository.save(teacher)
         return TeacherResponse(
             id=saved.id,
             name=saved.name,
             department=saved.department,
+            email=saved.email.email if saved.email else None,
         )

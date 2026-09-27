@@ -11,11 +11,15 @@ class TeacherCreate(BaseModel):
     department: str = Field(
         default="General", description="Departamento al que pertenece"
     )
+    email: Optional[str] = Field(
+        default=None, description="Correo electrónico del profesor"
+    )
 
 class TeacherResponse(BaseModel):
     id: str  # GUID devuelto al cliente
     name: str
     department: str
+    email: Optional[str] = None
 
 # --- Horario Base ---
 class SlotToggleRequest(BaseModel):

@@ -14,6 +14,10 @@
       <input id="teacherName" type="text" class="input-name" [(ngModel)]="teacher.name"
              name="teacher_name" required autofocus>
 
+      <label for="teacherEmail">Correo electrónico</label>
+      <input id="teacherEmail" type="email" class="input-email" [(ngModel)]="teacher.email"
+             name="teacher_email" placeholder="profesor@centroeducativo.es">
+
       <label for="teacherDepartment">Departamento</label>
       <select id="teacherDepartment" class="select-dept" [(ngModel)]="teacher.department"
               name="teacher_department">

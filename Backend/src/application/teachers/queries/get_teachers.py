@@ -16,6 +16,11 @@ class GetTeachersHandler(RequestHandler[GetTeachersQuery, list[TeacherResponse]]
 
     def handle(self, query: GetTeachersQuery) -> list[TeacherResponse]:
         return [
-            TeacherResponse(id=t.id, name=t.name, department=t.department)
+            TeacherResponse(
+                id=t.id,
+                name=t.name,
+                department=t.department,
+                email=t.email.email if t.email else None,
+            )
             for t in self.teacher_repository.get_all()
         ]

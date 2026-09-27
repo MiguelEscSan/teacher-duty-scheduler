@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./teacher-form-modal.component.css']
 })
 export class TeacherFormModalComponent {
-  @Input() teacher = { name: '', department: 'Matemáticas' };
+  @Input() teacher = { name: '', department: 'Matemáticas', email: '' };
   @Input() departments: string[] = [];
   @Output() saved = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();

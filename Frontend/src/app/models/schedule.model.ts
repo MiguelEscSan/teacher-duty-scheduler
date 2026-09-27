@@ -2,6 +2,7 @@ export interface Teacher {
   id?: string;
   name: string;
   department: string;
+  email?: string | null;
 }
 
 export interface TeacherRank {
