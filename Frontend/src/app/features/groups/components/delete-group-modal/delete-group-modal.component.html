@@ -1,0 +1,26 @@
+<div class="modal-backdrop" (click)="!isLoading && cancelled.emit()">
+  <section class="delete-modal" role="alertdialog" aria-modal="true"
+           aria-labelledby="delete-group-title" aria-describedby="delete-group-description"
+           (click)="$event.stopPropagation()">
+    <div class="warning-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5m0 3h.01"/>
+      </svg>
+    </div>
+    <div>
+      <h2 id="delete-group-title">¿Eliminar el grupo «{{ group.name }}»?</h2>
+      <div id="delete-group-description" class="message">
+        <p>Esta acción eliminará el grupo permanentemente del sistema.</p>
+        <p class="impact"><strong>⚠️ Aviso de impacto:</strong> Todas las horas lectivas que los profesores impartían a este grupo pasarán a quedar como <strong>horas libres</strong> de forma automática.</p>
+        <p>Esta acción no se puede deshacer.</p>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn secondary" [disabled]="isLoading" (click)="cancelled.emit()">Cancelar</button>
+      <button #confirmButton type="button" class="btn danger" [disabled]="isLoading" (click)="confirmed.emit()">
+        <span class="spinner" *ngIf="isLoading" aria-hidden="true"></span>
+        {{ isLoading ? 'Eliminando…' : 'Sí, eliminar y liberar horas' }}
+      </button>
+    </div>
+  </section>
+</div>

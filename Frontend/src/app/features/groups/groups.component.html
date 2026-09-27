@@ -2,7 +2,27 @@
   <div class="heading"><div><h2>Catálogo de grupos</h2><p>Configura el nombre y el aforo de cada grupo.</p></div><button type="button" class="primary" (click)="open()">+ Nuevo grupo</button></div>
   <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div><div *ngIf="toastMessage" class="toast" (click)="toastMessage=''">{{ toastMessage }}</div>
   <div class="table-wrap"><table><thead><tr><th>Nombre del grupo</th><th>Aforo / Nº alumnos</th><th>Acciones</th></tr></thead><tbody>
-    <tr *ngFor="let group of groups"><td><strong>{{ group.name }}</strong></td><td>{{ group.student_count ?? '—' }}</td><td><button type="button" class="link" (click)="open(group)">Editar</button></td></tr>
+    <tr *ngFor="let group of groups">
+      <td><strong>{{ group.name }}</strong></td>
+      <td>{{ group.student_count ?? '—' }}</td>
+      <td class="row-actions">
+        <div class="actions-menu">
+          <button type="button" class="menu-trigger" (click)="toggleActions(group.id); $event.stopPropagation()"
+                  [attr.aria-expanded]="openActionsGroupId === group.id"
+                  [attr.aria-controls]="'group-actions-' + group.id"
+                  [attr.aria-label]="'Acciones para ' + group.name" title="Más acciones">
+            <span aria-hidden="true">⋮</span>
+          </button>
+          <div *ngIf="openActionsGroupId === group.id" class="actions-dropdown" [id]="'group-actions-' + group.id">
+            <button type="button" (click)="open(group)">Editar</button>
+            <button type="button" class="danger-action" [disabled]="deletingGroupId === group.id" (click)="requestDelete(group)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </td>
+    </tr>
     <tr *ngIf="!loading && !groups.length"><td colspan="3" class="empty">No hay grupos registrados.</td></tr>
   </tbody></table></div>
 </section>
@@ -14,3 +34,4 @@
     <div class="actions"><button type="button" class="secondary" (click)="close()">Cancelar</button><button type="submit" class="primary" [disabled]="!form.name.trim() || (form.student_count !== null && form.student_count < 0)">Guardar</button></div>
   </form>
 </div>
+<app-delete-group-modal *ngIf="groupToDelete" [group]="groupToDelete" [isLoading]="deletingGroupId === groupToDelete.id" (confirmed)="confirmDelete()" (cancelled)="cancelDelete()"></app-delete-group-modal>

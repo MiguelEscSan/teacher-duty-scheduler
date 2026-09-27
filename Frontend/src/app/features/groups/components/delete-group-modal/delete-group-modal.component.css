@@ -1,0 +1,18 @@
+:host { display: contents; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 1rem; background: rgba(15, 23, 42, .6); }
+.delete-modal { width: min(100%, 520px); padding: 1.5rem; border-radius: 14px; background: #fff; box-shadow: 0 20px 50px rgba(15, 23, 42, .3); display: grid; grid-template-columns: auto 1fr; gap: 0 1rem; }
+.warning-icon { width: 2.8rem; height: 2.8rem; display: grid; place-items: center; border-radius: 50%; color: #b45309; background: #fef3c7; }
+.warning-icon svg { width: 1.5rem; height: 1.5rem; }
+h2 { margin: .25rem 0 .8rem; color: #0f172a; font-size: 1.2rem; }
+.message { color: #475569; line-height: 1.5; }
+.message p { margin: 0 0 .75rem; }
+.impact { padding: .75rem; border-left: 4px solid #f59e0b; border-radius: 4px; color: #92400e; background: #fffbeb; }
+.modal-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: .75rem; margin-top: .75rem; }
+.btn { border: 0; border-radius: 6px; padding: .7rem 1rem; font-weight: 700; cursor: pointer; }
+.btn:disabled { cursor: not-allowed; opacity: .65; }
+.secondary { color: #334155; background: #e2e8f0; }
+.danger { color: #fff; background: #dc2626; }
+.danger:hover:not(:disabled) { background: #b91c1c; }
+.spinner { display: inline-block; width: .85rem; height: .85rem; margin-right: .35rem; border: 2px solid rgba(255,255,255,.45); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -.1rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (max-width: 520px) { .delete-modal { grid-template-columns: 1fr; } .warning-icon { margin-bottom: .75rem; } .modal-actions { flex-direction: column-reverse; } .btn { width: 100%; } }

@@ -1,12 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject, tap } from 'rxjs';
 import { BaseSlot, StudentGroup } from '../models/schedule.model';
 import { API_URL } from './api-url';
 
 @Injectable({ providedIn: 'root' })
 export class BaseScheduleService {
   private readonly http = inject(HttpClient);
+  private readonly groupDeletedSubject = new Subject<string>();
+  readonly groupDeleted$ = this.groupDeletedSubject.asObservable();
 
   getGroups(): Observable<StudentGroup[]> {
     return this.http.get<StudentGroup[]>(`${API_URL}/groups`);
@@ -18,6 +20,12 @@ export class BaseScheduleService {
 
   updateGroup(id: string, payload: { name: string; student_count: number | null }): Observable<StudentGroup> {
     return this.http.put<StudentGroup>(`${API_URL}/groups/${id}`, payload);
+  }
+
+  deleteGroup(groupId: string): Observable<void> {
+    return this.http.delete<void>(`${API_URL}/groups/${groupId}`).pipe(
+      tap(() => this.groupDeletedSubject.next(groupId))
+    );
   }
 
   assignSlotGroup(teacherId: string, day: number, period: number, groupId: string | null): Observable<any> {

@@ -54,6 +54,10 @@ export class TeachersComponent implements OnInit {
   ngOnInit(): void {
     this.loadTeachers();
     this.scheduleApi.getGroups().subscribe(g => this.groups = g);
+    this.scheduleApi.groupDeleted$.subscribe(groupId => {
+      this.groups = this.groups.filter(group => group.id !== groupId);
+      if (this.selectedTeacher) this.selectTeacher(this.selectedTeacher);
+    });
   }
 
   get filteredTeachers(): Teacher[] {
