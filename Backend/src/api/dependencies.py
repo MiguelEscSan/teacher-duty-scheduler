@@ -207,7 +207,11 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
     )
     mediator.register(
         DeleteStudentGroupCommand,
-        lambda: DeleteStudentGroupHandler(student_group_repository),
+        lambda: DeleteStudentGroupHandler(
+            student_group_repository,
+            schedule_repository,
+            substitution_repository,
+        ),
     )
     mediator.register(
         AssignTeacherDutyCommand,

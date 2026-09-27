@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, status
 
 from src.api.dependencies import get_mediator
 from src.api.schemas import (
@@ -52,9 +52,9 @@ def update_student_group(
     )
 
 
-@router.delete("/{group_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{group_id}", status_code=status.HTTP_200_OK)
 def delete_student_group(
     group_id: str, mediator: Mediator = Depends(get_mediator)
 ):
     mediator.send(DeleteStudentGroupCommand(group_id=group_id))
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return {"message": "Grupo eliminado y horas lectivas liberadas correctamente."}

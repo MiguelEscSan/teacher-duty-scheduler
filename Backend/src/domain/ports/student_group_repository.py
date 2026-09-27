@@ -23,5 +23,6 @@ class StudentGroupRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def delete(self, group_id: str) -> None:
+    def delete(self, group_id: str) -> bool:
+        """Delete a student group."""
         raise NotImplementedError

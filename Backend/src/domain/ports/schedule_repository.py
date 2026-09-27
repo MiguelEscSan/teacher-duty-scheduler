@@ -39,3 +39,7 @@ class ScheduleRepository(ABC):
     @abstractmethod
     def delete_duties_for_teacher(self, teacher_id: str) -> None:
         raise NotImplementedError
+
+    @abstractmethod
+    def release_slots_for_group(self, group_id: str) -> None:
+        raise NotImplementedError

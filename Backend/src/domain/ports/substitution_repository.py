@@ -46,3 +46,7 @@ class SubstitutionRepository(ABC):
     @abstractmethod
     def get_last_used_at(self, teacher_ids: list[str], period: int) -> dict[str, datetime]:
         raise NotImplementedError
+
+    @abstractmethod
+    def unlink_group_from_history(self, group_id: str) -> None:
+        raise NotImplementedError

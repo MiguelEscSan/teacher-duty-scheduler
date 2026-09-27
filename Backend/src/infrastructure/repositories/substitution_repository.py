@@ -140,3 +140,12 @@ class SQLSubstitutionRepository(SubstitutionRepository):
         for item in logs:
             result.setdefault(item.substitute_teacher_id, item.created_at)
         return result
+
+    def unlink_group_from_history(self, group_id):
+        logs = self.session.exec(
+            select(SubstitutionLogDB).where(SubstitutionLogDB.group_id == group_id)
+        ).all()
+        for log in logs:
+            log.group_id = None
+            self.session.add(log)
+        self.session.commit()

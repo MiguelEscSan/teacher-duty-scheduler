@@ -106,3 +106,13 @@ class SQLScheduleRepository(ScheduleRepository):
             ).all():
                 self.session.delete(item)
         self.session.commit()
+
+    def release_slots_for_group(self, group_id):
+        slots = self.session.exec(
+            select(TeacherScheduleDB).where(TeacherScheduleDB.group_id == group_id)
+        ).all()
+        for slot in slots:
+            slot.group_id = None
+            slot.is_teaching = False
+            self.session.add(slot)
+        self.session.commit()
