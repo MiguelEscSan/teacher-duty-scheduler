@@ -153,10 +153,11 @@
 
 .btn {
   width: 100%;
-  padding: 0.65rem 1rem;
+  padding: 0.5rem 0.8rem;
   border-radius: 6px;
   border: none;
   font-weight: 600;
+  font-size: 0.82rem;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -295,6 +296,7 @@
 
 .dot-free { background: #22c55e; }
 .dot-teaching { background: #3b82f6; }
+.dot-non-presential { background: #d97706; }
 
 .table-container {
   overflow-x: auto;
@@ -372,6 +374,12 @@
   background: #eff6ff;
   border: 1px solid #bfdbfe;
   color: #1d4ed8;
+}
+
+.slot-non-presential {
+  background: repeating-linear-gradient(135deg, #fff7ed, #fff7ed 8px, #ffedd5 8px, #ffedd5 10px);
+  border: 1px solid #fdba74;
+  color: #9a3412;
 }
 
 .empty-state {
@@ -455,19 +463,46 @@
   background: #ffffff;
   padding: 1.75rem;
   border-radius: 12px;
-  width: 90%;
-  max-width: 440px;
+  width: 92%;
+  max-width: 520px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .modal-card h3 {
-  margin: 0 0 0.25rem 0;
+  margin: 0;
   color: #0f172a;
   font-size: 1.2rem;
 }
 
+.modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
 .modal-subtitle {
-  margin: 0 0 1.25rem 0;
+  margin: 0.35rem 0 1.25rem 0;
   font-size: 0.85rem;
   color: #64748b;
 }
@@ -485,6 +520,19 @@
   color: #334155;
 }
 
+.status-help {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.step-label {
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
 .select-group {
   padding: 0.65rem;
   border: 1px solid #cbd5e1;
@@ -500,10 +548,30 @@
   gap: 0.75rem;
 }
 
+.modal-state-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-non-presential {
+  background: #ffedd5;
+  color: #9a3412;
+  border: 1px solid #fdba74;
+}
+
+.btn-non-presential:hover {
+  background: #fed7aa;
+}
+
 .actions-right {
   display: flex;
   gap: 0.5rem;
   margin-left: auto;
+}
+
+.modal-state-actions .btn {
+  width: auto;
 }
 
 .btn-secondary {

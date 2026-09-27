@@ -37,6 +37,22 @@ export class BaseScheduleService {
     });
   }
 
+  updateSlotStatus(
+    teacherId: string,
+    day: number,
+    period: number,
+    status: 'FREE' | 'NON_PRESENTIAL' | 'TEACHING',
+    groupId: string | null = null
+  ): Observable<{ status: string }> {
+    return this.http.put<{ status: string }>(`${API_URL}/base-schedule/slot-status`, {
+      teacher_id: teacherId,
+      day,
+      period,
+      status,
+      group_id: groupId
+    });
+  }
+
   getBaseSchedule(teacherId: string): Observable<BaseSlot[][]> {
     return this.http.get<BaseSlot[][]>(`${API_URL}/base-schedule/${teacherId}`);
   }

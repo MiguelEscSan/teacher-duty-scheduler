@@ -14,7 +14,7 @@ export interface TeacherRank {
 export interface BaseSlot {
   day: number;
   period: number;
-  status: 'FREE' | 'TEACHING';
+  status: 'FREE' | 'TEACHING' | 'NON_PRESENTIAL';
   group_id: string | null;
   group_name: string | null;
 }

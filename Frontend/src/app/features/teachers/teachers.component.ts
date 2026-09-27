@@ -31,6 +31,7 @@ export class TeachersComponent implements OnInit {
   // Control del modal de asignación de grupo
   activeSlot: BaseSlot | null = null;
   selectedGroupId: string = '';
+  slotModalStep: 1 | 2 = 1;
 
   newTeacher: { name: string; department: string } = {
     name: '',
@@ -97,20 +98,33 @@ export class TeachersComponent implements OnInit {
   // Al hacer clic en una casilla, se abre el selector de grupo
   openSlotModal(cell: BaseSlot): void {
     this.activeSlot = cell;
-    this.selectedGroupId = cell.group_id || (this.groups.length > 0 ? this.groups[0].id : '');
+    this.slotModalStep = 1;
+    this.selectedGroupId = cell.group_id || '';
   }
 
   closeModal(): void {
     this.activeSlot = null;
+    this.slotModalStep = 1;
+  }
+
+  chooseTeachingSlot(): void {
+    if (this.groups.length === 0) return;
+    this.selectedGroupId = this.activeSlot?.group_id || this.groups[0].id;
+    this.slotModalStep = 2;
+  }
+
+  backToSlotType(): void {
+    this.slotModalStep = 1;
   }
 
   confirmGroupAssignment(): void {
     if (!this.selectedTeacher?.id || !this.activeSlot) return;
 
-    this.scheduleApi.assignSlotGroup(
+    this.scheduleApi.updateSlotStatus(
       this.selectedTeacher.id,
       this.activeSlot.day,
       this.activeSlot.period,
+      'TEACHING',
       this.selectedGroupId
     ).subscribe(() => {
       this.selectTeacher(this.selectedTeacher!);
@@ -121,11 +135,25 @@ export class TeachersComponent implements OnInit {
   setSlotFree(): void {
     if (!this.selectedTeacher?.id || !this.activeSlot) return;
 
-    this.scheduleApi.assignSlotGroup(
+    this.scheduleApi.updateSlotStatus(
       this.selectedTeacher.id,
       this.activeSlot.day,
       this.activeSlot.period,
-      null
+      'FREE'
+    ).subscribe(() => {
+      this.selectTeacher(this.selectedTeacher!);
+      this.closeModal();
+    });
+  }
+
+  setSlotNonPresential(): void {
+    if (!this.selectedTeacher?.id || !this.activeSlot) return;
+
+    this.scheduleApi.updateSlotStatus(
+      this.selectedTeacher.id,
+      this.activeSlot.day,
+      this.activeSlot.period,
+      'NON_PRESENTIAL'
     ).subscribe(() => {
       this.selectTeacher(this.selectedTeacher!);
       this.closeModal();

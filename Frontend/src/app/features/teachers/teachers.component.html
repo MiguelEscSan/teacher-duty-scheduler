@@ -71,8 +71,9 @@
           </p>
         </div>
         <div class="legend">
-          <span class="legend-item"><i class="dot dot-free"></i> Libre</span>
+          <span class="legend-item"><i class="dot dot-free"></i> Libre (en centro)</span>
           <span class="legend-item"><i class="dot dot-teaching"></i> Clase Lectiva (Grupo)</span>
+          <span class="legend-item"><i class="dot dot-non-presential"></i> No presencial</span>
         </div>
       </div>
 
@@ -95,14 +96,19 @@
               (click)="openSlotModal(cell)"
               [class.slot-teaching]="cell.status === 'TEACHING'"
               [class.slot-free]="cell.status === 'FREE'"
+              [class.slot-non-presential]="cell.status === 'NON_PRESENTIAL'"
+              [attr.title]="cell.status === 'NON_PRESENTIAL' ? 'El docente no se encuentra en el centro en este periodo. No elegible para guardias.' : null"
             >
               <div class="cell-content">
-                <span class="cell-icon" aria-hidden="true"><svg *ngIf="cell.status === 'TEACHING'" class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h13v17H6a2 2 0 0 0-2 2V5Z"/><path d="M4 20a2 2 0 0 1 2-2h13M8 7h7M8 11h7"/></svg><svg *ngIf="cell.status === 'FREE'" class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="m8 12 2.5 2.5L16 9"/></svg></span>
+                <span class="cell-icon" aria-hidden="true"><svg *ngIf="cell.status === 'TEACHING'" class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h13v17H6a2 2 0 0 0-2 2V5Z"/><path d="M4 20a2 2 0 0 1 2-2h13M8 7h7M8 11h7"/></svg><svg *ngIf="cell.status === 'FREE'" class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="m8 12 2.5 2.5L16 9"/></svg><svg *ngIf="cell.status === 'NON_PRESENTIAL'" class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V6l7-3 7 3v15M9 9h1M14 9h1M9 13h1M14 13h1"/><path d="m4 4 16 16"/></svg></span>
                 <span class="cell-label" *ngIf="cell.status === 'TEACHING'">
                     {{ cell.group_name }}
                   </span>
                 <span class="cell-label" *ngIf="cell.status === 'FREE'">
-                    Libre
+                    Libre (en centro)
+                  </span>
+                <span class="cell-label" *ngIf="cell.status === 'NON_PRESENTIAL'">
+                    No presencial
                   </span>
               </div>
             </td>
@@ -133,27 +139,67 @@
 <!-- Modal para asignar o quitar Grupo -->
 <div class="modal-backdrop" *ngIf="activeSlot" (click)="closeModal()">
   <div class="modal-card" (click)="$event.stopPropagation()">
-    <h3>Configurar Franja Horaria</h3>
+    <div class="modal-header">
+      <h3>Configurar Franja Horaria</h3>
+      <button
+        class="modal-close"
+        type="button"
+        aria-label="Cerrar"
+        title="Cerrar"
+        (click)="closeModal()"
+      >
+        <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+    </div>
     <p class="modal-subtitle">
       {{ days[activeSlot.day] }} a las {{ hours[activeSlot.period] }} (P{{ activeSlot.period }})
     </p>
 
-    <div class="modal-body">
-      <label>Grupo de alumnos:</label>
-      <select [(ngModel)]="selectedGroupId" class="select-group">
+    <div class="modal-body" *ngIf="slotModalStep === 1">
+      <span class="step-label">Paso 1 de 2</span>
+      <label>¿Qué ocurre en esta franja?</label>
+      <p class="status-help">Indica si el docente permanece en el centro o si tiene docencia.</p>
+      <div class="modal-state-actions">
+        <button
+          *ngIf="activeSlot.status !== 'FREE'"
+          class="btn btn-secondary"
+          type="button"
+          (click)="setSlotFree()"
+        >
+          Libre (en centro)
+        </button>
+        <button
+          *ngIf="activeSlot.status !== 'NON_PRESENTIAL'"
+          class="btn btn-non-presential"
+          type="button"
+          (click)="setSlotNonPresential()"
+        >
+          No presencial / Fuera de centro
+        </button>
+        <button class="btn btn-primary" type="button" (click)="chooseTeachingSlot()" [disabled]="groups.length === 0">
+          Tiene grupo
+        </button>
+      </div>
+      <p class="status-help" *ngIf="groups.length === 0">Crea al menos un grupo para asignar docencia.</p>
+    </div>
+
+    <div class="modal-body" *ngIf="slotModalStep === 2">
+      <span class="step-label">Paso 2 de 2</span>
+      <label for="slot-group">Grupo de alumnos:</label>
+      <select id="slot-group" [(ngModel)]="selectedGroupId" class="select-group">
         <option *ngFor="let g of groups" [value]="g.id">
           {{ g.name }} {{ g.student_count !== null ? '(' + g.student_count + ' alumnos)' : '' }}
         </option>
       </select>
     </div>
 
-    <div class="modal-actions">
-      <button class="btn btn-secondary" (click)="setSlotFree()" *ngIf="activeSlot.status === 'TEACHING'">
-        Marcar como Libre
-      </button>
+    <div class="modal-actions" *ngIf="slotModalStep === 2">
+      <button class="btn btn-outline" type="button" (click)="backToSlotType()">Atrás</button>
       <div class="actions-right">
-        <button class="btn btn-outline" (click)="closeModal()">Cancelar</button>
-        <button class="btn btn-primary" (click)="confirmGroupAssignment()">Guardar Grupo</button>
+        <button class="btn btn-outline" type="button" (click)="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" type="button" (click)="confirmGroupAssignment()">Guardar Grupo</button>
       </div>
     </div>
   </div>
