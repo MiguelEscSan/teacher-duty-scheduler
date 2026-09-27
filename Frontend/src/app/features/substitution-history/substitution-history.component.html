@@ -83,7 +83,7 @@
             <td class="substitute-cell">
               <ng-container *ngIf="editingId !== item.id; else editSubstitute">
                 <strong>{{ item.substitute_teacher_name }}</strong>
-                <button type="button" class="edit-action" (click)="startReassign(item)" aria-label="Cambiar sustituto">✎</button>
+                <button type="button" class="edit-action" (click)="startReassign(item)" aria-label="Cambiar sustituto"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m4 16-.7 4.7L8 20l11-11-4-4L4 16Z"/><path d="m13 6 4 4"/></svg></button>
                 <span *ngIf="item.reassigned || item.source_type === 'MANUAL'" class="manual-badge">MANUAL / REASIGNADO</span>
               </ng-container>
               <ng-template #editSubstitute>
@@ -100,7 +100,7 @@
             <td class="notification-cell">
               <span *ngIf="item.notified" class="notified-badge">Notificado</span>
               <button *ngIf="!item.notified" type="button" class="email-action" (click)="sendEmail(item)" [disabled]="emailSendingIds.has(item.id)" title="Enviar correo de aviso al sustituto">
-                {{ emailSendingIds.has(item.id) ? 'Enviando...' : '✉ Enviar' }}
+                <ng-container *ngIf="emailSendingIds.has(item.id); else sendEmailLabel">Enviando...</ng-container><ng-template #sendEmailLabel><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg> Enviar</ng-template>
               </button>
             </td>
           </tr>

@@ -2,7 +2,7 @@
   <!-- Barra de Selección de Semana y Acción -->
   <div class="action-card">
     <div class="calendar-navigator">
-      <button class="btn-nav" (click)="changeWeek(-7)" title="Semana anterior">◀ Anterior</button>
+      <button class="btn-nav" (click)="changeWeek(-7)" title="Semana anterior"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg> Anterior</button>
 
       <div class="picker-wrapper">
         <label for="weekPicker">Semana de:</label>
@@ -15,20 +15,20 @@
         />
       </div>
 
-      <button class="btn-nav" (click)="changeWeek(7)" title="Semana siguiente">Siguiente ▶</button>
+      <button class="btn-nav" (click)="changeWeek(7)" title="Semana siguiente">Siguiente <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
     </div>
 
     <div class="action-buttons">
       <button class="btn-run" [disabled]="isOptimizing" (click)="calculateGuards()">
-        <span *ngIf="!isOptimizing">⚡ Reoptimizar Semana</span>
-        <span *ngIf="isOptimizing">⚙️ Calculando...</span>
+        <span *ngIf="!isOptimizing"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m13 2-9 12h7l-1 8 9-12h-7l1-8Z"/></svg> Reoptimizar Semana</span>
+        <span *ngIf="isOptimizing"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg> Calculando...</span>
       </button>
-      <button *ngIf="results" class="btn-print" (click)="print()">🖨️ Imprimir</button>
+      <button *ngIf="results" class="btn-print" (click)="print()"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg> Imprimir</button>
     </div>
   </div>
 
   <div *ngIf="errorMessage" class="error-banner">
-    ⚠️ {{ errorMessage }}
+    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 9v5M12 17h.01"/></svg> {{ errorMessage }}
   </div>
 
   <div *ngIf="results" class="results-layout">
@@ -79,10 +79,10 @@
             <td *ngFor="let cell of row" [class.has-deficit]="cell.deficit > 0">
               <div class="cell-guardians">
                 <div *ngFor="let name of cell.assigned" class="pill-guardian">
-                  👤 {{ name }}
+                  <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21a7 7 0 0 1 14 0"/></svg> {{ name }}
                 </div>
                 <div *ngIf="cell.deficit > 0" class="tag-deficit">
-                  ⚠️ Falta {{ cell.deficit }}
+                  <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 9v5M12 17h.01"/></svg> Falta {{ cell.deficit }}
                 </div>
               </div>
             </td>

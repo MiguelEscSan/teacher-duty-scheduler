@@ -1,11 +1,11 @@
 <nav class="teachers-tabs" role="tablist" aria-label="Claustro y horario base">
   <button type="button" role="tab" [class.active]="activeTab === 'teachers'"
           [attr.aria-selected]="activeTab === 'teachers'" (click)="activeTab = 'teachers'">
-    👨‍🏫 Claustro y horario base
+    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21a7 7 0 0 1 14 0M4 4h4M16 4h4M6 4v4M18 4v4"/></svg> Claustro y horario base
   </button>
   <button type="button" role="tab" [class.active]="activeTab === 'groups'"
           [attr.aria-selected]="activeTab === 'groups'" (click)="activeTab = 'groups'">
-    👥 Grupos
+    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M2 20a7 7 0 0 1 14 0M16 5a3 3 0 0 1 0 6M17 14a6 6 0 0 1 5 6"/></svg> Grupos
   </button>
 </nav>
 
@@ -52,7 +52,7 @@
           </div>
         </div>
         <button class="btn-icon-danger" (click)="$event.stopPropagation(); removeTeacher(t.id!)" title="Eliminar docente">
-          🗑️
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>
         </button>
       </li>
     </ul>
@@ -97,7 +97,7 @@
               [class.slot-free]="cell.status === 'FREE'"
             >
               <div class="cell-content">
-                <span class="cell-icon">{{ cell.status === 'TEACHING' ? '📚' : '🟢' }}</span>
+                <span class="cell-icon" aria-hidden="true"><svg *ngIf="cell.status === 'TEACHING'" class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h13v17H6a2 2 0 0 0-2 2V5Z"/><path d="M4 20a2 2 0 0 1 2-2h13M8 7h7M8 11h7"/></svg><svg *ngIf="cell.status === 'FREE'" class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="m8 12 2.5 2.5L16 9"/></svg></span>
                 <span class="cell-label" *ngIf="cell.status === 'TEACHING'">
                     {{ cell.group_name }}
                   </span>
@@ -114,7 +114,7 @@
 
     <ng-template #noSelection>
       <div class="empty-state">
-        <span class="empty-icon">👈</span>
+        <span class="empty-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m14 5-7 7 7 7M7 12h13"/></svg></span>
         <h3>Selecciona un profesor</h3>
         <p>Elige un docente de la lista para gestionar su horario habitual.</p>
       </div>

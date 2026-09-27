@@ -15,11 +15,11 @@
       (cancelled)="cancelRemoveTeacher()"
     ></app-confirmation-modal>
     <button class="btn-refresh" type="button" (click)="loadCalendar()" [disabled]="isLoading">
-      ↻ Actualizar
+      <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.9-3M4 5v4h4M4 13a8 8 0 0 0 14.9 3M20 19v-4h-4"/></svg> Actualizar
     </button>
   </div>
 
-  <div *ngIf="errorMessage" class="error-banner">⚠️ {{ errorMessage }}</div>
+  <div *ngIf="errorMessage" class="error-banner"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 9v5M12 17h.01"/></svg> {{ errorMessage }}</div>
   <div *ngIf="toastMessage" class="toast" (click)="toastMessage = ''">{{ toastMessage }}</div>
   <div *ngIf="isLoading" class="loading-label">Cargando calendario...</div>
 
@@ -42,7 +42,7 @@
         <td *ngFor="let day of days" class="short-term-cell">
           <ng-container *ngIf="getTeachers(day, period).length; else noTeacher">
             <div *ngFor="let teacher of getTeachers(day, period)" class="teacher-pill">
-              <span>👤 {{ teacher.name }}</span><button type="button" class="chip-remove" (click)="removeTeacher(teacher, day, period)">×</button>
+              <span><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21a7 7 0 0 1 14 0"/></svg> {{ teacher.name }}</span><button type="button" class="chip-remove" (click)="removeTeacher(teacher, day, period)" aria-label="Quitar docente"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
             </div>
             <button type="button" class="add-duty" (click)="openAdd(day, period)">+ Añadir docente</button>
           </ng-container>

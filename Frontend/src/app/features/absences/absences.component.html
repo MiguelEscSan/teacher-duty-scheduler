@@ -68,7 +68,7 @@
         <tbody>
         <tr *ngFor="let item of absences">
           <td colspan="7" *ngIf="item.is_duty_absence" class="duty-alert">
-            <strong>⚠️ {{ item.alert_message || 'Docente ausente en franja de retén/guardia' }}</strong>
+            <strong><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 9v5M12 17h.01"/></svg> {{ item.alert_message || 'Docente ausente en franja de retén/guardia' }}</strong>
             <button type="button" (click)="autoCoverDuties(item)" [disabled]="autoCoverLoading">{{ autoCoverLoading ? 'Resolviendo...' : 'Auto-cubrir guardias' }}</button>
             <button type="button" (click)="openManualCoverModal(item)">Cubrir a mano</button>
           </td>
@@ -195,7 +195,7 @@
   <section class="cover-result" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
     <h3>Resumen de auto-cobertura</h3>
     <p *ngFor="let coverage of autoCoverResult.coverages">P{{ coverage.period }}: {{ coverage.message }}<span *ngIf="coverage.substitute_teacher_name"> — {{ coverage.substitute_teacher_name }}</span></p>
-    <p *ngFor="let alert of autoCoverResult.alerts" class="warning">⚠️ {{ alert }}</p>
+    <p *ngFor="let alert of autoCoverResult.alerts" class="warning"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 9v5M12 17h.01"/></svg> {{ alert }}</p>
     <button type="button" class="btn-filter" (click)="closeAutoCoverResult()">Cerrar</button>
   </section>
 </div>
