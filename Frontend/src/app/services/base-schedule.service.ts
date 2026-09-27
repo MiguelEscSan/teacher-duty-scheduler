@@ -1,8 +1,25 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject, tap } from 'rxjs';
-import { BaseSlot, StudentGroup } from '../models/schedule.model';
+import { BaseSlot, DutySlot, StudentGroup } from '../models/schedule.model';
 import { API_URL } from './api-url';
+
+export type DutyType = 'FIXED_DUTY' | 'SHORT_TERM';
+
+export interface DutyAssignmentPayload {
+  teacher_id: string;
+  day_of_week: number;
+  period: number;
+  duty_type: DutyType;
+}
+
+export interface DutyAssignmentResponse {
+  message: string;
+  teacher_id: string;
+  day_of_week: number;
+  period: number;
+  duty_type: DutyType;
+}
 
 @Injectable({ providedIn: 'root' })
 export class BaseScheduleService {
@@ -57,11 +74,30 @@ export class BaseScheduleService {
     return this.http.get<BaseSlot[][]>(`${API_URL}/base-schedule/${teacherId}`);
   }
 
-  toggleSlot(teacherId: string, day: number, period: number): Observable<any> {
-    return this.http.put(`${API_URL}/base-schedule/toggle`, {
-      teacher_id: teacherId,
-      day,
-      period
+  getDutyTeachers(filters?: { day_of_week?: number; period?: number }): Observable<DutySlot[]> {
+    return this.http.get<DutySlot[]>(`${API_URL}/base-schedule/duty`, {
+      params: this.toDutyParams(filters)
     });
+  }
+
+  getShortTermTeachers(filters?: { day_of_week?: number; period?: number }): Observable<DutySlot[]> {
+    return this.http.get<DutySlot[]>(`${API_URL}/base-schedule/short-term`, {
+      params: this.toDutyParams(filters)
+    });
+  }
+
+  assignDuty(payload: DutyAssignmentPayload): Observable<DutyAssignmentResponse> {
+    return this.http.post<DutyAssignmentResponse>(`${API_URL}/base-schedule/duty-assignment`, payload);
+  }
+
+  removeDuty(payload: DutyAssignmentPayload): Observable<DutyAssignmentResponse> {
+    return this.http.delete<DutyAssignmentResponse>(`${API_URL}/base-schedule/duty-assignment`, { body: payload });
+  }
+
+  private toDutyParams(filters?: { day_of_week?: number; period?: number }): Record<string, string> {
+    const params: Record<string, string> = {};
+    if (filters?.day_of_week !== undefined) params['day_of_week'] = filters.day_of_week.toString();
+    if (filters?.period !== undefined) params['period'] = filters.period.toString();
+    return params;
   }
 }

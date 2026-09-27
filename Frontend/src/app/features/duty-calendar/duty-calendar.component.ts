@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DutySlot, Teacher } from '../../models/schedule.model';
 import { TeachersService } from '../../services/teachers.service';
-import { SchedulesService } from '../../services/schedules.service';
+import { BaseScheduleService } from '../../services/base-schedule.service';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
@@ -15,7 +15,7 @@ import { ConfirmationModalComponent } from '../../shared/components/confirmation
 })
 export class DutyCalendarComponent implements OnInit {
   private api = inject(TeachersService);
-  private schedulesApi = inject(SchedulesService);
+  private schedulesApi = inject(BaseScheduleService);
 
   dutySlots: DutySlot[] = [];
   isLoading = false;

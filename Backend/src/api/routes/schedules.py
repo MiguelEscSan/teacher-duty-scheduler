@@ -24,14 +24,6 @@ from src.domain.exceptions.invalid_operation_exception import InvalidOperationEx
 router = APIRouter(prefix="/api/v1/base-schedule", tags=["Schedules & Absences"])
 
 
-@router.get("/{teacher_id}")
-def get_teacher_base_schedule(teacher_id: str, mediator: Mediator = Depends(get_mediator)):
-    try:
-        return mediator.send(GetTeacherBaseScheduleQuery(teacher_id=teacher_id))
-    except ValueError as ex:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ex))
-
-
 @router.put("/assign-slot")
 def assign_slot_group(payload: SlotToggleRequest, mediator: Mediator = Depends(get_mediator)):
     cmd = AssignSlotGroupCommand(
@@ -117,3 +109,11 @@ def remove_teacher_duty(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ex))
     except InvalidOperationException as ex:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ex))
+
+
+@router.get("/{teacher_id}")
+def get_teacher_base_schedule(teacher_id: str, mediator: Mediator = Depends(get_mediator)):
+    try:
+        return mediator.send(GetTeacherBaseScheduleQuery(teacher_id=teacher_id))
+    except ValueError as ex:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ex))
