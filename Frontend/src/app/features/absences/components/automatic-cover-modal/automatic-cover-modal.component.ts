@@ -13,7 +13,7 @@ import { PeriodResolveResponse } from '../../../../models/substitutions.model';
 })
 export class AutomaticCoverModalComponent implements OnInit {
   @Input() absence!: Absence;
-  @Output() confirmed = new EventEmitter<void>();
+  @Output() confirmed = new EventEmitter<PeriodResolveResponse>();
   @Output() cancelled = new EventEmitter<void>();
 
   private substitutionsApi = inject(SubstitutionsService);
@@ -43,6 +43,7 @@ export class AutomaticCoverModalComponent implements OnInit {
       next: (response) => {
         this.resolution = response;
         this.loading = false;
+        if (response.resolved) this.confirmed.emit(response);
       },
       error: (err) => {
         console.error(err);

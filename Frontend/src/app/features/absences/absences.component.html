@@ -91,6 +91,7 @@
           <td>
             {{ item.reason }}
             <span *ngIf="item.resolved" class="resolved-badge">Resuelta</span>
+            <span *ngIf="item.substitute_name" class="text-muted"> — {{ item.substitute_name }}</span>
           </td>
 
           <!-- Columna de menú de 3 puntos -->
@@ -186,7 +187,7 @@
 <app-automatic-cover-modal
   *ngIf="selectedAbsenceForAutomaticCover"
   [absence]="selectedAbsenceForAutomaticCover"
-  (confirmed)="onAutomaticCoverConfirmed()"
+  (confirmed)="onAutomaticCoverConfirmed($event)"
   (cancelled)="onAutomaticCoverCancelled()"
 >
 </app-automatic-cover-modal>

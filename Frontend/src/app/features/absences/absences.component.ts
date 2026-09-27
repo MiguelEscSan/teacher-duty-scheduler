@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { AbsencesService } from '../../services/absences.service';
 import { SubstitutionsService } from '../../services/substitutions.service';
 import { TeachersService } from '../../services/teachers.service';
@@ -65,20 +65,23 @@ export class AbsencesComponent implements OnInit {
       this.teachers = t;
       if (t.length > 0) this.newAbsence.teacher_id = t[0].id!;
     });
-    this.loadAbsences();
+    this.loadAbsences().subscribe();
   }
 
-  loadAbsences(): void {
-    this.absencesApi.getAbsences({
+  loadAbsences() {
+    return this.absencesApi.getAbsences({
       from_date: this.filters.date || undefined,
       teacher_id: this.filters.teacher_id || undefined,
       resolved: this.filters.status === 'all' ? undefined : this.filters.status === 'resolved'
-    }).subscribe(a => this.absences = a);
+    }).pipe(map(a => {
+      this.absences = a;
+      return a;
+    }));
   }
 
   clearFilters(): void {
     this.filters = { date: this.todayDate(), teacher_id: '', status: 'all' };
-    this.loadAbsences();
+    this.loadAbsences().subscribe();
   }
 
   private todayDate(): string {
@@ -89,10 +92,9 @@ export class AbsencesComponent implements OnInit {
   }
 
   submitAbsence(): void {
-    this.absencesApi.addAbsence(this.newAbsence).subscribe(() => {
-      this.loadAbsences();
-      this.showAbsenceModal = false;
-    });
+    this.absencesApi.addAbsence(this.newAbsence).pipe(
+      switchMap(() => this.loadAbsences())
+    ).subscribe(() => this.showAbsenceModal = false);
   }
 
   openAbsenceModal(): void {
@@ -137,8 +139,7 @@ export class AbsencesComponent implements OnInit {
       this.bulkActionLoading = false;
       this.clearAbsenceSelection();
       this.bulkFailureMessage = failed ? `${selected.length - failed} ausencias marcadas como no cubrir y ${failed} fallaron.` : '';
-      this.loadAbsences();
-      this.redirectToHistory(this.firstAbsenceDate(selected));
+      this.loadAbsences().subscribe(() => this.redirectToHistory(this.firstAbsenceDate(selected)));
     });
   }
 
@@ -157,8 +158,7 @@ export class AbsencesComponent implements OnInit {
       this.bulkActionLoading = false;
       this.clearAbsenceSelection();
       this.bulkFailureMessage = failed ? `${selected.length - failed} ausencias auto-cubiertas y ${failed} fallaron.` : '';
-      this.loadAbsences();
-      this.redirectToHistory(this.firstAbsenceDate(selected));
+      this.loadAbsences().subscribe(() => this.redirectToHistory(this.firstAbsenceDate(selected)));
     });
   }
 
@@ -178,17 +178,18 @@ export class AbsencesComponent implements OnInit {
     forkJoin(results).subscribe(responses => {
       const failures = responses.filter(response => !response.success);
       const saved = responses.length - failures.length;
-      this.showAbsenceModal = false;
       this.bulkFailureMessage = failures.length
         ? `${saved} ausencias guardadas. ${failures.length} no se pudieron registrar: ${failures.map(item => `${item.absence.date} P${item.absence.period} (${this.teacherName(item.absence.teacher_id)}): ${item.message}`).join('; ')}`
         : '';
-      this.loadAbsences();
-      if (!failures.length) {
-        this.router.navigate(['/substitutions/history'], {
-          queryParams: { date: this.firstAbsenceDate(absences) },
-          state: { successMessage: `${saved} ausencias registradas correctamente. Redirigiendo al seguimiento de sustituciones...` }
-        });
-      }
+      this.loadAbsences().subscribe(() => {
+        this.showAbsenceModal = false;
+        if (!failures.length) {
+          this.router.navigate(['/substitutions/history'], {
+            queryParams: { date: this.firstAbsenceDate(absences) },
+            state: { successMessage: `${saved} ausencias registradas correctamente. Redirigiendo al seguimiento de sustituciones...` }
+          });
+        }
+      });
     });
   }
 
@@ -246,15 +247,16 @@ export class AbsencesComponent implements OnInit {
         this.bulkFailureMessage = failed ? `${selected.length - failed} sustituciones registradas y ${failed} fallaron.` : '';
         this.selectedAbsenceForManualCover = null;
         this.clearAbsenceSelection();
-        this.loadAbsences();
-        if (!failed) this.redirectToHistory(firstDate);
+        this.loadAbsences().subscribe(() => {
+          if (!failed) this.redirectToHistory(firstDate);
+        });
       });
       return;
     }
     const firstDate = this.firstAbsenceDate(this.selectedAbsences);
     this.selectedAbsenceForManualCover = null;
     this.clearAbsenceSelection();
-    this.loadAbsences(); // Recarga la tabla para reflejar la sustitución
+    this.loadAbsences().subscribe(); // Recarga la tabla para reflejar la sustitución
     if (wasBulk) this.redirectToHistory(firstDate);
   }
 
@@ -271,7 +273,7 @@ export class AbsencesComponent implements OnInit {
       period: absence.period,
       absent_teacher_id: absence.teacher_id
     }).subscribe(() => {
-      this.loadAbsences();
+      this.loadAbsences().subscribe();
     });
   }
 
@@ -291,16 +293,33 @@ export class AbsencesComponent implements OnInit {
       group_id: absence.group_id,
       action: 'AUTO_ASSIGN'
     }).subscribe({
-      next: result => { this.autoCoverResult = result; this.autoCoverLoading = false; this.loadAbsences(); },
+      next: result => {
+        this.autoCoverResult = result;
+        this.autoCoverLoading = false;
+        const updatedAbsence = this.absences.find(item =>
+          item.date === result.date && item.period === result.period
+        );
+        if (updatedAbsence) {
+          updatedAbsence.resolved = result.resolved;
+          updatedAbsence.substitute_name = result.substitute_name;
+        }
+        this.loadAbsences().subscribe();
+      },
       error: err => { this.errorMessage = err?.error?.detail || 'No se pudo resolver automáticamente la sustitución.'; this.autoCoverLoading = false; }
     });
   }
 
   closeAutoCoverResult(): void { this.autoCoverResult = null; }
 
-  onAutomaticCoverConfirmed(): void {
-    this.selectedAbsenceForAutomaticCover = null;
-    this.loadAbsences();
+  onAutomaticCoverConfirmed(result: PeriodResolveResponse): void {
+    const absence = this.absences.find(item =>
+      item.date === result.date && item.period === result.period
+    );
+    if (absence) {
+      absence.resolved = result.resolved;
+      absence.substitute_name = result.substitute_name;
+    }
+    this.loadAbsences().subscribe();
   }
 
   onAutomaticCoverCancelled(): void {
@@ -312,7 +331,7 @@ export class AbsencesComponent implements OnInit {
     this.activeMenuId = null;
     if (id === undefined) return;
     this.absencesApi.deleteAbsence(id).subscribe(() => {
-      this.loadAbsences();
+      this.loadAbsences().subscribe();
     });
   }
 }

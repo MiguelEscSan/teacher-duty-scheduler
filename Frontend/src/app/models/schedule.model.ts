@@ -36,6 +36,7 @@ export interface Absence {
   group_id?: string;
   group_name?: string;
   student_count?: number | null;
+  substitute_name?: string | null;
   reason: string;
   is_duty_absence?: boolean;
   alert_message?: string;
