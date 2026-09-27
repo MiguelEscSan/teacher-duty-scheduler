@@ -16,7 +16,7 @@
       </button>
     </div>
 
-    <form class="filters" (ngSubmit)="loadAbsences()">
+    <form class="filters" (ngSubmit)="applyFilters()">
       <div class="form-group">
         <label for="absenceFilterDate">Fecha</label>
         <input id="absenceFilterDate" type="date" [(ngModel)]="filters.date" name="filter_date">

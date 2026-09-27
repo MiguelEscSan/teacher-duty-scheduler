@@ -79,6 +79,10 @@ export class AbsencesComponent implements OnInit {
     }));
   }
 
+  applyFilters(): void {
+    this.loadAbsences().subscribe();
+  }
+
   clearFilters(): void {
     this.filters = { date: this.todayDate(), teacher_id: '', status: 'all' };
     this.loadAbsences().subscribe();
