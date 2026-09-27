@@ -426,6 +426,28 @@
   text-overflow: ellipsis;
 }
 
+.teacher-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.btn-icon-edit {
+  flex: 0 0 auto;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #2563eb;
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.btn-icon-edit:hover {
+  color: #1d4ed8;
+}
+
 .teacher-dept {
   font-size: 0.75rem;
   color: #64748b;

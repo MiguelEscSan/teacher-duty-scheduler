@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 export class TeacherFormModalComponent {
   @Input() teacher = { name: '', department: 'Matemáticas', email: '' };
   @Input() departments: string[] = [];
+  @Input() isEditing = false;
   @Output() saved = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
 

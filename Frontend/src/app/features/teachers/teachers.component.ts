@@ -25,6 +25,7 @@ export class TeachersComponent implements OnInit {
   teacherSchedule: BaseSlot[][] = [];
   teacherSearch = '';
   showTeacherModal = false;
+  editingTeacherId: string | null = null;
   activeTab: 'teachers' | 'groups' = 'teachers';
   teacherIdToRemove: string | null = null;
 
@@ -163,25 +164,48 @@ export class TeachersComponent implements OnInit {
 
   saveTeacher(): void {
     if (!this.newTeacher.name.trim()) return;
-    this.teachersApi.addTeacher({
+    const payload = {
       name: this.newTeacher.name.trim(),
       department: this.newTeacher.department,
       email: this.newTeacher.email.trim() || undefined
-    }).subscribe((created) => {
-      this.newTeacher.name = '';
-      this.newTeacher.email = '';
-      this.teachers.push(created);
-      this.selectTeacher(created);
+    };
+    const request = this.editingTeacherId
+      ? this.teachersApi.updateTeacher(this.editingTeacherId, payload)
+      : this.teachersApi.addTeacher(payload);
+    request.subscribe((saved) => {
+      if (this.editingTeacherId) {
+        const index = this.teachers.findIndex(t => t.id === saved.id);
+        if (index >= 0) this.teachers[index] = saved;
+      } else {
+        this.teachers.push(saved);
+      }
+      this.newTeacher = { name: '', department: 'Matemáticas', email: '' };
+      this.editingTeacherId = null;
+      this.selectTeacher(saved);
       this.showTeacherModal = false;
     });
   }
 
   openTeacherModal(): void {
+    this.editingTeacherId = null;
+    this.newTeacher = { name: '', department: 'Matemáticas', email: '' };
+    this.showTeacherModal = true;
+  }
+
+  openEditTeacherModal(teacher: Teacher): void {
+    if (!teacher.id) return;
+    this.editingTeacherId = teacher.id;
+    this.newTeacher = {
+      name: teacher.name,
+      department: teacher.department,
+      email: teacher.email || ''
+    };
     this.showTeacherModal = true;
   }
 
   closeTeacherModal(): void {
     this.showTeacherModal = false;
+    this.editingTeacherId = null;
   }
 
   removeTeacher(id: string): void {

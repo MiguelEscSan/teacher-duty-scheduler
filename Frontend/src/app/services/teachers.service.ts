@@ -16,6 +16,10 @@ export class TeachersService {
     return this.http.post<Teacher>(`${API_URL}/teachers`, teacher);
   }
 
+  updateTeacher(id: string, teacher: Pick<Teacher, 'name' | 'department' | 'email'>): Observable<Teacher> {
+    return this.http.put<Teacher>(`${API_URL}/teachers/${id}`, teacher);
+  }
+
   deleteTeacher(id: string): Observable<any> {
     return this.http.delete(`${API_URL}/teachers/${id}`);
   }

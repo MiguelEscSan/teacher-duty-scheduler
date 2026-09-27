@@ -8,10 +8,12 @@ from src.api.schemas import (
     DutySlotOut,
     TeacherCreate,
     TeacherResponse,
+    TeacherUpdate,
 )
 from src.application.common.mediator import Mediator
 from src.application.teachers.commands.create_teacher import CreateTeacherCommand
 from src.application.teachers.commands.delete_teacher import DeleteTeacherCommand
+from src.application.teachers.commands.update_teacher import UpdateTeacherCommand
 from src.application.teachers.commands.manage_duty_assignment import AssignTeacherDutyCommand
 from src.application.teachers.commands.remove_duty_assignment import RemoveTeacherDutyCommand
 from src.application.teachers.queries.get_duty_teachers import GetDutyTeachersQuery
@@ -39,6 +41,27 @@ def create_teacher(
         email=dto.email,
     )
     return mediator.send(cmd)
+
+
+@router.put("/{teacher_id}", response_model=TeacherResponse)
+def update_teacher(
+    teacher_id: str,
+    dto: TeacherUpdate,
+    mediator: Mediator = Depends(get_mediator),
+):
+    try:
+        return mediator.send(
+            UpdateTeacherCommand(
+                teacher_id=teacher_id,
+                name=dto.name,
+                department=dto.department,
+                email=dto.email,
+            )
+        )
+    except EntityNotFoundException as ex:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ex))
+    except ValueError as ex:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(ex))
 
 
 @router.get("/duty", response_model=List[DutySlotOut])

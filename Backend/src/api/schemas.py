@@ -15,6 +15,15 @@ class TeacherCreate(BaseModel):
         default=None, description="Correo electrónico del profesor"
     )
 
+class TeacherUpdate(BaseModel):
+    name: str = Field(min_length=2, description="Nombre completo del profesor")
+    department: str = Field(
+        default="General", description="Departamento al que pertenece"
+    )
+    email: Optional[str] = Field(
+        default=None, description="Correo electrónico del profesor"
+    )
+
 class TeacherResponse(BaseModel):
     id: str  # GUID devuelto al cliente
     name: str

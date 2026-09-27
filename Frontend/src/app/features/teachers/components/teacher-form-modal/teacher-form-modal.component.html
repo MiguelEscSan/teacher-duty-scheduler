@@ -3,8 +3,8 @@
            (click)="$event.stopPropagation()">
     <header class="modal-header">
       <div>
-        <h3 id="teacherModalTitle">Registrar profesor</h3>
-        <p>Introduce los datos del nuevo docente.</p>
+        <h3 id="teacherModalTitle">{{ isEditing ? 'Editar profesor' : 'Registrar profesor' }}</h3>
+        <p>{{ isEditing ? 'Actualiza los datos de contacto del docente.' : 'Introduce los datos del nuevo docente.' }}</p>
       </div>
       <button type="button" class="btn-close" (click)="close()" aria-label="Cerrar">&times;</button>
     </header>
@@ -26,7 +26,7 @@
 
       <footer class="modal-actions">
         <button type="button" class="btn btn-outline" (click)="close()">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar profesor</button>
+        <button type="submit" class="btn btn-primary">{{ isEditing ? 'Guardar cambios' : 'Guardar profesor' }}</button>
       </footer>
     </form>
   </section>

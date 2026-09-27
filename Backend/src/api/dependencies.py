@@ -97,6 +97,10 @@ from src.application.teachers.commands.delete_teacher import (
     DeleteTeacherCommand,
     DeleteTeacherHandler,
 )
+from src.application.teachers.commands.update_teacher import (
+    UpdateTeacherCommand,
+    UpdateTeacherHandler,
+)
 from src.application.teachers.queries.get_duty_teachers import (
     GetDutyTeachersHandler,
     GetDutyTeachersQuery,
@@ -197,6 +201,9 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
     mediator.register(
         DeleteTeacherCommand,
         lambda: DeleteTeacherHandler(teacher_repository, absence_repository, schedule_repository),
+    )
+    mediator.register(
+        UpdateTeacherCommand, lambda: UpdateTeacherHandler(teacher_repository)
     )
     mediator.register(
         AssignSlotGroupCommand, lambda: AssignSlotGroupHandler(schedule_repository)

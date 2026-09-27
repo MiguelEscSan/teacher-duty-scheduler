@@ -47,7 +47,12 @@
         <div class="teacher-info">
           <span class="teacher-avatar">{{ t.name.charAt(0) }}</span>
           <div class="teacher-texts">
-            <div class="teacher-name">{{ t.name }}</div>
+            <div class="teacher-name-row">
+              <div class="teacher-name">{{ t.name }}</div>
+              <button class="btn-icon-edit" type="button"
+                      (click)="$event.stopPropagation(); openEditTeacherModal(t)"
+                      title="Editar docente" aria-label="Editar docente">✎</button>
+            </div>
             <div class="teacher-dept">{{ t.department }}</div>
           </div>
         </div>
@@ -132,6 +137,7 @@
   *ngIf="showTeacherModal"
   [teacher]="newTeacher"
   [departments]="departments"
+  [isEditing]="editingTeacherId !== null"
   (saved)="saveTeacher()"
   (cancelled)="closeTeacherModal()"
 ></app-teacher-form-modal>
