@@ -76,7 +76,7 @@ class SQLSubstitutionRepository(SubstitutionRepository):
         item.group_id = log.group_id
         item.created_at = log.created_at
         self.session.add(item)
-        self.session.commit()
+        self.session.flush()
         self.session.refresh(item)
 
     def get_busy_teacher_ids(self, date, period):
@@ -148,4 +148,3 @@ class SQLSubstitutionRepository(SubstitutionRepository):
         for log in logs:
             log.group_id = None
             self.session.add(log)
-        self.session.commit()

@@ -2,6 +2,8 @@
 from typing import Any, Callable, Dict, Generic, Type, TypeVar
 from dataclasses import dataclass
 
+from src.domain.ports.transaction_manager import TransactionManager
+
 TResult = TypeVar("TResult")
 TRequest = TypeVar("TRequest")
 
@@ -34,8 +36,11 @@ class Mediator:
     de su ejecutor concreto.
     """
 
-    def __init__(self):
+    def __init__(
+        self, transaction_manager_factory: Callable[[], TransactionManager] | None = None
+    ):
         self._handlers: Dict[Type[Request], Callable[[], RequestHandler]] = {}
+        self._transaction_manager_factory = transaction_manager_factory
 
     def register(
             self,
@@ -54,4 +59,10 @@ class Mediator:
             raise KeyError(f"No hay handler registrado para {request_type.__name__}")
 
         handler = handler_factory()
-        return handler.handle(request)
+        if self._transaction_manager_factory is None or not isinstance(request, Command):
+            return handler.handle(request)
+
+        with self._transaction_manager_factory() as transaction_manager:
+            result = handler.handle(request)
+            transaction_manager.commit()
+            return result

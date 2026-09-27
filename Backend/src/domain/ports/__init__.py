@@ -10,6 +10,7 @@ from src.domain.ports.schedule_repository import ScheduleRepository
 from src.domain.ports.student_group_repository import StudentGroupRepository
 from src.domain.ports.substitution_repository import SubstitutionRepository
 from src.domain.ports.teacher_repository import TeacherRepository
+from src.domain.ports.transaction_manager import TransactionManager
 
 __all__ = [
     "AbsenceRepository",
@@ -18,4 +19,5 @@ __all__ = [
     "StudentGroupRepository",
     "SubstitutionRepository",
     "TeacherRepository",
+    "TransactionManager",
 ]

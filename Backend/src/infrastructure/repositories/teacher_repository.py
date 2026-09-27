@@ -38,7 +38,7 @@ class SQLTeacherRepository(TeacherRepository):
         item.department = teacher.department
         item.email = str(teacher.email) if teacher.email else None
         self.session.add(item)
-        self.session.commit()
+        self.session.flush()
         self.session.refresh(item)
         return self._to_domain(item)
 
@@ -47,7 +47,6 @@ class SQLTeacherRepository(TeacherRepository):
         if item is None:
             return False
         self.session.delete(item)
-        self.session.commit()
         return True
 
     def _set_fixed_duty_schedule_state(
@@ -82,7 +81,6 @@ class SQLTeacherRepository(TeacherRepository):
                 )
             )
         self._set_fixed_duty_schedule_state(teacher_id, day_of_week, period, False)
-        self.session.commit()
 
     def remove_fixed_duty(self, teacher_id: str, day_of_week: int, period: int) -> bool:
         item = self.session.exec(
@@ -107,7 +105,6 @@ class SQLTeacherRepository(TeacherRepository):
             if schedule.is_teaching:
                 schedule.slot_type = "TEACHING"
             self.session.add(schedule)
-        self.session.commit()
         return True
 
     def add_short_term_duty(self, teacher_id: str, day_of_week: int, period: int) -> None:
@@ -126,7 +123,6 @@ class SQLTeacherRepository(TeacherRepository):
                     period=period,
                 )
             )
-        self.session.commit()
 
     def remove_short_term_duty(
         self, teacher_id: str, day_of_week: int, period: int
@@ -141,7 +137,6 @@ class SQLTeacherRepository(TeacherRepository):
         if item is None:
             return False
         self.session.delete(item)
-        self.session.commit()
         return True
 
     def is_teacher_in_fixed_duty(

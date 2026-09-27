@@ -114,6 +114,7 @@ from src.application.teachers.queries.get_teachers import (
     GetTeachersQuery,
 )
 from src.infrastructure.db.config import get_session
+from src.infrastructure.db.transaction_manager import SQLTransactionManager
 from src.infrastructure.email.smtp_email_sender import SMTPEmailSender
 from src.infrastructure.optimization.ortools_guard_optimizer import ORToolsGuardOptimizer
 from src.infrastructure.repositories import (
@@ -159,7 +160,7 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
         substitution_repository,
     )
     optimizer = ORToolsGuardOptimizer()
-    mediator = Mediator()
+    mediator = Mediator(lambda: SQLTransactionManager(session))
 
     mediator.register(
         CalculateWeekGuardsQuery,

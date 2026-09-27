@@ -45,12 +45,10 @@ class SQLStudentGroupRepository(StudentGroupRepository):
         else:
             record.name = group.name
             record.student_count = group.student_count
-        self.session.commit()
 
     def delete(self, group_id: str) -> bool:
         record = self.session.get(StudentGroupDB, group_id)
         if record is None:
             return False
         self.session.delete(record)
-        self.session.commit()
         return True

@@ -68,7 +68,7 @@ class SQLScheduleRepository(ScheduleRepository):
         item.is_teaching = entry.is_teaching
         item.slot_type = entry.effective_status.value
         self.session.add(item)
-        self.session.commit()
+        self.session.flush()
         self.session.refresh(item)
         return self._to_domain(item)
 
@@ -77,7 +77,6 @@ class SQLScheduleRepository(ScheduleRepository):
             select(TeacherScheduleDB).where(TeacherScheduleDB.teacher_id == teacher_id)
         ).all():
             self.session.delete(item)
-        self.session.commit()
 
     def get_fixed_duty_teacher_ids(self, day_of_week, period):
         return [
@@ -107,7 +106,6 @@ class SQLScheduleRepository(ScheduleRepository):
                 select(model).where(model.teacher_id == teacher_id)
             ).all():
                 self.session.delete(item)
-        self.session.commit()
 
     def release_slots_for_group(self, group_id):
         slots = self.session.exec(
@@ -118,4 +116,3 @@ class SQLScheduleRepository(ScheduleRepository):
             slot.is_teaching = False
             slot.slot_type = "FREE"
             self.session.add(slot)
-        self.session.commit()

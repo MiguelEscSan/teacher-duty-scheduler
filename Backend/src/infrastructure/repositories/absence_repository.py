@@ -77,7 +77,7 @@ class SQLAbsenceRepository(AbsenceRepository):
             item.reason = absence.reason
             item.resolved = absence.resolved
         self.session.add(item)
-        self.session.commit()
+        self.session.flush()
         self.session.refresh(item)
         return self._to_domain(item)
 
@@ -86,5 +86,4 @@ class SQLAbsenceRepository(AbsenceRepository):
         if item is None:
             return False
         self.session.delete(item)
-        self.session.commit()
         return True
