@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from src.api.schemas import AvailableTeacherOut
 from src.application.common.mediator import Query, RequestHandler
+from src.application.substitutions.dtos.available_teacher import AvailableTeacherDto
 from src.domain.ports import SubstitutionRepository
 from src.domain.ports.absence_repository import AbsenceRepository
 from src.domain.ports.schedule_repository import ScheduleRepository
@@ -10,13 +10,13 @@ from src.domain.ports.teacher_repository import TeacherRepository
 
 
 @dataclass(frozen=True)
-class GetAvailableCandidatesQuery(Query[list[AvailableTeacherOut]]):
+class GetAvailableCandidatesQuery(Query[list[AvailableTeacherDto]]):
     date_str: str
     period: int
 
 
 class GetAvailableCandidatesHandler(
-    RequestHandler[GetAvailableCandidatesQuery, list[AvailableTeacherOut]]
+    RequestHandler[GetAvailableCandidatesQuery, list[AvailableTeacherDto]]
 ):
     def __init__(
         self,
@@ -30,7 +30,7 @@ class GetAvailableCandidatesHandler(
         self.schedule_repository = schedule_repository
         self.substitution_repository = substitution_repository
 
-    def handle(self, request: GetAvailableCandidatesQuery) -> list[AvailableTeacherOut]:
+    def handle(self, request: GetAvailableCandidatesQuery) -> list[AvailableTeacherDto]:
         day = datetime.strptime(request.date_str, "%Y-%m-%d").weekday()
         if day > 4:
             return []
@@ -61,7 +61,7 @@ class GetAvailableCandidatesHandler(
                 continue
             duty_type = "FIXED_DUTY" if teacher.id in fixed else "SHORT_TERM" if teacher.id in short else "FREE"
             candidates.append(
-                AvailableTeacherOut(
+                AvailableTeacherDto(
                     id=teacher.id, name=teacher.name, department=teacher.department,
                     duty_type=duty_type, interventions_count=counts.get(teacher.id, 0),
                 )

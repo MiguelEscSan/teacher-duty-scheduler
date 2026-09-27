@@ -2,7 +2,6 @@ from datetime import datetime
 
 import pytest
 
-from src.api.schemas import ResolutionAction
 from src.application.substitutions.commands.assign_manual_substitution import (
     AssignManualSubstitutionCommand,
     AssignManualSubstitutionHandler,

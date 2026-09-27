@@ -1,5 +1,5 @@
 from typing import Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from enum import Enum
 from typing import Literal, Optional
 from datetime import datetime
@@ -25,6 +25,7 @@ class TeacherUpdate(BaseModel):
     )
 
 class TeacherResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: str  # GUID devuelto al cliente
     name: str
     department: str
@@ -58,6 +59,7 @@ class SlotCellResponse(BaseModel):
 
 
 class StudentGroupResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: str
     name: str
     student_count: Optional[int] = None
@@ -91,6 +93,7 @@ class AbsenceCreate(BaseModel):
     reason: str = "Permiso / Asunto propio"
 
 class AbsenceResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: str
     teacher_id: str
     teacher_name: str
@@ -138,6 +141,7 @@ class SubstitutionEmailRequest(BaseModel):
 
 
 class PeriodResolveResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     date: str
     period: int
     resolved: bool
@@ -153,6 +157,7 @@ class PeriodResolveResponse(BaseModel):
     details: str
 
 class AvailableTeacherOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: str
     name: str
     department: str
@@ -161,6 +166,7 @@ class AvailableTeacherOut(BaseModel):
 
 
 class DutySlotOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     day_of_week: int
     day_name: str
     period: int
@@ -191,6 +197,7 @@ class ManualAssignmentIn(BaseModel):
 
 
 class SubstitutionHistoryOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: str
     date: str
     period: int
@@ -205,6 +212,7 @@ class SubstitutionHistoryOut(BaseModel):
 
 
 class SubstitutionInterventionsSummaryOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     teacher_id: str
     teacher_name: str
     ordinary_guard_count: int

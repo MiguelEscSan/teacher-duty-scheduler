@@ -1,10 +1,10 @@
 import pytest
 
-from src.api.schemas import ResolutionAction
 from src.application.substitutions.commands.resolve_substitution import (
     ResolveSubstitutionCommand,
     ResolveSubstitutionHandler,
 )
+from src.application.substitutions.dtos.resolution_action import ResolutionAction
 from src.domain.absence import Absence
 from src.domain.exceptions.absence_already_resolved_exception import AbsenceAlreadyResolvedException
 from src.domain.student_group import StudentGroup

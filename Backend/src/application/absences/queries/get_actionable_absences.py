@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from src.api.schemas import AbsenceResponse
 from src.application.common.mediator import Query, RequestHandler
+from src.application.absences.dtos.absence_response import AbsenceResponseDto
 from src.domain.ports.absence_repository import AbsenceRepository
 from src.domain.ports.schedule_repository import ScheduleRepository
 from src.domain.ports.student_group_repository import StudentGroupRepository
@@ -10,14 +10,14 @@ from src.domain.ports.teacher_repository import TeacherRepository
 
 
 @dataclass(frozen=True)
-class GetActionableAbsencesQuery(Query[list[AbsenceResponse]]):
+class GetActionableAbsencesQuery(Query[list[AbsenceResponseDto]]):
     date: str | None = None
     teacher_id: str | None = None
     resolved: bool | None = None
     from_date: str | None = None
 
 
-class GetActionableAbsencesHandler(RequestHandler[GetActionableAbsencesQuery, list[AbsenceResponse]]):
+class GetActionableAbsencesHandler(RequestHandler[GetActionableAbsencesQuery, list[AbsenceResponseDto]]):
     def __init__(
         self,
         absence_repository: AbsenceRepository,
@@ -30,7 +30,7 @@ class GetActionableAbsencesHandler(RequestHandler[GetActionableAbsencesQuery, li
         self.student_group_repository = student_group_repository
         self.schedule_repository = schedule_repository
 
-    def handle(self, query: GetActionableAbsencesQuery) -> list[AbsenceResponse]:
+    def handle(self, query: GetActionableAbsencesQuery) -> list[AbsenceResponseDto]:
         absences = self.absence_repository.get_all(
             query.date, query.teacher_id, query.resolved, query.from_date
         )
@@ -52,7 +52,7 @@ class GetActionableAbsencesHandler(RequestHandler[GetActionableAbsencesQuery, li
                 continue
             group = groups.get(group_id)
             result.append(
-                AbsenceResponse(
+                AbsenceResponseDto(
                     id=absence.id,
                     teacher_id=absence.teacher_id,
                     teacher_name=teachers.get(absence.teacher_id, absence.teacher_id),

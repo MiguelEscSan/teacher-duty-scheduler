@@ -27,7 +27,7 @@ router = APIRouter(prefix="/api/v1/teachers", tags=["Teachers"])
 
 @router.get("", response_model=list[TeacherResponse])
 def list_teachers(mediator: Mediator = Depends(get_mediator)):
-    return mediator.send(GetTeachersQuery())
+    return [TeacherResponse.model_validate(item) for item in mediator.send(GetTeachersQuery())]
 
 
 @router.post("", response_model=TeacherResponse, status_code=status.HTTP_201_CREATED)
@@ -40,7 +40,7 @@ def create_teacher(
         department=dto.department,
         email=dto.email,
     )
-    return mediator.send(cmd)
+    return TeacherResponse.model_validate(mediator.send(cmd))
 
 
 @router.put("/{teacher_id}", response_model=TeacherResponse)
@@ -50,14 +50,14 @@ def update_teacher(
     mediator: Mediator = Depends(get_mediator),
 ):
     try:
-        return mediator.send(
+        return TeacherResponse.model_validate(mediator.send(
             UpdateTeacherCommand(
                 teacher_id=teacher_id,
                 name=dto.name,
                 department=dto.department,
                 email=dto.email,
             )
-        )
+        ))
     except EntityNotFoundException as ex:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ex))
     except ValueError as ex:
@@ -70,7 +70,10 @@ def get_duty_teachers(
     period: int | None = Query(default=None, ge=0, le=5),
     mediator: Mediator = Depends(get_mediator),
 ):
-    return mediator.send(GetDutyTeachersQuery(day_of_week=day_of_week, period=period))
+    return [
+        DutySlotOut.model_validate(item)
+        for item in mediator.send(GetDutyTeachersQuery(day_of_week=day_of_week, period=period))
+    ]
 
 
 @router.get("/short-term", response_model=List[DutySlotOut])
@@ -79,9 +82,12 @@ def get_short_term_teachers(
     period: int | None = Query(default=None, ge=0, le=5),
     mediator: Mediator = Depends(get_mediator),
 ):
-    return mediator.send(
-        GetShortTermTeachersQuery(day_of_week=day_of_week, period=period)
-    )
+    return [
+        DutySlotOut.model_validate(item)
+        for item in mediator.send(
+            GetShortTermTeachersQuery(day_of_week=day_of_week, period=period)
+        )
+    ]
 
 
 @router.post("/duty-assignment", response_model=DutyAssignmentResponse)

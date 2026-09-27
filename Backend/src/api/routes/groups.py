@@ -30,11 +30,12 @@ def get_student_groups(mediator: Mediator = Depends(get_mediator)):
 def create_student_group(
     payload: StudentGroupCreate, mediator: Mediator = Depends(get_mediator)
 ):
-    return mediator.send(
+    result = mediator.send(
         CreateStudentGroupCommand(
             name=payload.name, student_count=payload.student_count
         )
     )
+    return StudentGroupResponse.model_validate(result)
 
 
 @router.put("/{group_id}", response_model=StudentGroupResponse)
@@ -43,13 +44,14 @@ def update_student_group(
     payload: StudentGroupUpdate,
     mediator: Mediator = Depends(get_mediator),
 ):
-    return mediator.send(
+    result = mediator.send(
         UpdateStudentGroupCommand(
             group_id=group_id,
             name=payload.name,
             student_count=payload.student_count,
         )
     )
+    return StudentGroupResponse.model_validate(result)
 
 
 @router.delete("/{group_id}", status_code=status.HTTP_200_OK)

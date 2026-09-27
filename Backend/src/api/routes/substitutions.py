@@ -21,6 +21,9 @@ from src.application.substitutions.commands.assign_manual_substitution import As
 from src.application.substitutions.commands.mark_absence_do_not_cover import MarkAbsenceDoNotCoverCommand
 from src.application.substitutions.commands.notify_substitution_assignment import NotifySubstitutionAssignmentCommand
 from src.application.substitutions.commands.resolve_substitution import ResolveSubstitutionCommand
+from src.application.substitutions.dtos.resolution_action import (
+    ResolutionAction as ApplicationResolutionAction,
+)
 from src.application.substitutions.commands.reassign_substitution import ReassignSubstitutionCommand
 from src.domain.exceptions.assignment_exceptions import EntityNotFoundException
 from src.domain.exceptions.invalid_operation_exception import InvalidOperationException
@@ -62,19 +65,25 @@ def get_substitution_history(
     absent_teacher_id: str | None = Query(default=None),
     mediator: Mediator = Depends(get_mediator),
 ):
-    return mediator.send(
+    return [
+        SubstitutionHistoryOut.model_validate(item)
+        for item in mediator.send(
         GetSubstitutionHistoryQuery(
             date=date,
             substitute_teacher_id=substitute_teacher_id,
             absent_teacher_id=absent_teacher_id,
         )
-    )
+        )
+    ]
 
 @router.get("/summary", response_model=List[SubstitutionInterventionsSummaryOut])
 def get_substitution_interventions_summary(
     mediator: Mediator = Depends(get_mediator),
 ):
-    return mediator.send(GetSubstitutionInterventionsSummaryQuery())
+    return [
+        SubstitutionInterventionsSummaryOut.model_validate(item)
+        for item in mediator.send(GetSubstitutionInterventionsSummaryQuery())
+    ]
 
 
 @router.post("/resolve", response_model=PeriodResolveResponse)
@@ -88,7 +97,7 @@ def resolve_substitution(
                 date=payload.date,
                 period=payload.period,
                 absent_teacher_id=payload.absent_teacher_id,
-                action=payload.action,
+                action=ApplicationResolutionAction(payload.action.value),
                 group_id=payload.group_id,
                 merged_with_group_id=payload.merged_with_group_id,
             )
@@ -137,7 +146,10 @@ def get_available_candidates(
     mediator: Mediator = Depends(get_mediator)
 ):
     query = GetAvailableCandidatesQuery(date_str=date_str, period=period)
-    return mediator.send(query)
+    return [
+        AvailableTeacherOut.model_validate(item)
+        for item in mediator.send(query)
+    ]
 
 @router.post("/assign-manual", status_code=status.HTTP_201_CREATED)
 def assign_manual_substitution(

@@ -20,12 +20,13 @@ def get_actionable_absences(
     mediator: Mediator = Depends(get_mediator),
 ):
     """Devuelve las ausencias que requieren sustitución en aula."""
-    return mediator.send(GetActionableAbsencesQuery(
+    result = mediator.send(GetActionableAbsencesQuery(
         date=date,
         from_date=from_date,
         teacher_id=teacher_id,
         resolved=resolved,
     ))
+    return [AbsenceResponse.model_validate(item) for item in result]
 
 
 @router.post("", response_model=AutoCoverDutiesResponse, status_code=status.HTTP_201_CREATED)

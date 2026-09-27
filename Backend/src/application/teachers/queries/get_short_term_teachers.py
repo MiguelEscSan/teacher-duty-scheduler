@@ -1,36 +1,37 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from src.api.schemas import DutySlotOut, TeacherResponse
 from src.application.common.mediator import Query, RequestHandler
+from src.application.teachers.dtos.duty_slot import DutySlotDto
+from src.application.teachers.dtos.teacher_response import TeacherResponseDto
 from src.domain.constants import DAY_NAMES
 from src.domain.ports.schedule_repository import ScheduleRepository
 from src.domain.ports.teacher_repository import TeacherRepository
 
 
 @dataclass(frozen=True)
-class GetShortTermTeachersQuery(Query[list[DutySlotOut]]):
+class GetShortTermTeachersQuery(Query[list[DutySlotDto]]):
     day_of_week: Optional[int] = None
     period: Optional[int] = None
 
 
-class GetShortTermTeachersHandler(RequestHandler[GetShortTermTeachersQuery, list[DutySlotOut]]):
+class GetShortTermTeachersHandler(RequestHandler[GetShortTermTeachersQuery, list[DutySlotDto]]):
     def __init__(self, schedule_repository: ScheduleRepository, teacher_repository: TeacherRepository):
         self.schedule_repository = schedule_repository
         self.teacher_repository = teacher_repository
 
-    def handle(self, query: GetShortTermTeachersQuery) -> list[DutySlotOut]:
+    def handle(self, query: GetShortTermTeachersQuery) -> list[DutySlotDto]:
         days = [query.day_of_week] if query.day_of_week is not None else range(5)
         periods = [query.period] if query.period is not None else range(6)
         teachers = {t.id: t for t in self.teacher_repository.get_all()}
-        by_slot: dict[tuple[int, int], list[TeacherResponse]] = {}
+        by_slot: dict[tuple[int, int], list[TeacherResponseDto]] = {}
         for day in days:
             for period in periods:
                 for teacher_id in self.schedule_repository.get_short_term_teacher_ids(day, period):
                     teacher = teachers.get(teacher_id)
                     if teacher:
                         by_slot.setdefault((day, period), []).append(
-                            TeacherResponse(
+                            TeacherResponseDto(
                                 id=teacher.id,
                                 name=teacher.name,
                                 department=teacher.department,
@@ -38,7 +39,7 @@ class GetShortTermTeachersHandler(RequestHandler[GetShortTermTeachersQuery, list
                             )
                         )
         return [
-            DutySlotOut(
+            DutySlotDto(
                 day_of_week=day,
                 day_name=DAY_NAMES[day],
                 period=period,

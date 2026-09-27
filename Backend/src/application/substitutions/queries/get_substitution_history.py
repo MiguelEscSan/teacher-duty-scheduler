@@ -1,22 +1,22 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from src.api.schemas import SubstitutionHistoryOut
 from src.application.common.mediator import Query, RequestHandler
+from src.application.substitutions.dtos.substitution_history import SubstitutionHistoryDto
 from src.domain.ports import SubstitutionRepository
 from src.domain.ports.student_group_repository import StudentGroupRepository
 from src.domain.ports.teacher_repository import TeacherRepository
 
 
 @dataclass(frozen=True)
-class GetSubstitutionHistoryQuery(Query[list[SubstitutionHistoryOut]]):
+class GetSubstitutionHistoryQuery(Query[list[SubstitutionHistoryDto]]):
     date: Optional[str] = None
     substitute_teacher_id: Optional[str] = None
     absent_teacher_id: Optional[str] = None
 
 
 class GetSubstitutionHistoryHandler(
-    RequestHandler[GetSubstitutionHistoryQuery, list[SubstitutionHistoryOut]]
+    RequestHandler[GetSubstitutionHistoryQuery, list[SubstitutionHistoryDto]]
 ):
     def __init__(
         self,
@@ -28,14 +28,14 @@ class GetSubstitutionHistoryHandler(
         self.teacher_repository = teacher_repository
         self.student_group_repository = student_group_repository
 
-    def handle(self, query: GetSubstitutionHistoryQuery) -> list[SubstitutionHistoryOut]:
+    def handle(self, query: GetSubstitutionHistoryQuery) -> list[SubstitutionHistoryDto]:
         logs = self.substitution_repository.get_all(
             query.date, query.substitute_teacher_id, query.absent_teacher_id
         )
         teachers = {t.id: t.name for t in self.teacher_repository.get_all()}
         groups = {g.id: g.name for g in self.student_group_repository.get_all()}
         return [
-            SubstitutionHistoryOut(
+            SubstitutionHistoryDto(
                 id=log.id,
                 date=log.date,
                 period=log.period,

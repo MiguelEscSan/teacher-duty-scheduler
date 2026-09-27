@@ -2,8 +2,11 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
-from src.api.schemas import PeriodResolveResponse, ResolutionAction
 from src.application.common.mediator import Command, RequestHandler
+from src.application.substitutions.dtos.period_resolve_response import (
+    PeriodResolveResponseDto,
+)
+from src.application.substitutions.dtos.resolution_action import ResolutionAction
 from src.application.substitutions.services.auto_cover_teacher_duties import (
     AutoCoverTeacherDutiesService,
 )
@@ -17,7 +20,7 @@ from src.domain.substitution import SubstitutionSourceType
 
 
 @dataclass(frozen=True)
-class ResolveSubstitutionCommand(Command[PeriodResolveResponse]):
+class ResolveSubstitutionCommand(Command[PeriodResolveResponseDto]):
     date: str
     period: int
     absent_teacher_id: str
@@ -27,7 +30,7 @@ class ResolveSubstitutionCommand(Command[PeriodResolveResponse]):
 
 
 class ResolveSubstitutionHandler(
-    RequestHandler[ResolveSubstitutionCommand, PeriodResolveResponse]
+    RequestHandler[ResolveSubstitutionCommand, PeriodResolveResponseDto]
 ):
     def __init__(
         self,
@@ -50,7 +53,7 @@ class ResolveSubstitutionHandler(
             substitution_repository,
         )
 
-    def handle(self, cmd: ResolveSubstitutionCommand) -> PeriodResolveResponse:
+    def handle(self, cmd: ResolveSubstitutionCommand) -> PeriodResolveResponseDto:
         day_of_week = datetime.strptime(cmd.date, "%Y-%m-%d").weekday()
         absent_teacher = self.teacher_repository.get_by_id(cmd.absent_teacher_id)
         if not absent_teacher:
@@ -72,7 +75,7 @@ class ResolveSubstitutionHandler(
         if cmd.action == ResolutionAction.EXCURSION:
             absence.resolve_by_excursion()
             self.absence_repository.save(absence)
-            return PeriodResolveResponse(
+            return PeriodResolveResponseDto(
                 date=cmd.date, period=cmd.period, resolved=True,
                 action_applied=cmd.action.value,
                 details=f"Grupo [{group_name}] en excursión. No se requiere sustituto.",
@@ -87,7 +90,7 @@ class ResolveSubstitutionHandler(
             absence.resolve_by_group_merge()
             self.absence_repository.save(absence)
             target_name = target.name if target else "otro grupo"
-            return PeriodResolveResponse(
+            return PeriodResolveResponseDto(
                 date=cmd.date, period=cmd.period, resolved=True,
                 action_applied=cmd.action.value,
                 details=(
@@ -106,7 +109,7 @@ class ResolveSubstitutionHandler(
         staff_room_keeper = match.staff_room_keeper
         source = match.source_type
         if substitute is None or source is None:
-            return PeriodResolveResponse(
+            return PeriodResolveResponseDto(
                 date=cmd.date, period=cmd.period, resolved=False,
                 action_applied=cmd.action.value,
                 details="ALERTA: Sin profesores disponibles en guardia ni en sustitución corta.",
@@ -115,7 +118,7 @@ class ResolveSubstitutionHandler(
         log = absence.resolve_with_substitute(substitute.id, source, cmd.group_id)
         self.absence_repository.save(absence)
         self.substitution_repository.save(log)
-        return PeriodResolveResponse(
+        return PeriodResolveResponseDto(
             date=cmd.date, period=cmd.period, resolved=True,
             action_applied=source.value, substitute_id=substitute.id,
             substitute_name=substitute.name, substitute_email=str(substitute.email),

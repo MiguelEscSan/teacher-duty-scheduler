@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from src.api.schemas import StudentGroupResponseDto
 from src.application.common.mediator import Command, RequestHandler
+from src.application.schedules.dtos.student_group_response import StudentGroupResponseDto
 from src.domain.exceptions.assignment_exceptions import (
     ConflictException,
     EntityNotFoundException,
