@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DutySlot, Teacher } from '../../models/schedule.model';
 import { TeachersService } from '../../services/teachers.service';
+import { SchedulesService } from '../../services/schedules.service';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
@@ -14,6 +15,7 @@ import { ConfirmationModalComponent } from '../../shared/components/confirmation
 })
 export class DutyCalendarComponent implements OnInit {
   private api = inject(TeachersService);
+  private schedulesApi = inject(SchedulesService);
 
   dutySlots: DutySlot[] = [];
   isLoading = false;
@@ -40,7 +42,7 @@ export class DutyCalendarComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.api.getDutyTeachers().subscribe({
+    this.schedulesApi.getDutyTeachers().subscribe({
       next: (slots) => {
         this.dutySlots = slots;
         this.isLoading = false;
@@ -77,7 +79,7 @@ export class DutyCalendarComponent implements OnInit {
   addTeacher(teacher: Teacher): void {
     if (!this.selectedSlot || !teacher.id) return;
     const slot = this.selectedSlot;
-    this.api.assignDuty({ teacher_id: teacher.id, day_of_week: slot.day, period: slot.period, duty_type: 'FIXED_DUTY' }).subscribe({
+    this.schedulesApi.assignDuty({ teacher_id: teacher.id, day_of_week: slot.day, period: slot.period, duty_type: 'FIXED_DUTY' }).subscribe({
       next: () => { this.toastMessage = `${teacher.name} añadido a la guardia.`; this.closeAdd(); this.loadCalendar(); },
       error: err => this.showError(err)
     });
@@ -93,7 +95,7 @@ export class DutyCalendarComponent implements OnInit {
     if (!removal?.teacher.id) return;
 
     this.teacherToRemove = null;
-    this.api.removeDuty({
+    this.schedulesApi.removeDuty({
       teacher_id: removal.teacher.id,
       day_of_week: removal.day,
       period: removal.period,

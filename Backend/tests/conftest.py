@@ -124,6 +124,36 @@ class FakeScheduleRepository:
     def get_short_term_teacher_ids(self, day, period):
         return list(self.short.get((day, period), []))
 
+    def add_fixed_duty(self, teacher_id, day, period):
+        values = self.fixed.setdefault((day, period), [])
+        if teacher_id not in values:
+            values.append(teacher_id)
+
+    def remove_fixed_duty(self, teacher_id, day, period):
+        values = self.fixed.get((day, period), [])
+        if teacher_id not in values:
+            return False
+        values.remove(teacher_id)
+        return True
+
+    def add_short_term_duty(self, teacher_id, day, period):
+        values = self.short.setdefault((day, period), [])
+        if teacher_id not in values:
+            values.append(teacher_id)
+
+    def remove_short_term_duty(self, teacher_id, day, period):
+        values = self.short.get((day, period), [])
+        if teacher_id not in values:
+            return False
+        values.remove(teacher_id)
+        return True
+
+    def is_teacher_in_fixed_duty(self, teacher_id, day, period):
+        return teacher_id in self.fixed.get((day, period), [])
+
+    def is_teacher_in_short_term_duty(self, teacher_id, day, period):
+        return teacher_id in self.short.get((day, period), [])
+
     def get_all(self):
         return list(self.entries)
 

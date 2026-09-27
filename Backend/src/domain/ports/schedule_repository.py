@@ -37,6 +37,34 @@ class ScheduleRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def add_fixed_duty(self, teacher_id: str, day_of_week: int, period: int) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def remove_fixed_duty(self, teacher_id: str, day_of_week: int, period: int) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def add_short_term_duty(self, teacher_id: str, day_of_week: int, period: int) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def remove_short_term_duty(self, teacher_id: str, day_of_week: int, period: int) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def is_teacher_in_fixed_duty(
+        self, teacher_id: str, day_of_week: int, period: int
+    ) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def is_teacher_in_short_term_duty(
+        self, teacher_id: str, day_of_week: int, period: int
+    ) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
     def delete_duties_for_teacher(self, teacher_id: str) -> None:
         raise NotImplementedError
 

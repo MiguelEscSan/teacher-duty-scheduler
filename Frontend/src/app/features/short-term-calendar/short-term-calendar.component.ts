@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DutySlot, Teacher } from '../../models/schedule.model';
 import { TeachersService } from '../../services/teachers.service';
+import { SchedulesService } from '../../services/schedules.service';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
@@ -14,6 +15,7 @@ import { ConfirmationModalComponent } from '../../shared/components/confirmation
 })
 export class ShortTermCalendarComponent implements OnInit {
   private api = inject(TeachersService);
+  private schedulesApi = inject(SchedulesService);
 
   slots: DutySlot[] = [];
   isLoading = false;
@@ -40,7 +42,7 @@ export class ShortTermCalendarComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.api.getShortTermTeachers().subscribe({
+    this.schedulesApi.getShortTermTeachers().subscribe({
       next: (slots) => {
         this.slots = slots;
         this.isLoading = false;
@@ -72,7 +74,7 @@ export class ShortTermCalendarComponent implements OnInit {
   addTeacher(teacher: Teacher): void {
     if (!this.selectedSlot || !teacher.id) return;
     const slot = this.selectedSlot;
-    this.api.assignDuty({ teacher_id: teacher.id, day_of_week: slot.day, period: slot.period, duty_type: 'SHORT_TERM' }).subscribe({
+    this.schedulesApi.assignDuty({ teacher_id: teacher.id, day_of_week: slot.day, period: slot.period, duty_type: 'SHORT_TERM' }).subscribe({
       next: () => { this.toastMessage = `${teacher.name} añadido.`; this.closeAdd(); this.loadCalendar(); },
       error: err => this.errorMessage = err?.error?.detail || 'No se pudo asignar el docente.'
     });
@@ -87,7 +89,7 @@ export class ShortTermCalendarComponent implements OnInit {
     if (!removal?.teacher.id) return;
 
     this.teacherToRemove = null;
-    this.api.removeDuty({
+    this.schedulesApi.removeDuty({
       teacher_id: removal.teacher.id,
       day_of_week: removal.day,
       period: removal.period,

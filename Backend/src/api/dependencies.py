@@ -41,11 +41,11 @@ from src.application.schedules.commands.update_student_group import (
     UpdateStudentGroupCommand,
     UpdateStudentGroupHandler,
 )
-from src.application.teachers.commands.manage_duty_assignment import (
+from src.application.schedules.commands.manage_duty_assignment import (
     AssignTeacherDutyCommand,
     AssignTeacherDutyHandler,
 )
-from src.application.teachers.commands.remove_duty_assignment import (
+from src.application.schedules.commands.remove_duty_assignment import (
     RemoveTeacherDutyCommand,
     RemoveTeacherDutyHandler,
 )
@@ -230,11 +230,11 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
     )
     mediator.register(
         AssignTeacherDutyCommand,
-        lambda: AssignTeacherDutyHandler(teacher_repository),
+        lambda: AssignTeacherDutyHandler(teacher_repository, schedule_repository),
     )
     mediator.register(
         RemoveTeacherDutyCommand,
-        lambda: RemoveTeacherDutyHandler(teacher_repository),
+        lambda: RemoveTeacherDutyHandler(teacher_repository, schedule_repository),
     )
     mediator.register(
         CreateAbsenceCommand,

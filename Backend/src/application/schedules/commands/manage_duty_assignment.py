@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from src.application.common.mediator import Command, RequestHandler
 from src.domain.duty_type import DutyType
 from src.domain.exceptions.invalid_operation_exception import InvalidOperationException
+from src.domain.ports.schedule_repository import ScheduleRepository
 from src.domain.ports.teacher_repository import TeacherRepository
 
 
@@ -24,8 +25,13 @@ class AssignTeacherDutyCommand(Command[DutyAssignmentResultOut]):
 
 
 class AssignTeacherDutyHandler(RequestHandler[AssignTeacherDutyCommand, DutyAssignmentResultOut]):
-    def __init__(self, teacher_repository: TeacherRepository):
+    def __init__(
+        self,
+        teacher_repository: TeacherRepository,
+        schedule_repository: ScheduleRepository,
+    ):
         self.teacher_repository = teacher_repository
+        self.schedule_repository = schedule_repository
 
     @staticmethod
     def _validate_slot(day_of_week: int, period: int) -> None:
@@ -39,9 +45,13 @@ class AssignTeacherDutyHandler(RequestHandler[AssignTeacherDutyCommand, DutyAssi
             raise ValueError("Profesor no encontrado.")
         self._validate_slot(cmd.day_of_week, cmd.period)
         if cmd.duty_type is DutyType.FIXED_DUTY:
-            self.teacher_repository.add_fixed_duty(cmd.teacher_id, cmd.day_of_week, cmd.period)
+            self.schedule_repository.add_fixed_duty(
+                cmd.teacher_id, cmd.day_of_week, cmd.period
+            )
         else:
-            self.teacher_repository.add_short_term_duty(cmd.teacher_id, cmd.day_of_week, cmd.period)
+            self.schedule_repository.add_short_term_duty(
+                cmd.teacher_id, cmd.day_of_week, cmd.period
+            )
         return DutyAssignmentResultOut(
             message="Asignación de guardia actualizada correctamente.",
             teacher_id=cmd.teacher_id,
