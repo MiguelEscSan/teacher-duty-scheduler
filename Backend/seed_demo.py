@@ -170,7 +170,7 @@ def seed():
             alias = (
                 name.split(",")[0].strip().lower().replace(" ", "").replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u").replace("ñ", "n")
             )
-            email = f"miguelescobedosantana2@gmail.com"
+            email = f"{alias}{i}@centroeducativo.es"
             t = TeacherDB(
                 id=str(uuid.uuid4()),
                 name=name,
