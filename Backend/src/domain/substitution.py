@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 from src.domain.exceptions.invalid_operation_exception import InvalidOperationException
@@ -23,7 +23,7 @@ class SubstitutionLog:
     substitute_teacher_id: str
     source_type: SubstitutionSourceType
     group_id: str | None = None
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     @classmethod
     def create(

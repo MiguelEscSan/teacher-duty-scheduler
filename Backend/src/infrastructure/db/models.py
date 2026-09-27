@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 from sqlmodel import Field, SQLModel
 from typing import Optional
@@ -98,4 +98,4 @@ class SubstitutionLogDB(SQLModel, table=True):
     substitute_teacher_id: str = Field(index=True)
     group_id: Optional[str] = Field(default=None)
     source_type: SubstitutionSourceType
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
