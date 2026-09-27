@@ -31,7 +31,7 @@ export class SubstitutionHistoryComponent implements OnInit {
   selectedTeacherId = '';
   activeTab: 'history' | 'balance' = 'history';
   filters = {
-    date: '',
+    date: this.todayDate(),
     substitute_teacher_id: '',
     absent_teacher_id: ''
   };
@@ -42,7 +42,8 @@ export class SubstitutionHistoryComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParamMap.subscribe(params => {
       const date = params.get('date');
-      if (date) this.filters.date = date;
+      this.filters.date = date || this.todayDate();
+      this.loadHistory();
     });
     const successMessage = history.state?.successMessage as string | undefined;
     if (successMessage) this.toastMessage = successMessage;
@@ -50,7 +51,6 @@ export class SubstitutionHistoryComponent implements OnInit {
       next: teachers => this.teachers = teachers,
       error: () => this.errorMessage = 'No se pudo cargar la lista de profesores.'
     });
-    this.loadHistory();
   }
 
   loadHistory(): void {
@@ -71,11 +71,18 @@ export class SubstitutionHistoryComponent implements OnInit {
 
   clearFilters(): void {
     this.filters = {
-      date: '',
+      date: this.todayDate(),
       substitute_teacher_id: '',
       absent_teacher_id: ''
     };
     this.loadHistory();
+  }
+
+  private todayDate(): string {
+    const today = new Date();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${today.getFullYear()}-${month}-${day}`;
   }
 
   formatDateTime(value: string): string {

@@ -12,6 +12,7 @@ class AbsenceRepository(ABC):
         date: str | None = None,
         teacher_id: str | None = None,
         resolved: bool | None = None,
+        from_date: str | None = None,
     ) -> list[Absence]:
         raise NotImplementedError
 

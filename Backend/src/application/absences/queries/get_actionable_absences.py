@@ -14,6 +14,7 @@ class GetActionableAbsencesQuery(Query[list[AbsenceResponse]]):
     date: str | None = None
     teacher_id: str | None = None
     resolved: bool | None = None
+    from_date: str | None = None
 
 
 class GetActionableAbsencesHandler(RequestHandler[GetActionableAbsencesQuery, list[AbsenceResponse]]):
@@ -30,7 +31,9 @@ class GetActionableAbsencesHandler(RequestHandler[GetActionableAbsencesQuery, li
         self.schedule_repository = schedule_repository
 
     def handle(self, query: GetActionableAbsencesQuery) -> list[AbsenceResponse]:
-        absences = self.absence_repository.get_all(query.date, query.teacher_id, query.resolved)
+        absences = self.absence_repository.get_all(
+            query.date, query.teacher_id, query.resolved, query.from_date
+        )
         teachers = {t.id: t.name for t in self.teacher_repository.get_all()}
         groups = {g.id: g for g in self.student_group_repository.get_all()}
         schedules = [

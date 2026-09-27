@@ -42,7 +42,7 @@ class SQLSubstitutionRepository(SubstitutionRepository):
     def get_all(self, date=None, substitute_teacher_id=None, absent_teacher_id=None):
         query = select(SubstitutionLogDB)
         if date is not None:
-            query = query.where(SubstitutionLogDB.date == date)
+            query = query.where(SubstitutionLogDB.date >= date)
         if substitute_teacher_id is not None:
             query = query.where(SubstitutionLogDB.substitute_teacher_id == substitute_teacher_id)
         if absent_teacher_id is not None:

@@ -29,7 +29,7 @@ export class AbsencesComponent implements OnInit {
   teachers: Teacher[] = [];
   absences: Absence[] = [];
   filters = {
-    date: '',
+    date: this.todayDate(),
     teacher_id: '',
     status: 'all' as 'all' | 'pending' | 'resolved'
   };
@@ -70,15 +70,22 @@ export class AbsencesComponent implements OnInit {
 
   loadAbsences(): void {
     this.absencesApi.getAbsences({
-      date: this.filters.date || undefined,
+      from_date: this.filters.date || undefined,
       teacher_id: this.filters.teacher_id || undefined,
       resolved: this.filters.status === 'all' ? undefined : this.filters.status === 'resolved'
     }).subscribe(a => this.absences = a);
   }
 
   clearFilters(): void {
-    this.filters = { date: '', teacher_id: '', status: 'all' };
+    this.filters = { date: this.todayDate(), teacher_id: '', status: 'all' };
     this.loadAbsences();
+  }
+
+  private todayDate(): string {
+    const today = new Date();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${today.getFullYear()}-${month}-${day}`;
   }
 
   submitAbsence(): void {
@@ -131,7 +138,7 @@ export class AbsencesComponent implements OnInit {
       this.clearAbsenceSelection();
       this.bulkFailureMessage = failed ? `${selected.length - failed} ausencias marcadas como no cubrir y ${failed} fallaron.` : '';
       this.loadAbsences();
-      this.redirectToTodayHistory();
+      this.redirectToHistory(this.firstAbsenceDate(selected));
     });
   }
 
@@ -151,13 +158,13 @@ export class AbsencesComponent implements OnInit {
       this.clearAbsenceSelection();
       this.bulkFailureMessage = failed ? `${selected.length - failed} ausencias auto-cubiertas y ${failed} fallaron.` : '';
       this.loadAbsences();
-      this.redirectToTodayHistory();
+      this.redirectToHistory(this.firstAbsenceDate(selected));
     });
   }
 
-  redirectToTodayHistory(): void {
+  redirectToHistory(date: string): void {
     this.router.navigate(['/substitutions/history'], {
-      queryParams: { date: new Date().toISOString().slice(0, 10) }
+      queryParams: { date }
     });
   }
 
@@ -178,7 +185,7 @@ export class AbsencesComponent implements OnInit {
       this.loadAbsences();
       if (!failures.length) {
         this.router.navigate(['/substitutions/history'], {
-          queryParams: { date: absences[0]?.date },
+          queryParams: { date: this.firstAbsenceDate(absences) },
           state: { successMessage: `${saved} ausencias registradas correctamente. Redirigiendo al seguimiento de sustituciones...` }
         });
       }
@@ -190,7 +197,16 @@ export class AbsencesComponent implements OnInit {
   }
 
   goToBulkHistory(): void {
-    this.router.navigate(['/substitutions/history'], { queryParams: { date: this.filters.date || undefined } });
+    this.router.navigate(['/substitutions/history'], {
+      queryParams: { date: this.firstAbsenceDate(this.absences) || this.filters.date || undefined }
+    });
+  }
+
+  private firstAbsenceDate(absences: Absence[]): string {
+    return absences
+      .map(absence => absence.date)
+      .filter(Boolean)
+      .sort()[0];
   }
 
   // Cierra cualquier menú desplegable si el usuario pulsa en cualquier parte de la pantalla
@@ -216,6 +232,7 @@ export class AbsencesComponent implements OnInit {
     const wasBulk = this.selectedAbsenceIds.size > 1;
     if (wasBulk) {
       const selected = this.selectedAbsences;
+      const firstDate = this.firstAbsenceDate(selected);
       this.bulkActionLoading = true;
       forkJoin(selected.map(item => this.substitutionsApi.assignManualSubstitution({
         date: item.date,
@@ -230,14 +247,15 @@ export class AbsencesComponent implements OnInit {
         this.selectedAbsenceForManualCover = null;
         this.clearAbsenceSelection();
         this.loadAbsences();
-        if (!failed) this.redirectToTodayHistory();
+        if (!failed) this.redirectToHistory(firstDate);
       });
       return;
     }
+    const firstDate = this.firstAbsenceDate(this.selectedAbsences);
     this.selectedAbsenceForManualCover = null;
     this.clearAbsenceSelection();
     this.loadAbsences(); // Recarga la tabla para reflejar la sustitución
-    if (wasBulk) this.redirectToTodayHistory();
+    if (wasBulk) this.redirectToHistory(firstDate);
   }
 
   onManualCoverCancelled(): void {

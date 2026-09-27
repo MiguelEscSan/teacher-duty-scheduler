@@ -48,10 +48,11 @@ class FakeAbsenceRepository:
     def __init__(self, absences=None):
         self.items = list(absences or [])
 
-    def get_all(self, date=None, teacher_id=None, resolved=None):
+    def get_all(self, date=None, teacher_id=None, resolved=None, from_date=None):
         return [
             item for item in self.items
             if (date is None or item.date == date)
+            and (from_date is None or item.date >= from_date)
             and (teacher_id is None or item.teacher_id == teacher_id)
             and (resolved is None or item.resolved == resolved)
         ]
@@ -153,7 +154,7 @@ class FakeSubstitutionRepository:
 
     def get_all(self, date=None, substitute_teacher_id=None, absent_teacher_id=None):
         return [item for item in self.logs
-                if (date is None or item.date == date)
+                if (date is None or item.date >= date)
                 and (substitute_teacher_id is None or item.substitute_teacher_id == substitute_teacher_id)
                 and (absent_teacher_id is None or item.absent_teacher_id == absent_teacher_id)]
 

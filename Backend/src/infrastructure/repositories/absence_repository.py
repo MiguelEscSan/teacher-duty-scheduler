@@ -34,10 +34,12 @@ class SQLAbsenceRepository(AbsenceRepository):
     def _query(self):
         return select(AbsenceDB)
 
-    def get_all(self, date=None, teacher_id=None, resolved=None) -> list[Absence]:
+    def get_all(self, date=None, teacher_id=None, resolved=None, from_date=None) -> list[Absence]:
         query = self._query()
         if date is not None:
             query = query.where(AbsenceDB.date == date)
+        if from_date is not None:
+            query = query.where(AbsenceDB.date >= from_date)
         if teacher_id is not None:
             query = query.where(AbsenceDB.teacher_id == teacher_id)
         if resolved is not None:

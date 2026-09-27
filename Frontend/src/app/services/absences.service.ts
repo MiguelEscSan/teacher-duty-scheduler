@@ -11,11 +11,13 @@ export class AbsencesService {
 
   getAbsences(filters?: {
     date?: string;
+    from_date?: string;
     teacher_id?: string;
     resolved?: boolean;
   }): Observable<Absence[]> {
     let params = new HttpParams();
     if (filters?.date) params = params.set('date', filters.date);
+    if (filters?.from_date) params = params.set('from_date', filters.from_date);
     if (filters?.teacher_id) params = params.set('teacher_id', filters.teacher_id);
     if (filters?.resolved !== undefined) params = params.set('resolved', filters.resolved.toString());
     return this.http.get<Absence[]>(`${API_URL}/absences`, { params });
