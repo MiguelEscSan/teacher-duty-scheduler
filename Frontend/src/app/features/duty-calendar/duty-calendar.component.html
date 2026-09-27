@@ -4,6 +4,16 @@
       <h2>Calendario de guardias fijas</h2>
       <p>Profesores asignados a cada franja semanal.</p>
     </div>
+
+    <app-confirmation-modal
+      *ngIf="teacherToRemove"
+      title="Quitar docente"
+      [message]="'¿Quitar a ' + teacherToRemove.teacher.name + ' de esta guardia?'"
+      confirmLabel="Quitar"
+      [danger]="true"
+      (confirmed)="confirmRemoveTeacher()"
+      (cancelled)="cancelRemoveTeacher()"
+    ></app-confirmation-modal>
     <button class="btn-refresh" type="button" (click)="loadCalendar()" [disabled]="isLoading">
       ↻ Actualizar
     </button>

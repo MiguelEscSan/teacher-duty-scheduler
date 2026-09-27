@@ -18,6 +18,16 @@
       <span class="badge">{{ teachers.length }} profesores</span>
     </div>
 
+    <app-confirmation-modal
+      *ngIf="teacherIdToRemove"
+      title="Eliminar docente"
+      [message]="'¿Eliminar a ' + teacherPendingRemoval?.name + ' (' + teacherPendingRemoval?.department + ')?'"
+      confirmLabel="Eliminar"
+      [danger]="true"
+      (confirmed)="confirmRemoveTeacher()"
+      (cancelled)="cancelRemoveTeacher()"
+    ></app-confirmation-modal>
+
     <div class="sidebar-actions">
       <button class="btn btn-primary" type="button" (click)="openTeacherModal()">+ Añadir docente</button>
     </div>

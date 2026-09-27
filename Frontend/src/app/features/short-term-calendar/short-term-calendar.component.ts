@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DutySlot, Teacher } from '../../models/schedule.model';
 import { TeachersService } from '../../services/teachers.service';
+import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-short-term-calendar',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ConfirmationModalComponent],
   templateUrl: './short-term-calendar.component.html',
   styleUrls: ['./short-term-calendar.component.css']
 })
@@ -21,6 +22,7 @@ export class ShortTermCalendarComponent implements OnInit {
   selectedSlot: { day: number; period: number } | null = null;
   teacherSearch = '';
   teachers: Teacher[] = [];
+  teacherToRemove: { teacher: Teacher; day: number; period: number } | null = null;
 
   readonly days = [0, 1, 2, 3, 4];
   readonly dayNames = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
@@ -76,10 +78,27 @@ export class ShortTermCalendarComponent implements OnInit {
     });
   }
   removeTeacher(teacher: Teacher, day: number, period: number): void {
-    if (!teacher.id || !confirm(`¿Quitar a ${teacher.name} de esta franja?`)) return;
-    this.api.removeDuty({ teacher_id: teacher.id, day_of_week: day, period, duty_type: 'SHORT_TERM' }).subscribe({
-      next: () => { this.toastMessage = `${teacher.name} desasignado.`; this.loadCalendar(); },
+    if (!teacher.id) return;
+    this.teacherToRemove = { teacher, day, period };
+  }
+
+  confirmRemoveTeacher(): void {
+    const removal = this.teacherToRemove;
+    if (!removal?.teacher.id) return;
+
+    this.teacherToRemove = null;
+    this.api.removeDuty({
+      teacher_id: removal.teacher.id,
+      day_of_week: removal.day,
+      period: removal.period,
+      duty_type: 'SHORT_TERM'
+    }).subscribe({
+      next: () => { this.toastMessage = `${removal.teacher.name} desasignado.`; this.loadCalendar(); },
       error: err => this.errorMessage = err?.error?.detail || 'No se pudo quitar el docente.'
     });
+  }
+
+  cancelRemoveTeacher(): void {
+    this.teacherToRemove = null;
   }
 }

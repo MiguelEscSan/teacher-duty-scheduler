@@ -6,11 +6,12 @@ import { TeachersService } from '../../services/teachers.service';
 import { BaseSlot, StudentGroup, Teacher } from '../../models/schedule.model';
 import { TeacherFormModalComponent } from './components/teacher-form-modal/teacher-form-modal.component';
 import { GroupsComponent } from '../groups/groups.component';
+import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-teachers',
   standalone: true,
-  imports: [CommonModule, FormsModule, TeacherFormModalComponent, GroupsComponent],
+  imports: [CommonModule, FormsModule, TeacherFormModalComponent, GroupsComponent, ConfirmationModalComponent],
   templateUrl: './teachers.component.html',
   styleUrls: ['./teachers.component.css']
 })
@@ -25,6 +26,7 @@ export class TeachersComponent implements OnInit {
   teacherSearch = '';
   showTeacherModal = false;
   activeTab: 'teachers' | 'groups' = 'teachers';
+  teacherIdToRemove: string | null = null;
 
   // Control del modal de asignación de grupo
   activeSlot: BaseSlot | null = null;
@@ -61,6 +63,10 @@ export class TeachersComponent implements OnInit {
       teacher.name.toLowerCase().includes(search) ||
       teacher.department.toLowerCase().includes(search)
     );
+  }
+
+  get teacherPendingRemoval(): Teacher | null {
+    return this.teachers.find(teacher => teacher.id === this.teacherIdToRemove) || null;
   }
 
   loadTeachers(): void {
@@ -144,11 +150,22 @@ export class TeachersComponent implements OnInit {
   }
 
   removeTeacher(id: string): void {
-    if (!confirm('¿Eliminar a este docente?')) return;
+    this.teacherIdToRemove = id;
+  }
+
+  confirmRemoveTeacher(): void {
+    const id = this.teacherIdToRemove;
+    if (!id) return;
+
+    this.teacherIdToRemove = null;
     this.teachersApi.deleteTeacher(id).subscribe(() => {
       this.teachers = this.teachers.filter(t => t.id !== id);
       this.selectedTeacher = this.teachers.length > 0 ? this.teachers[0] : null;
       if (this.selectedTeacher) this.selectTeacher(this.selectedTeacher);
     });
+  }
+
+  cancelRemoveTeacher(): void {
+    this.teacherIdToRemove = null;
   }
 }
