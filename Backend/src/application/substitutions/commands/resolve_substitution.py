@@ -4,6 +4,9 @@ from typing import Optional
 
 from src.api.schemas import PeriodResolveResponse, ResolutionAction
 from src.application.common.mediator import Command, RequestHandler
+from src.application.substitutions.services.auto_cover_teacher_duties import (
+    AutoCoverTeacherDutiesService,
+)
 from src.domain.absence import Absence
 from src.domain.ports import SubstitutionRepository
 from src.domain.ports.absence_repository import AbsenceRepository
@@ -33,58 +36,18 @@ class ResolveSubstitutionHandler(
         schedule_repository: ScheduleRepository,
         substitution_repository: SubstitutionRepository,
         student_group_repository: StudentGroupRepository,
+        auto_cover_service: AutoCoverTeacherDutiesService | None = None,
     ):
         self.teacher_repository = teacher_repository
         self.absence_repository = absence_repository
         self.schedule_repository = schedule_repository
         self.substitution_repository = substitution_repository
         self.student_group_repository = student_group_repository
-
-    def _available_ids(self, date: str, period: int, ids: list[str]) -> list[str]:
-        absent = {
-            item.teacher_id
-            for item in self.absence_repository.get_all(date=date)
-            if item.period == period
-        }
-        busy = self.substitution_repository.get_busy_teacher_ids(date, period)
-        return [item for item in ids if item not in absent and item not in busy]
-
-    def _choose(self, ids: list[str], period: int) -> str | None:
-        if not ids:
-            return None
-        last_used = self.substitution_repository.get_last_used_at(ids, period)
-        never_used = [item for item in ids if item not in last_used]
-        return never_used[0] if never_used else min(last_used, key=last_used.get)
-
-    def _ordinary(self, date: str, day: int, period: int):
-        available = self._available_ids(
-            date, period,
-            self.schedule_repository.get_fixed_duty_teacher_ids(day, period),
-        )
-        if len(available) < 2:
-            keeper = self.teacher_repository.get_by_id(available[0]) if available else None
-            return None, keeper, (
-                "Sin cupo de guardia ordinaria: Se requiere mínimo 1 profesor permanente "
-                "en Sala de Profesores."
-            )
-        chosen = self._choose(available, period)
-        keeper_id = next(item for item in available if item != chosen)
-        return (
-            self.teacher_repository.get_by_id(chosen),
-            self.teacher_repository.get_by_id(keeper_id),
-            "Asignado desde guardia ordinaria.",
-        )
-
-    def _short_term(self, date: str, day: int, period: int):
-        available = self._available_ids(
-            date, period,
-            self.schedule_repository.get_short_term_teacher_ids(day, period),
-        )
-        if not available:
-            return None, "Lista de sustitución corta agotada o no disponible."
-        return (
-            self.teacher_repository.get_by_id(self._choose(available, period)),
-            "Asignado por lista de sustitución corta.",
+        self.auto_cover_service = auto_cover_service or AutoCoverTeacherDutiesService(
+            teacher_repository,
+            absence_repository,
+            schedule_repository,
+            substitution_repository,
         )
 
     def handle(self, cmd: ResolveSubstitutionCommand) -> PeriodResolveResponse:
@@ -133,26 +96,22 @@ class ResolveSubstitutionHandler(
                     f"{current_count + target_count} alumnos."
                 ),
             )
-        substitute = None
-        staff_room_keeper = None
-        source = None
-        details = ""
-        if cmd.action == ResolutionAction.AUTO_ASSIGN:
-            substitute, staff_room_keeper, details = self._ordinary(
-                cmd.date, day_of_week, cmd.period
+        match = self.auto_cover_service.select_candidate(
+            cmd.date,
+            day_of_week,
+            cmd.period,
+            force_short_term=cmd.action == ResolutionAction.FORCE_SHORT_TERM,
+        )
+        substitute = match.substitute
+        staff_room_keeper = match.staff_room_keeper
+        source = match.source_type
+        if substitute is None or source is None:
+            return PeriodResolveResponse(
+                date=cmd.date, period=cmd.period, resolved=False,
+                action_applied=cmd.action.value,
+                details="ALERTA: Sin profesores disponibles en guardia ni en sustitución corta.",
             )
-            if substitute:
-                source = SubstitutionSourceType.ORDINARY_GUARD
-        if not substitute or cmd.action == ResolutionAction.FORCE_SHORT_TERM:
-            substitute, details = self._short_term(cmd.date, day_of_week, cmd.period)
-            if substitute:
-                source = SubstitutionSourceType.SHORT_TERM_SUBSTITUTION
-            else:
-                return PeriodResolveResponse(
-                    date=cmd.date, period=cmd.period, resolved=False,
-                    action_applied=cmd.action.value,
-                    details="ALERTA: Sin profesores disponibles en guardia ni en sustitución corta.",
-                )
+        details = match.reason
         log = absence.resolve_with_substitute(substitute.id, source, cmd.group_id)
         self.absence_repository.save(absence)
         self.substitution_repository.save(log)

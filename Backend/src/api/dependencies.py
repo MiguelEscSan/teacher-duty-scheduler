@@ -175,7 +175,7 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
         ResolveSubstitutionCommand,
         lambda: ResolveSubstitutionHandler(
             teacher_repository, absence_repository, schedule_repository,
-            substitution_repository, student_group_repository,
+            substitution_repository, student_group_repository, auto_cover_service,
         ),
     )
     mediator.register(
