@@ -78,8 +78,4 @@ export class SubstitutionsService {
   autoCoverDuties(payload: { date: string; teacher_id: string }): Observable<AutoCoverDutiesResponse> {
     return this.http.post<AutoCoverDutiesResponse>(`${API_URL}/substitutions/auto-cover-duties`, payload);
   }
-
-  coverDutyManual(payload: { date: string; period: number; absent_teacher_id: string; substitute_teacher_id: string }): Observable<unknown> {
-    return this.http.post(`${API_URL}/substitutions/cover-duty-manual`, payload);
-  }
 }

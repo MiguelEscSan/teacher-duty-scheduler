@@ -8,6 +8,7 @@ import { AbsencesService } from '../../services/absences.service';
 import { SubstitutionsService } from '../../services/substitutions.service';
 import { TeachersService } from '../../services/teachers.service';
 import { Absence, Teacher } from '../../models/schedule.model';
+import { PeriodResolveResponse } from '../../models/substitutions.model';
 import { ManualCoverModalComponent } from './components/manual-cover-modal/manual-cover-modal.component'
 import { AutomaticCoverModalComponent } from './components/automatic-cover-modal/automatic-cover-modal.component';
 import { AbsenceFormModalComponent } from './components/absence-form-modal/absence-form-modal.component';
@@ -54,7 +55,7 @@ export class AbsencesComponent implements OnInit {
   showAbsenceModal = false;
   errorMessage = '';
   autoCoverLoading = false;
-  autoCoverResult: { alerts: string[]; coverages: Array<{ period: number; covered: boolean; substitute_teacher_name?: string; message: string }> } | null = null;
+  autoCoverResult: PeriodResolveResponse | null = null;
   bulkFailureMessage = '';
   selectedAbsenceIds = new Set<number>();
   bulkActionLoading = false;
@@ -138,8 +139,12 @@ export class AbsencesComponent implements OnInit {
     const selected = this.selectedAbsences.filter(item => !item.resolved && !item.is_duty_absence);
     if (!selected.length || this.bulkActionLoading) return;
     this.bulkActionLoading = true;
-    forkJoin(selected.map(item => this.substitutionsApi.autoCoverDuties({
-      date: item.date, teacher_id: item.teacher_id
+    forkJoin(selected.map(item => this.substitutionsApi.resolvePeriod({
+      date: item.date,
+      period: item.period,
+      absent_teacher_id: item.teacher_id,
+      group_id: item.group_id,
+      action: 'AUTO_ASSIGN'
     }).pipe(catchError(() => of(null))))).subscribe(results => {
       const failed = results.filter(result => result === null).length;
       this.bulkActionLoading = false;
@@ -261,9 +266,15 @@ export class AbsencesComponent implements OnInit {
   autoCoverDuties(absence: Absence): void {
     if (!absence.teacher_id) return;
     this.autoCoverLoading = true;
-    this.substitutionsApi.autoCoverDuties({ date: absence.date, teacher_id: absence.teacher_id }).subscribe({
+    this.substitutionsApi.resolvePeriod({
+      date: absence.date,
+      period: absence.period,
+      absent_teacher_id: absence.teacher_id,
+      group_id: absence.group_id,
+      action: 'AUTO_ASSIGN'
+    }).subscribe({
       next: result => { this.autoCoverResult = result; this.autoCoverLoading = false; this.loadAbsences(); },
-      error: err => { this.errorMessage = err?.error?.detail || 'No se pudieron auto-cubrir las guardias.'; this.autoCoverLoading = false; }
+      error: err => { this.errorMessage = err?.error?.detail || 'No se pudo resolver automáticamente la sustitución.'; this.autoCoverLoading = false; }
     });
   }
 

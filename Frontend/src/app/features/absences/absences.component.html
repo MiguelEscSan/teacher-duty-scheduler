@@ -194,8 +194,8 @@
 <div class="modal-backdrop" *ngIf="autoCoverResult" (click)="closeAutoCoverResult()">
   <section class="cover-result" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
     <h3>Resumen de auto-cobertura</h3>
-    <p *ngFor="let coverage of autoCoverResult.coverages">P{{ coverage.period }}: {{ coverage.message }}<span *ngIf="coverage.substitute_teacher_name"> — {{ coverage.substitute_teacher_name }}</span></p>
-    <p *ngFor="let alert of autoCoverResult.alerts" class="warning"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 9v5M12 17h.01"/></svg> {{ alert }}</p>
+    <p>P{{ autoCoverResult.period }}: {{ autoCoverResult.details }}<span *ngIf="autoCoverResult.substitute_name"> — {{ autoCoverResult.substitute_name }}</span></p>
+    <p *ngIf="!autoCoverResult.resolved" class="warning"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 9v5M12 17h.01"/></svg> No se encontró sustituto disponible.</p>
     <button type="button" class="btn-filter" (click)="closeAutoCoverResult()">Cerrar</button>
   </section>
 </div>
