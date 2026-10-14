@@ -152,7 +152,6 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
     schedule_repository = SQLScheduleRepository(session)
     student_group_repository = SQLStudentGroupRepository(session)
     substitution_repository = SQLSubstitutionRepository(session)
-    email_sender = SMTPEmailSender()
     auto_cover_service = AutoCoverTeacherDutiesService(
         teacher_repository,
         absence_repository,
@@ -189,10 +188,12 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
         MarkAbsenceDoNotCoverCommand,
         lambda: MarkAbsenceDoNotCoverHandler(absence_repository),
     )
+    # SMTPEmailSender se crea de forma perezosa: si falta la configuración SMTP
+    # solo falla el envío de correos, no el resto de la API.
     mediator.register(
         NotifySubstitutionAssignmentCommand,
         lambda: NotifySubstitutionAssignmentHandler(
-            teacher_repository, student_group_repository, email_sender
+            teacher_repository, student_group_repository, SMTPEmailSender()
         ),
     )
     mediator.register(GetTeachersQuery, lambda: GetTeachersHandler(teacher_repository))
