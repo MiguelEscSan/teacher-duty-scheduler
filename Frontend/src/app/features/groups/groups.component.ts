@@ -3,12 +3,13 @@ import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BaseScheduleService } from '../../services/base-schedule.service';
 import { StudentGroup } from '../../models/schedule.model';
+import { FloatingMenuDirective } from '../../shared/directives/floating-menu.directive';
 import { DeleteGroupModalComponent } from './components/delete-group-modal/delete-group-modal.component';
 
 @Component({
   selector: 'app-groups',
   standalone: true,
-  imports: [CommonModule, FormsModule, DeleteGroupModalComponent],
+  imports: [CommonModule, FormsModule, DeleteGroupModalComponent, FloatingMenuDirective],
   templateUrl: './groups.component.html',
   styleUrls: ['./groups.component.css']
 })

@@ -47,18 +47,28 @@
         <div class="teacher-info">
           <span class="teacher-avatar">{{ t.name.charAt(0) }}</span>
           <div class="teacher-texts">
-            <div class="teacher-name-row">
-              <div class="teacher-name">{{ t.name }}</div>
-              <button class="btn-icon-edit" type="button"
-                      (click)="$event.stopPropagation(); openEditTeacherModal(t)"
-                      title="Editar docente" aria-label="Editar docente">✎</button>
-            </div>
+            <div class="teacher-name" [title]="t.name">{{ t.name }}</div>
             <div class="teacher-dept">{{ t.department }}</div>
           </div>
         </div>
-        <button class="btn-icon-danger" (click)="$event.stopPropagation(); removeTeacher(t.id!)" title="Eliminar docente">
-          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>
+        <button #trigger class="teacher-menu-trigger" type="button"
+                (click)="$event.stopPropagation(); toggleTeacherMenu(t.id!)"
+                [attr.aria-expanded]="openTeacherMenuId === t.id"
+                [attr.aria-label]="'Acciones para ' + t.name" title="Más acciones">
+          <span aria-hidden="true">⋮</span>
         </button>
+        <div *ngIf="openTeacherMenuId === t.id" class="teacher-actions-dropdown"
+             [appFloatingMenu]="trigger" (menuClose)="closeTeacherMenu()"
+             (click)="$event.stopPropagation()">
+          <button type="button" (click)="closeTeacherMenu(); openEditTeacherModal(t)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></svg>
+            Editar
+          </button>
+          <button type="button" class="danger-action" (click)="closeTeacherMenu(); removeTeacher(t.id!)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>
+            Eliminar
+          </button>
+        </div>
       </li>
     </ul>
     <p class="empty-search" *ngIf="filteredTeachers.length === 0">No hay profesores que coincidan.</p>

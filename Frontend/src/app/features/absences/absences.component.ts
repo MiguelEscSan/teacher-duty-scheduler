@@ -12,11 +12,12 @@ import { PeriodResolveResponse } from '../../models/substitutions.model';
 import { ManualCoverModalComponent } from './components/manual-cover-modal/manual-cover-modal.component'
 import { AutomaticCoverModalComponent } from './components/automatic-cover-modal/automatic-cover-modal.component';
 import { AbsenceFormModalComponent } from './components/absence-form-modal/absence-form-modal.component';
+import { FloatingMenuDirective } from '../../shared/directives/floating-menu.directive';
 
 @Component({
   selector: 'app-absences',
   standalone: true,
-  imports: [CommonModule, FormsModule, ManualCoverModalComponent, AutomaticCoverModalComponent, AbsenceFormModalComponent],
+  imports: [CommonModule, FormsModule, ManualCoverModalComponent, AutomaticCoverModalComponent, AbsenceFormModalComponent, FloatingMenuDirective],
   templateUrl: './absences.component.html',
   styleUrls: ['./absences.component.css']
 })

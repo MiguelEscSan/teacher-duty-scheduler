@@ -204,11 +204,14 @@
 
 .teacher-info {
   display: flex;
+  flex: 1;
+  min-width: 0;
   align-items: center;
   gap: 0.75rem;
 }
 
 .teacher-avatar {
+  flex: 0 0 auto;
   width: 34px;
   height: 34px;
   background: #e2e8f0;
@@ -237,18 +240,70 @@
   color: #64748b;
 }
 
-.btn-icon-danger {
+/* Menú de acciones (⋮) de cada docente; posición calculada por FloatingMenuDirective */
+.teacher-menu-trigger {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  margin-left: 0.5rem;
+  border: 0;
+  border-radius: 6px;
   background: transparent;
-  border: none;
+  color: #64748b;
+  font-size: 1.25rem;
+  line-height: 1;
   cursor: pointer;
-  padding: 0.3rem;
-  border-radius: 4px;
-  opacity: 0.4;
-  transition: opacity 0.2s;
 }
 
-.btn-icon-danger:hover {
-  opacity: 1;
+.teacher-menu-trigger:hover,
+.teacher-menu-trigger[aria-expanded=true] {
+  background: #e2e8f0;
+  color: #1e3a8a;
+}
+
+.teacher-actions-dropdown {
+  position: fixed;
+  z-index: 15;
+  min-width: 9rem;
+  padding: 0.3rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+  cursor: default;
+}
+
+.teacher-actions-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #334155;
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.teacher-actions-dropdown button:hover {
+  background: #f8fafc;
+}
+
+.teacher-actions-dropdown .danger-action {
+  color: #b91c1c;
+}
+
+.teacher-actions-dropdown .danger-action:hover {
+  background: #fef2f2;
+}
+
+.teacher-actions-dropdown svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 /* Panel Principal de Horario */
@@ -424,28 +479,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.teacher-name-row {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  min-width: 0;
-}
-
-.btn-icon-edit {
-  flex: 0 0 auto;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: #2563eb;
-  font-size: 0.8rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.btn-icon-edit:hover {
-  color: #1d4ed8;
 }
 
 .teacher-dept {

@@ -26,17 +26,23 @@ export class BaseScheduleService {
   private readonly http = inject(HttpClient);
   private readonly groupDeletedSubject = new Subject<string>();
   readonly groupDeleted$ = this.groupDeletedSubject.asObservable();
+  private readonly groupSavedSubject = new Subject<StudentGroup>();
+  readonly groupSaved$ = this.groupSavedSubject.asObservable();
 
   getGroups(): Observable<StudentGroup[]> {
     return this.http.get<StudentGroup[]>(`${API_URL}/groups`);
   }
 
   createGroup(payload: { name: string; student_count: number | null }): Observable<StudentGroup> {
-    return this.http.post<StudentGroup>(`${API_URL}/groups`, payload);
+    return this.http.post<StudentGroup>(`${API_URL}/groups`, payload).pipe(
+      tap(group => this.groupSavedSubject.next(group))
+    );
   }
 
   updateGroup(id: string, payload: { name: string; student_count: number | null }): Observable<StudentGroup> {
-    return this.http.put<StudentGroup>(`${API_URL}/groups/${id}`, payload);
+    return this.http.put<StudentGroup>(`${API_URL}/groups/${id}`, payload).pipe(
+      tap(group => this.groupSavedSubject.next(group))
+    );
   }
 
   deleteGroup(groupId: string): Observable<void> {

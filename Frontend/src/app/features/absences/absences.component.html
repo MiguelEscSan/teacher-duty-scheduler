@@ -98,6 +98,7 @@
           <td class="text-right action-cell">
             <div class="dropdown-wrapper">
               <button
+                #trigger
                 type="button"
                 class="btn-dots"
                 (click)="toggleMenu($event, item.id)"
@@ -111,7 +112,12 @@
               </button>
 
               <!-- Menú desplegable -->
-              <div class="dropdown-menu" *ngIf="activeMenuId === item.id">
+              <div
+                class="dropdown-menu"
+                *ngIf="activeMenuId === item.id"
+                [appFloatingMenu]="trigger"
+                (menuClose)="onDocumentClick()"
+              >
                 <!-- 1. Cubrir Manualmente -->
                 <button *ngIf="!item.resolved" type="button" class="menu-item" (click)="openManualCoverModal(item)">
                   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">

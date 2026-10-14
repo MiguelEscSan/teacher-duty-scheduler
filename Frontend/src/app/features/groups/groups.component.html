@@ -7,13 +7,14 @@
       <td>{{ group.student_count ?? '—' }}</td>
       <td class="row-actions">
         <div class="actions-menu">
-          <button type="button" class="menu-trigger" (click)="toggleActions(group.id); $event.stopPropagation()"
+          <button #trigger type="button" class="menu-trigger" (click)="toggleActions(group.id); $event.stopPropagation()"
                   [attr.aria-expanded]="openActionsGroupId === group.id"
                   [attr.aria-controls]="'group-actions-' + group.id"
                   [attr.aria-label]="'Acciones para ' + group.name" title="Más acciones">
             <span aria-hidden="true">⋮</span>
           </button>
-          <div *ngIf="openActionsGroupId === group.id" class="actions-dropdown" [id]="'group-actions-' + group.id">
+          <div *ngIf="openActionsGroupId === group.id" class="actions-dropdown" [id]="'group-actions-' + group.id"
+               [appFloatingMenu]="trigger" (menuClose)="closeActionsMenu()">
             <button type="button" (click)="open(group)">Editar</button>
             <button type="button" class="danger-action" [disabled]="deletingGroupId === group.id" (click)="requestDelete(group)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>

@@ -1,4 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseScheduleService } from '../../services/base-schedule.service';
@@ -7,17 +8,19 @@ import { BaseSlot, StudentGroup, Teacher } from '../../models/schedule.model';
 import { TeacherFormModalComponent } from './components/teacher-form-modal/teacher-form-modal.component';
 import { GroupsComponent } from '../groups/groups.component';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
+import { FloatingMenuDirective } from '../../shared/directives/floating-menu.directive';
 
 @Component({
   selector: 'app-teachers',
   standalone: true,
-  imports: [CommonModule, FormsModule, TeacherFormModalComponent, GroupsComponent, ConfirmationModalComponent],
+  imports: [CommonModule, FormsModule, TeacherFormModalComponent, GroupsComponent, ConfirmationModalComponent, FloatingMenuDirective],
   templateUrl: './teachers.component.html',
   styleUrls: ['./teachers.component.css']
 })
 export class TeachersComponent implements OnInit {
   private teachersApi = inject(TeachersService);
   private scheduleApi = inject(BaseScheduleService);
+  private destroyRef = inject(DestroyRef);
 
   teachers: Teacher[] = [];
   groups: StudentGroup[] = [];
@@ -28,6 +31,7 @@ export class TeachersComponent implements OnInit {
   editingTeacherId: string | null = null;
   activeTab: 'teachers' | 'groups' = 'teachers';
   teacherIdToRemove: string | null = null;
+  openTeacherMenuId: string | null = null;
 
   // Control del modal de asignación de grupo
   activeSlot: BaseSlot | null = null;
@@ -56,11 +60,20 @@ export class TeachersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadTeachers();
-    this.scheduleApi.getGroups().subscribe(g => this.groups = g);
-    this.scheduleApi.groupDeleted$.subscribe(groupId => {
+    this.loadGroups();
+    this.scheduleApi.groupSaved$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.loadGroups();
+      // El horario muestra el nombre del grupo: se recarga por si se ha renombrado.
+      if (this.selectedTeacher) this.selectTeacher(this.selectedTeacher);
+    });
+    this.scheduleApi.groupDeleted$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(groupId => {
       this.groups = this.groups.filter(group => group.id !== groupId);
       if (this.selectedTeacher) this.selectTeacher(this.selectedTeacher);
     });
+  }
+
+  loadGroups(): void {
+    this.scheduleApi.getGroups().subscribe(g => this.groups = g);
   }
 
   get filteredTeachers(): Teacher[] {
@@ -210,6 +223,15 @@ export class TeachersComponent implements OnInit {
 
   removeTeacher(id: string): void {
     this.teacherIdToRemove = id;
+  }
+
+  toggleTeacherMenu(id: string): void {
+    this.openTeacherMenuId = this.openTeacherMenuId === id ? null : id;
+  }
+
+  @HostListener('document:click')
+  closeTeacherMenu(): void {
+    this.openTeacherMenuId = null;
   }
 
   confirmRemoveTeacher(): void {
