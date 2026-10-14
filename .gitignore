@@ -9,6 +9,10 @@ venv/
 *.sqlite3
 .env
 
+# Empaquetado de escritorio (PyInstaller)
+Backend/build/
+Backend/dist/
+
 # Node / Angular Frontend
 node_modules/
 dist/

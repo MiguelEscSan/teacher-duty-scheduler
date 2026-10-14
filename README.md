@@ -35,6 +35,7 @@ A través de un algoritmo de asignación con restricciones, el sistema distribuy
 - **Backend / Algoritmo:** Python 
 - **Frontend :** Interfaz Web (Angular)
 - **Base de Datos / Almacenamiento:** SQLite 
+- **Aplicación de escritorio:** PyInstaller + pywebview (WebView2 de Windows)
 
 ---
 
@@ -50,5 +51,46 @@ A través de un algoritmo de asignación con restricciones, el sistema distribuy
 ### 1. Clonar el repositorio
 
 ```bash
-git clone [https://github.com/MiguelEscSan/teacher-duty-scheduler.git](https://github.com/MiguelEscSan/teacher-duty-scheduler.git)
+git clone https://github.com/MiguelEscSan/teacher-duty-scheduler.git
 cd teacher-duty-scheduler
+```
+
+---
+
+## 🖥️ Aplicación de escritorio (Windows `.exe`)
+
+La aplicación se puede distribuir como un único `Guardias.exe` que no necesita tener Python ni Node instalados: al abrirlo arranca el backend internamente y muestra la interfaz en una ventana propia.
+
+### Ejecutar el `.exe`
+
+1. Haz doble clic en `Guardias.exe`.
+2. Se abre la ventana **Gestor de Guardias** (tarda un par de segundos la primera vez). Al cerrarla, la aplicación se detiene.
+
+Los datos se guardan fuera del ejecutable, en `%APPDATA%\Guardias\`:
+
+| Archivo | Contenido |
+|---|---|
+| `guardias.db` | Base de datos SQLite. Se conserva al actualizar o recompilar el `.exe`. |
+| `guardias.log` | Registro de errores, útil si la aplicación no arranca. |
+| `.env` | *(Opcional)* Configuración SMTP para el envío de correos. |
+
+Para activar el envío de correos, crea un `.env` en `%APPDATA%\Guardias\` (o junto al `.exe`) con las variables de [`.env.example`](.env.example), sin la línea `DB_DIR`. Sin él la aplicación funciona igual; solo fallará el envío de notificaciones.
+
+> Al no estar firmado digitalmente, Windows SmartScreen puede mostrar un aviso la primera vez: pulsa **Más información → Ejecutar de todas formas**.
+
+### Generar el `.exe`
+
+Requisitos: **Python 3.10+** y **Node.js 18+**. Desde la raíz del proyecto, con el `.exe` cerrado:
+
+```bash
+powershell -ExecutionPolicy Bypass -File build.ps1
+```
+
+El script compila el frontend de Angular, instala en `Backend\.venv` las dependencias de empaquetado ([`requirements-desktop.txt`](Backend/requirements-desktop.txt)) y genera **`Backend\dist\Guardias.exe`**.
+
+### Cómo está montado
+
+- **[`Backend/desktop.py`](Backend/desktop.py)**: punto de entrada del `.exe`. Arranca FastAPI con uvicorn en segundo plano (puerto `8765`, u otro libre si está ocupado) y abre la interfaz con [pywebview](https://pywebview.flowrl.com/), que usa el WebView2 ya incluido en Windows. Se eligió en lugar de Electron porque no obliga a empaquetar Node ni Chromium (el `.exe` ronda los 70 MB).
+- **[`Backend/src/main.py`](Backend/src/main.py)**: si existe el build de Angular, FastAPI sirve también el frontend, de modo que interfaz y API comparten origen (`/api/v1`). En desarrollo con `ng serve` y en Docker el comportamiento no cambia.
+- **[`Backend/guardias.spec`](Backend/guardias.spec)**: configuración de PyInstaller. Incluye el build de Angular, las librerías nativas de OR-Tools y el icono [`Backend/assets/icon.ico`](Backend/assets/icon.ico).
+- **[`build.ps1`](build.ps1)**: automatiza todo el proceso de compilación.
