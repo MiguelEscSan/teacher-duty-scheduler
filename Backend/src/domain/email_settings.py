@@ -62,3 +62,11 @@ class SmtpSettings:
             raise ValueError("El puerto SMTP debe estar entre 1 y 65535.")
         EmailRecipient(self.user)
         EmailRecipient(self.sender_email)
+
+
+@dataclass(frozen=True)
+class EmailConfiguration:
+    """Configuración completa de correo: transporte SMTP y plantilla del mensaje."""
+
+    smtp: SmtpSettings
+    template: EmailTemplate

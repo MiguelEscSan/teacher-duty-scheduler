@@ -99,3 +99,16 @@ class SubstitutionLogDB(SQLModel, table=True):
     group_id: Optional[str] = Field(default=None)
     source_type: SubstitutionSourceType
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class EmailSettingsDB(SQLModel, table=True):
+    """Configuración SMTP y plantilla de correo. Siempre una única fila (id='default')."""
+    __tablename__ = "email_settings"
+
+    id: str = Field(default="default", primary_key=True)
+    smtp_host: str
+    smtp_port: int
+    smtp_user: str
+    smtp_password_encrypted: str
+    sender_email: str
+    subject_template: str
+    body_template: str

@@ -30,8 +30,8 @@ Hoy `SMTPEmailSender` lee `SMTP_*` y `SENDER_EMAIL` del entorno, y el cuerpo/asu
 - `Frontend`: `npm run build` (o `ng build`).
 
 ## Tareas
-- [ ] T1 Dominio: `EmailSettings`, plantilla y validación de placeholders (TDD).
-- [ ] T2 Cifrado de secretos y repositorio SQL de la configuración.
+- [x] T1 Dominio: `EmailSettings`, plantilla y validación de placeholders (TDD).
+- [x] T2 Cifrado de secretos y repositorio SQL de la configuración.
 - [ ] T3 `SMTPEmailSender` lee la configuración efectiva (BBDD o entorno).
 - [ ] T4 Notificación usa la plantilla configurada.
 - [ ] T5 Endpoints de configuración y de prueba.
