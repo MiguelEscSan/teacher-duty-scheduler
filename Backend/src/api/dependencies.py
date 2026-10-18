@@ -113,8 +113,9 @@ from src.application.teachers.queries.get_teachers import (
     GetTeachersHandler,
     GetTeachersQuery,
 )
-from src.infrastructure.db.config import get_session
+from src.infrastructure.db.config import get_secret_box, get_session
 from src.infrastructure.db.transaction_manager import SQLTransactionManager
+from src.infrastructure.email.configuration_provider import resolve_email_configuration
 from src.infrastructure.email.smtp_email_sender import SMTPEmailSender
 from src.infrastructure.optimization.ortools_guard_optimizer import ORToolsGuardOptimizer
 from src.infrastructure.repositories import (
@@ -123,6 +124,9 @@ from src.infrastructure.repositories import (
     SQLStudentGroupRepository,
     SQLSubstitutionRepository,
     SQLTeacherRepository,
+)
+from src.infrastructure.repositories.email_settings_repository import (
+    SQLEmailSettingsRepository,
 )
 
 
@@ -159,6 +163,11 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
         substitution_repository,
     )
     optimizer = ORToolsGuardOptimizer()
+    email_settings_repository = SQLEmailSettingsRepository(session, get_secret_box())
+
+    def load_email_configuration():
+        return resolve_email_configuration(email_settings_repository)
+
     mediator = Mediator(lambda: SQLTransactionManager(session))
 
     mediator.register(
@@ -188,12 +197,15 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
         MarkAbsenceDoNotCoverCommand,
         lambda: MarkAbsenceDoNotCoverHandler(absence_repository),
     )
-    # SMTPEmailSender se crea de forma perezosa: si falta la configuración SMTP
+    # La configuración SMTP se resuelve en cada envío (BBDD o entorno): si falta
     # solo falla el envío de correos, no el resto de la API.
     mediator.register(
         NotifySubstitutionAssignmentCommand,
         lambda: NotifySubstitutionAssignmentHandler(
-            teacher_repository, student_group_repository, SMTPEmailSender()
+            teacher_repository,
+            student_group_repository,
+            SMTPEmailSender(load_email_configuration),
+            lambda: load_email_configuration().template,
         ),
     )
     mediator.register(GetTeachersQuery, lambda: GetTeachersHandler(teacher_repository))

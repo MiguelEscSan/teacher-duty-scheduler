@@ -7,10 +7,18 @@ from typing import Generator
 from sqlalchemy import inspect, text
 from sqlmodel import Session, SQLModel, create_engine
 
+from src.infrastructure.security.secret_box import SecretBox
+
 SQLITE_FILE_NAME = "guardias.db"
+SECRET_KEY_FILE_NAME = "secret.key"
 DB_DIR = Path(os.getenv("DB_DIR", "."))
 os.makedirs(DB_DIR, exist_ok=True)
 SQLITE_URL = f"sqlite:///{DB_DIR / SQLITE_FILE_NAME}"
+
+
+def get_secret_box() -> SecretBox:
+    """Cifrado de secretos guardados en BBDD; la clave vive junto a la base de datos."""
+    return SecretBox(DB_DIR / SECRET_KEY_FILE_NAME)
 
 engine = create_engine(
     SQLITE_URL,
