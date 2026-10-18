@@ -74,7 +74,7 @@ Los datos se guardan fuera del ejecutable, en `%APPDATA%\Guardias\`:
 | `guardias.log` | Registro de errores, útil si la aplicación no arranca. |
 | `.env` | *(Opcional)* Configuración SMTP para el envío de correos. |
 
-La forma recomendada es configurarlo desde la app, en **Ajustes de correo**: servidor SMTP, remitente, contraseña de aplicación, plantilla del mensaje y un envío de prueba. La contraseña se guarda cifrada en la base de datos (la clave de cifrado está en `secret.key`, junto a `guardias.db`).
+La forma recomendada es configurarlo desde la app, en **Ajustes de correo**: correo de la cuenta (que también es el remitente), contraseña de aplicación, plantilla del mensaje y un envío de prueba. El servidor SMTP lo fija la aplicación (`smtp.gmail.com`, puerto 587 con STARTTLS o 465 con SSL). La contraseña se guarda cifrada en la base de datos (la clave de cifrado está en `secret.key`, junto a `guardias.db`).
 
 Si no hay configuración guardada en la app, se usan las variables de [`.env.example`](.env.example) (útil con Docker). Para ese modo, crea un `.env` en `%APPDATA%\Guardias\` (o junto al `.exe`), sin la línea `DB_DIR`. Sin configuración la aplicación funciona igual; solo fallará el envío de notificaciones.
 
