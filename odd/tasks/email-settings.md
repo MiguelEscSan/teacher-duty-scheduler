@@ -34,7 +34,7 @@ Hoy `SMTPEmailSender` lee `SMTP_*` y `SENDER_EMAIL` del entorno, y el cuerpo/asu
 - [x] T2 Cifrado de secretos y repositorio SQL de la configuración.
 - [x] T3 `SMTPEmailSender` lee la configuración efectiva (BBDD o entorno).
 - [x] T4 Notificación usa la plantilla configurada.
-- [ ] T5 Endpoints de configuración y de prueba.
+- [x] T5 Endpoints de configuración y de prueba.
 - [ ] T6 Frontend: página de ajustes y enlace de navegación.
 - [ ] T7 Verificación final (tests, build) y documentación en README.
 

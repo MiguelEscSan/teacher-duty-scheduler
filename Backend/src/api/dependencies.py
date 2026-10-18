@@ -115,7 +115,19 @@ from src.application.teachers.queries.get_teachers import (
 )
 from src.infrastructure.db.config import get_secret_box, get_session
 from src.infrastructure.db.transaction_manager import SQLTransactionManager
-from src.infrastructure.email.configuration_provider import resolve_email_configuration
+from src.application.email.command.send_email import SendEmailCommand, SendEmailHandler
+from src.application.email.settings.get_email_settings import (
+    GetEmailSettingsHandler,
+    GetEmailSettingsQuery,
+)
+from src.application.email.settings.save_email_settings import (
+    SaveEmailSettingsCommand,
+    SaveEmailSettingsHandler,
+)
+from src.infrastructure.email.configuration_provider import (
+    env_email_configuration,
+    resolve_email_configuration,
+)
 from src.infrastructure.email.smtp_email_sender import SMTPEmailSender
 from src.infrastructure.optimization.ortools_guard_optimizer import ORToolsGuardOptimizer
 from src.infrastructure.repositories import (
@@ -207,6 +219,18 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
             SMTPEmailSender(load_email_configuration),
             lambda: load_email_configuration().template,
         ),
+    )
+    mediator.register(
+        SendEmailCommand,
+        lambda: SendEmailHandler(SMTPEmailSender(load_email_configuration)),
+    )
+    mediator.register(
+        GetEmailSettingsQuery,
+        lambda: GetEmailSettingsHandler(email_settings_repository, env_email_configuration),
+    )
+    mediator.register(
+        SaveEmailSettingsCommand,
+        lambda: SaveEmailSettingsHandler(email_settings_repository),
     )
     mediator.register(GetTeachersQuery, lambda: GetTeachersHandler(teacher_repository))
     mediator.register(

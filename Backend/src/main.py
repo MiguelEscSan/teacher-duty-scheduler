@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
 from fastapi.responses import FileResponse, JSONResponse
 
-from src.api.routes import absences, guards, groups, schedules, substitutions, teachers
+from src.api.routes import absences, email, guards, groups, schedules, substitutions, teachers
 from src.infrastructure.db.config import init_db
 from src.domain.exceptions.assignment_exceptions import (
     ConflictException,
@@ -64,6 +64,7 @@ app.include_router(groups.router)
 app.include_router(guards.router)
 app.include_router(substitutions.router)
 app.include_router(absences.router)
+app.include_router(email.router)
 
 
 def _frontend_dir() -> Path:
