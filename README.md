@@ -74,7 +74,9 @@ Los datos se guardan fuera del ejecutable, en `%APPDATA%\Guardias\`:
 | `guardias.log` | Registro de errores, útil si la aplicación no arranca. |
 | `.env` | *(Opcional)* Configuración SMTP para el envío de correos. |
 
-Para activar el envío de correos, crea un `.env` en `%APPDATA%\Guardias\` (o junto al `.exe`) con las variables de [`.env.example`](.env.example), sin la línea `DB_DIR`. Sin él la aplicación funciona igual; solo fallará el envío de notificaciones.
+La forma recomendada es configurarlo desde la app, en **Ajustes de correo**: servidor SMTP, remitente, contraseña de aplicación, plantilla del mensaje y un envío de prueba. La contraseña se guarda cifrada en la base de datos (la clave de cifrado está en `secret.key`, junto a `guardias.db`).
+
+Si no hay configuración guardada en la app, se usan las variables de [`.env.example`](.env.example) (útil con Docker). Para ese modo, crea un `.env` en `%APPDATA%\Guardias\` (o junto al `.exe`), sin la línea `DB_DIR`. Sin configuración la aplicación funciona igual; solo fallará el envío de notificaciones.
 
 > Al no estar firmado digitalmente, Windows SmartScreen puede mostrar un aviso la primera vez: pulsa **Más información → Ejecutar de todas formas**.
 

@@ -4,10 +4,12 @@ import { AbsencesComponent } from './features/absences/absences.component';
 import { GuardsComponent } from './features/guards/guards.component';
 import { SubstitutionHistoryComponent } from './features/substitution-history/substitution-history.component';
 import { CalendarLayoutComponent } from './features/calendar-layout/calendar-layout.component';
+import { EmailSettingsComponent } from './features/email-settings/email-settings.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'teachers' },
   { path: 'teachers', component: TeachersComponent },
+  { path: 'settings/email', component: EmailSettingsComponent },
   { path: 'absences', component: AbsencesComponent },
   { path: 'guards', component: GuardsComponent },
   { path: 'history', component: SubstitutionHistoryComponent },

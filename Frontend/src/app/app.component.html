@@ -48,6 +48,15 @@
       </button>
 
       <button
+        class="nav-tab"
+        routerLink="/settings/email"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span class="nav-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span> Ajustes de correo
+      </button>
+
+      <button
         *ngIf="false"
         class="nav-tab"
         routerLink="/guards"

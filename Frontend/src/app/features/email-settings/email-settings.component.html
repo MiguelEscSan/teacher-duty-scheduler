@@ -1,0 +1,85 @@
+<section class="email-settings">
+  <header class="email-settings__header">
+    <h2>Ajustes de correo</h2>
+    <p class="email-settings__hint">
+      Servidor de envío y plantilla de los avisos de guardia.
+      <span *ngIf="source === 'environment'">
+        Ahora mismo se usa la configuración del entorno; al guardar aquí pasará a usar la de la aplicación.
+      </span>
+    </p>
+  </header>
+
+  <p *ngIf="errorMessage" class="email-settings__alert email-settings__alert--error" role="alert">{{ errorMessage }}</p>
+  <p *ngIf="toastMessage" class="email-settings__alert email-settings__alert--success" role="status">{{ toastMessage }}</p>
+
+  <p *ngIf="loading">Cargando configuración…</p>
+
+  <form *ngIf="!loading" #settingsForm="ngForm" class="email-settings__card" (ngSubmit)="save()">
+    <h3>Servidor SMTP</h3>
+    <div class="email-settings__grid">
+      <label>
+        Servidor
+        <input name="smtp_host" [(ngModel)]="form.smtp_host" required />
+      </label>
+      <label>
+        Puerto
+        <input name="smtp_port" type="number" min="1" max="65535" [(ngModel)]="form.smtp_port" required />
+      </label>
+      <label>
+        Usuario
+        <input name="smtp_user" type="email" [(ngModel)]="form.smtp_user" required />
+      </label>
+      <label>
+        Contraseña de aplicación
+        <input
+          name="smtp_password"
+          type="password"
+          autocomplete="new-password"
+          [(ngModel)]="form.smtp_password"
+          [required]="!hasPassword"
+          [placeholder]="hasPassword ? 'Sin cambios' : ''"
+        />
+      </label>
+      <label>
+        Remitente
+        <input name="sender_email" type="email" [(ngModel)]="form.sender_email" required />
+      </label>
+    </div>
+
+    <h3>Plantilla del correo</h3>
+    <p class="email-settings__hint">
+      Variables disponibles:
+      <code *ngFor="let name of placeholders" class="email-settings__var">{{ '{' + name + '}' }}</code>
+    </p>
+    <label class="email-settings__full">
+      Asunto
+      <input name="subject_template" [(ngModel)]="form.subject_template" required />
+    </label>
+    <label class="email-settings__full">
+      Cuerpo
+      <textarea name="body_template" rows="8" [(ngModel)]="form.body_template" required></textarea>
+    </label>
+
+    <div class="email-settings__actions">
+      <button type="submit" class="email-settings__primary" [disabled]="settingsForm.invalid || saving">
+        {{ saving ? 'Guardando…' : 'Guardar configuración' }}
+      </button>
+    </div>
+  </form>
+
+  <section *ngIf="!loading" class="email-settings__card">
+    <h3>Enviar correo de prueba</h3>
+    <div class="email-settings__test">
+      <input
+        name="testRecipient"
+        type="email"
+        placeholder="docente@centro.es"
+        aria-label="Correo de destino para la prueba"
+        [(ngModel)]="testRecipient"
+      />
+      <button type="button" class="email-settings__secondary" (click)="sendTest()" [disabled]="testing">
+        {{ testing ? 'Enviando…' : 'Enviar prueba' }}
+      </button>
+    </div>
+  </section>
+</section>

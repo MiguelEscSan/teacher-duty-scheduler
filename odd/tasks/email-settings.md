@@ -35,8 +35,8 @@ Hoy `SMTPEmailSender` lee `SMTP_*` y `SENDER_EMAIL` del entorno, y el cuerpo/asu
 - [x] T3 `SMTPEmailSender` lee la configuración efectiva (BBDD o entorno).
 - [x] T4 Notificación usa la plantilla configurada.
 - [x] T5 Endpoints de configuración y de prueba.
-- [ ] T6 Frontend: página de ajustes y enlace de navegación.
-- [ ] T7 Verificación final (tests, build) y documentación en README.
+- [x] T6 Frontend: página de ajustes y enlace de navegación.
+- [x] T7 Verificación final (tests, build) y documentación en README.
 
 ## Route declaration
 - Todas las tareas: ruta inline (edición directa), decisión del agente principal por tamaño acotado y coherencia de contexto.
