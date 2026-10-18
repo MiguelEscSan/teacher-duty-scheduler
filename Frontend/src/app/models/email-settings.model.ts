@@ -2,18 +2,19 @@ export type EmailSettingsSource = 'database' | 'environment' | 'none';
 
 export interface EmailSettings {
   source: EmailSettingsSource;
-  smtp_host: string;
-  smtp_port: number;
   smtp_user: string;
-  sender_email: string;
   has_password: boolean;
   subject_template: string;
   body_template: string;
 }
 
-export interface EmailSettingsUpdate extends Omit<EmailSettings, 'source' | 'has_password'> {
+export interface EmailSettingsUpdate {
+  /** Correo con el que se inicia sesión y que también firma como remitente. */
+  smtp_user: string;
   /** Vacía o null: se conserva la contraseña ya guardada. */
   smtp_password: string | null;
+  subject_template: string;
+  body_template: string;
 }
 
 export const EMAIL_TEMPLATE_PLACEHOLDERS = [

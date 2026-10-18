@@ -29,10 +29,7 @@ export class EmailSettingsComponent implements OnInit {
   toastMessage = '';
 
   form: EmailSettingsUpdate = {
-    smtp_host: '',
-    smtp_port: 587,
     smtp_user: '',
-    sender_email: '',
     smtp_password: '',
     subject_template: '',
     body_template: '',
@@ -49,10 +46,7 @@ export class EmailSettingsComponent implements OnInit {
         this.source = settings.source;
         this.hasPassword = settings.has_password;
         this.form = {
-          smtp_host: settings.smtp_host,
-          smtp_port: settings.smtp_port,
           smtp_user: settings.smtp_user,
-          sender_email: settings.sender_email,
           smtp_password: '',
           subject_template: settings.subject_template,
           body_template: settings.body_template,
