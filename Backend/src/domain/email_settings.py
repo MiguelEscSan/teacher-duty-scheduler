@@ -43,15 +43,18 @@ def _check_placeholders(text: str) -> None:
             raise ValueError(f"Placeholder desconocido: {{{field_name}}}")
 
 
+IMPLICIT_TLS_PORT = 465  # SMTPS: TLS desde el inicio de la conexión
+STARTTLS_PORT = 587  # Conexión plana que se eleva a TLS con STARTTLS
+
+
 @dataclass(frozen=True)
 class SmtpSettings:
-    """Configuración de salida SMTP. Value Object validado al construirse."""
+    """Transporte SMTP. El remitente es siempre la cuenta que se autentica."""
 
     host: str
     port: int
     user: str
     password: str
-    sender_email: str
 
     def __post_init__(self):
         if not self.host.strip():
@@ -61,7 +64,14 @@ class SmtpSettings:
         if not 1 <= self.port <= 65535:
             raise ValueError("El puerto SMTP debe estar entre 1 y 65535.")
         EmailRecipient(self.user)
-        EmailRecipient(self.sender_email)
+
+    @property
+    def sender_email(self) -> str:
+        return self.user
+
+    @property
+    def uses_implicit_tls(self) -> bool:
+        return self.port == IMPLICIT_TLS_PORT
 
 
 @dataclass(frozen=True)

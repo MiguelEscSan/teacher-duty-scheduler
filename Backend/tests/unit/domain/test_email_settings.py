@@ -45,19 +45,27 @@ def test_template_rejects_malformed_braces():
         EmailTemplate("Hola {teacher_name", "Cuerpo")
 
 
-def test_smtp_settings_require_host_user_and_sender():
+def test_smtp_settings_require_host_and_password():
     with pytest.raises(ValueError):
-        SmtpSettings(host="", port=587, user="a@b.es", password="x", sender_email="a@b.es")
+        SmtpSettings(host="", port=587, user="a@b.es", password="x")
+    with pytest.raises(ValueError):
+        SmtpSettings(host="smtp.x.es", port=587, user="a@b.es", password="")
 
 
 @pytest.mark.parametrize("port", [0, 65536, -1])
 def test_smtp_settings_reject_out_of_range_port(port):
     with pytest.raises(ValueError):
-        SmtpSettings(host="smtp.x.es", port=port, user="a@b.es", password="x", sender_email="a@b.es")
+        SmtpSettings(host="smtp.x.es", port=port, user="a@b.es", password="x")
 
 
-def test_smtp_settings_accept_valid_values():
-    settings = SmtpSettings(
-        host="smtp.x.es", port=587, user="a@b.es", password="x", sender_email="a@b.es"
-    )
-    assert settings.port == 587
+def test_sender_is_always_the_authenticated_user():
+    settings = SmtpSettings(host="smtp.x.es", port=587, user="a@b.es", password="x")
+
+    assert settings.sender_email == "a@b.es"
+
+
+@pytest.mark.parametrize(("port", "implicit"), [(465, True), (587, False)])
+def test_port_465_means_implicit_tls(port, implicit):
+    settings = SmtpSettings(host="smtp.x.es", port=port, user="a@b.es", password="x")
+
+    assert settings.uses_implicit_tls is implicit

@@ -105,10 +105,7 @@ class EmailSettingsDB(SQLModel, table=True):
     __tablename__ = "email_settings"
 
     id: str = Field(default="default", primary_key=True)
-    smtp_host: str
-    smtp_port: int
-    smtp_user: str
+    smtp_user: str  # También es el remitente
     smtp_password_encrypted: str
-    sender_email: str
     subject_template: str
     body_template: str

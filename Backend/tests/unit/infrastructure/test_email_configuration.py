@@ -13,11 +13,8 @@ from src.infrastructure.email.configuration_provider import (
 )
 
 SMTP_ENV = {
-    "SMTP_HOST": "smtp.env.es",
-    "SMTP_PORT": "2525",
     "SMTP_USER": "env@centro.es",
     "SMTP_PASS": "env-clave",
-    "SENDER_EMAIL": "env@centro.es",
 }
 
 
@@ -35,44 +32,59 @@ class FakeRepository:
 def _stored():
     return EmailConfiguration(
         smtp=SmtpSettings(
-            host="smtp.db.es",
-            port=465,
+            host="smtp.gmail.com",
+            port=587,
             user="db@centro.es",
             password="db-clave",
-            sender_email="db@centro.es",
         ),
         template=EmailTemplate("Asunto BD", "Cuerpo BD {teacher_name}"),
     )
 
 
-def test_stored_configuration_wins_over_environment(monkeypatch):
+@pytest.fixture
+def clean_env(monkeypatch):
+    for name in ("SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SENDER_EMAIL"):
+        monkeypatch.delenv(name, raising=False)
+    return monkeypatch
+
+
+def test_stored_configuration_wins_over_environment(clean_env):
     for key, value in SMTP_ENV.items():
-        monkeypatch.setenv(key, value)
+        clean_env.setenv(key, value)
 
     config = resolve_email_configuration(FakeRepository(_stored()))
 
-    assert config.smtp.host == "smtp.db.es"
+    assert config.smtp.user == "db@centro.es"
     assert config.template.subject == "Asunto BD"
 
 
-def test_falls_back_to_environment_when_nothing_is_stored(monkeypatch):
+def test_falls_back_to_environment_with_default_server(clean_env):
     for key, value in SMTP_ENV.items():
-        monkeypatch.setenv(key, value)
+        clean_env.setenv(key, value)
 
     config = resolve_email_configuration(FakeRepository(None))
 
-    assert config.smtp.host == "smtp.env.es"
-    assert config.smtp.port == 2525
-    assert config.smtp.password == "env-clave"
+    assert config.smtp.host == "smtp.gmail.com"
+    assert config.smtp.port == 587
+    assert config.smtp.user == "env@centro.es"
+    assert config.smtp.sender_email == "env@centro.es"
     assert config.template.subject == DEFAULT_SUBJECT_TEMPLATE
     assert config.template.body == DEFAULT_BODY_TEMPLATE
 
 
-def test_missing_environment_names_every_missing_variable(monkeypatch):
-    for key in SMTP_ENV:
-        monkeypatch.delenv(key, raising=False)
+def test_environment_can_override_the_server(clean_env):
+    for key, value in SMTP_ENV.items():
+        clean_env.setenv(key, value)
+    clean_env.setenv("SMTP_HOST", "smtp.otro.es")
+    clean_env.setenv("SMTP_PORT", "465")
 
-    with pytest.raises(RuntimeError, match="SMTP_HOST") as error:
+    config = env_email_configuration()
+
+    assert (config.smtp.host, config.smtp.port) == ("smtp.otro.es", 465)
+
+
+def test_missing_environment_names_every_missing_variable(clean_env):
+    with pytest.raises(RuntimeError, match="SMTP_USER") as error:
         env_email_configuration()
 
-    assert "SENDER_EMAIL" in str(error.value)
+    assert "SMTP_PASS" in str(error.value)

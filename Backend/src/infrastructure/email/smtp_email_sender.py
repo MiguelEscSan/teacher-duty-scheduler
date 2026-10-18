@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 from typing import Callable
 
 from src.domain.email import EmailMessage
-from src.domain.email_settings import EmailConfiguration
+from src.domain.email_settings import EmailConfiguration, SmtpSettings
 from src.domain.ports.email_sender import EmailSender
 
 logger = logging.getLogger("SMTPEmailSender")
@@ -28,8 +28,7 @@ class SMTPEmailSender(EmailSender):
             msg["Subject"] = message.subject
             msg.attach(MIMEText(message.body, "plain", "utf-8"))
 
-            with smtplib.SMTP(smtp.host, smtp.port) as server:
-                server.starttls()
+            with self._connect(smtp) as server:
                 server.login(smtp.user, smtp.password)
                 server.send_message(msg)
 
@@ -38,3 +37,16 @@ class SMTPEmailSender(EmailSender):
         except Exception as exc:
             logger.exception(f"Fallo al enviar correo a {message.to.email}: {exc}")
             return False
+
+    @staticmethod
+    def _connect(smtp: SmtpSettings):
+        # Puerto 465: TLS desde el inicio. Otros puertos (587): STARTTLS.
+        if smtp.uses_implicit_tls:
+            return smtplib.SMTP_SSL(smtp.host, smtp.port)
+        server = smtplib.SMTP(smtp.host, smtp.port)
+        try:
+            server.starttls()
+        except Exception:
+            server.close()
+            raise
+        return server

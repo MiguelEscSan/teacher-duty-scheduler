@@ -3,10 +3,7 @@ import pytest
 from src.infrastructure.security.secret_box import SecretBox
 
 PAYLOAD = {
-    "smtp_host": "smtp.centro.es",
-    "smtp_port": 587,
     "smtp_user": "avisos@centro.es",
-    "sender_email": "avisos@centro.es",
     "smtp_password": "clave-secreta",
     "subject_template": "Guardia {date} P{period}",
     "body_template": "Hola {teacher_name}, cubres a {absent_teacher_name}.",
@@ -61,7 +58,7 @@ def test_put_saves_settings_and_never_returns_the_password(client):
     assert "clave-secreta" not in response.text
     body = client.get("/api/v1/email/settings").json()
     assert body["source"] == "database"
-    assert body["smtp_host"] == "smtp.centro.es"
+    assert body["smtp_user"] == "avisos@centro.es"
     assert body["has_password"] is True
     assert body["subject_template"] == "Guardia {date} P{period}"
 

@@ -25,10 +25,7 @@ def save_email_settings(
     try:
         result = mediator.send(
             SaveEmailSettingsCommand(
-                smtp_host=payload.smtp_host.strip(),
-                smtp_port=payload.smtp_port,
                 smtp_user=payload.smtp_user.strip(),
-                sender_email=payload.sender_email.strip(),
                 smtp_password=payload.smtp_password,
                 subject_template=payload.subject_template,
                 body_template=payload.body_template,

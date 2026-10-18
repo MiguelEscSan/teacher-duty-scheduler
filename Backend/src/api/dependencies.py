@@ -127,6 +127,7 @@ from src.application.email.settings.save_email_settings import (
 from src.infrastructure.email.configuration_provider import (
     env_email_configuration,
     resolve_email_configuration,
+    smtp_server_from_env,
 )
 from src.infrastructure.email.smtp_email_sender import SMTPEmailSender
 from src.infrastructure.optimization.ortools_guard_optimizer import ORToolsGuardOptimizer
@@ -175,7 +176,10 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
         substitution_repository,
     )
     optimizer = ORToolsGuardOptimizer()
-    email_settings_repository = SQLEmailSettingsRepository(session, get_secret_box())
+    smtp_host, smtp_port = smtp_server_from_env()
+    email_settings_repository = SQLEmailSettingsRepository(
+        session, get_secret_box(), smtp_host, smtp_port
+    )
 
     def load_email_configuration():
         return resolve_email_configuration(email_settings_repository)
@@ -230,7 +234,7 @@ def get_mediator(session: Session = Depends(get_session)) -> Mediator:
     )
     mediator.register(
         SaveEmailSettingsCommand,
-        lambda: SaveEmailSettingsHandler(email_settings_repository),
+        lambda: SaveEmailSettingsHandler(email_settings_repository, smtp_host, smtp_port),
     )
     mediator.register(GetTeachersQuery, lambda: GetTeachersHandler(teacher_repository))
     mediator.register(

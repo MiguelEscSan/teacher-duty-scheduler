@@ -36,20 +36,14 @@ class EmailSettingsResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     source: Literal["database", "environment", "none"]
-    smtp_host: str
-    smtp_port: int
     smtp_user: str
-    sender_email: str
     has_password: bool
     subject_template: str
     body_template: str
 
 
 class EmailSettingsUpdate(BaseModel):
-    smtp_host: str = Field(min_length=1)
-    smtp_port: int = Field(ge=1, le=65535)
     smtp_user: str = Field(min_length=1)
-    sender_email: str = Field(min_length=1)
     smtp_password: Optional[str] = None
     subject_template: str
     body_template: str

@@ -9,10 +9,7 @@ from src.domain.ports.email_settings_repository import EmailSettingsRepository
 
 @dataclass(frozen=True)
 class SaveEmailSettingsCommand(Command[EmailSettingsView]):
-    smtp_host: str
-    smtp_port: int
     smtp_user: str
-    sender_email: str
     subject_template: str
     body_template: str
     # Vacía o None: se conserva la contraseña ya guardada.
@@ -20,19 +17,20 @@ class SaveEmailSettingsCommand(Command[EmailSettingsView]):
 
 
 class SaveEmailSettingsHandler(RequestHandler[SaveEmailSettingsCommand, EmailSettingsView]):
-    def __init__(self, repository: EmailSettingsRepository):
+    def __init__(self, repository: EmailSettingsRepository, host: str, port: int):
         self.repository = repository
+        self.host = host
+        self.port = port
 
     def handle(self, cmd: SaveEmailSettingsCommand) -> EmailSettingsView:
         stored = self.repository.get()
         password = cmd.smtp_password or (stored.smtp.password if stored else "")
         config = EmailConfiguration(
             smtp=SmtpSettings(
-                host=cmd.smtp_host,
-                port=cmd.smtp_port,
+                host=self.host,
+                port=self.port,
                 user=cmd.smtp_user,
                 password=password,
-                sender_email=cmd.sender_email,
             ),
             template=EmailTemplate(cmd.subject_template, cmd.body_template),
         )

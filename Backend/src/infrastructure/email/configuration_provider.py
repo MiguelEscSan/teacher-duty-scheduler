@@ -4,35 +4,42 @@ import os
 from src.domain.email_settings import (
     DEFAULT_BODY_TEMPLATE,
     DEFAULT_SUBJECT_TEMPLATE,
+    STARTTLS_PORT,
     EmailConfiguration,
     EmailTemplate,
     SmtpSettings,
 )
 from src.domain.ports.email_settings_repository import EmailSettingsRepository
 
-REQUIRED_ENV_VARS = ("SMTP_HOST", "SMTP_USER", "SMTP_PASS", "SENDER_EMAIL")
+DEFAULT_SMTP_HOST = "smtp.gmail.com"
+
+
+def smtp_server_from_env() -> tuple[str, int]:
+    """Servidor SMTP del sistema. Lo fijamos nosotros; las variables solo sobrescriben (Docker)."""
+    host = os.getenv("SMTP_HOST") or DEFAULT_SMTP_HOST
+    try:
+        port = int(os.getenv("SMTP_PORT") or STARTTLS_PORT)
+    except ValueError as exc:
+        raise RuntimeError("SMTP_PORT debe ser un número entero.") from exc
+    return host, port
 
 
 def env_email_configuration() -> EmailConfiguration:
     """Configuración heredada de las variables de entorno (Docker, desarrollo)."""
-    values = {name: os.getenv(name) for name in REQUIRED_ENV_VARS}
-    missing = [name for name, value in values.items() if not value]
+    user = os.getenv("SMTP_USER")
+    password = os.getenv("SMTP_PASS")
+    missing = [name for name, value in (("SMTP_USER", user), ("SMTP_PASS", password)) if not value]
     if missing:
         raise RuntimeError(
             "Faltan variables de entorno SMTP requeridas: " + ", ".join(missing)
         )
-    try:
-        port = int(os.getenv("SMTP_PORT", "587"))
-    except ValueError as exc:
-        raise RuntimeError("SMTP_PORT debe ser un número entero.") from exc
-
+    host, port = smtp_server_from_env()
     return EmailConfiguration(
         smtp=SmtpSettings(
-            host=values["SMTP_HOST"],
+            host=host,
             port=port,
-            user=values["SMTP_USER"],
-            password=values["SMTP_PASS"].replace(" ", ""),
-            sender_email=values["SENDER_EMAIL"],
+            user=user,
+            password=password.replace(" ", ""),
         ),
         template=EmailTemplate(DEFAULT_SUBJECT_TEMPLATE, DEFAULT_BODY_TEMPLATE),
     )
