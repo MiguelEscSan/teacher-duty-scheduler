@@ -58,6 +58,14 @@ def test_smtp_settings_reject_out_of_range_port(port):
         SmtpSettings(host="smtp.x.es", port=port, user="a@b.es", password="x")
 
 
+def test_app_password_spaces_are_removed():
+    settings = SmtpSettings(
+        host="smtp.gmail.com", port=587, user="a@b.es", password="yxht ggcg nktr zjrx"
+    )
+
+    assert settings.password == "yxhtggcgnktrzjrx"
+
+
 def test_sender_is_always_the_authenticated_user():
     settings = SmtpSettings(host="smtp.x.es", port=587, user="a@b.es", password="x")
 

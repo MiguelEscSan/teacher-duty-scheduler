@@ -39,7 +39,7 @@ def env_email_configuration() -> EmailConfiguration:
             host=host,
             port=port,
             user=user,
-            password=password.replace(" ", ""),
+            password=password,
         ),
         template=EmailTemplate(DEFAULT_SUBJECT_TEMPLATE, DEFAULT_BODY_TEMPLATE),
     )

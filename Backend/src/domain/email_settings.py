@@ -59,6 +59,8 @@ class SmtpSettings:
     def __post_init__(self):
         if not self.host.strip():
             raise ValueError("El servidor SMTP es obligatorio.")
+        # Google muestra las contraseñas de aplicación con espacios; no forman parte del secreto.
+        object.__setattr__(self, "password", self.password.replace(" ", ""))
         if not self.password:
             raise ValueError("La contraseña SMTP es obligatoria.")
         if not 1 <= self.port <= 65535:
