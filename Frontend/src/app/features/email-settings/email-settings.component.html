@@ -35,17 +35,38 @@
     </div>
 
     <h3>Plantilla del correo</h3>
-    <p class="email-settings__hint">
-      Variables disponibles:
-      <code *ngFor="let name of placeholders" class="email-settings__var">{{ '{' + name + '}' }}</code>
-    </p>
+    <div class="email-settings__chips" role="group" aria-label="Datos que se insertan en el mensaje">
+      <span class="email-settings__hint">Insertar en {{ activeField === 'subject_template' ? 'el asunto' : 'el cuerpo' }}:</span>
+      <button
+        *ngFor="let placeholder of placeholders"
+        type="button"
+        class="email-settings__chip"
+        (mousedown)="$event.preventDefault()"
+        (click)="insertPlaceholder(placeholder.name)"
+      >
+        + {{ placeholder.label }}
+      </button>
+    </div>
     <label class="email-settings__full">
       Asunto
-      <input name="subject_template" [(ngModel)]="form.subject_template" required />
+      <input
+        #subjectInput
+        name="subject_template"
+        [(ngModel)]="form.subject_template"
+        (focus)="focusField('subject_template')"
+        required
+      />
     </label>
     <label class="email-settings__full">
       Cuerpo
-      <textarea name="body_template" rows="8" [(ngModel)]="form.body_template" required></textarea>
+      <textarea
+        #bodyInput
+        name="body_template"
+        rows="8"
+        [(ngModel)]="form.body_template"
+        (focus)="focusField('body_template')"
+        required
+      ></textarea>
     </label>
 
     <div class="email-settings__actions">

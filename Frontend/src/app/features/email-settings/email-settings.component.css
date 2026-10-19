@@ -59,11 +59,24 @@
   resize: vertical;
 }
 
-.email-settings__var {
-  background: #f1f4f8;
-  border-radius: 4px;
-  padding: 1px 6px;
-  margin-right: 4px;
+.email-settings__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.email-settings__chip {
+  background: #eef3ff;
+  border: 1px solid #c5d4f7;
+  color: #1f3fa0;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+}
+
+.email-settings__chip:hover {
+  background: #dfe8ff;
 }
 
 .email-settings__actions {
