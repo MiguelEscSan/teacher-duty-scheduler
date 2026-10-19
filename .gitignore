@@ -27,3 +27,6 @@ Thumbs.db
 
 # Docker local data
 data/
+# Datos locales de la app: base de datos y clave de cifrado
+guardias.db
+secret.key
